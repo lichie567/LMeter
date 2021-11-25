@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{B57241FD-A62F-46E6-8662-AA7F70F0B6A5}") = "LMeter", "LMeter\LMeter.csproj", "{347B5BB0-810D-4083-BF0E-D920B14C4213}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{226FB92B-E6FD-4D1A-9D6F-C4292450B706}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{347B5BB0-810D-4083-BF0E-D920B14C4213}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{347B5BB0-810D-4083-BF0E-D920B14C4213}.Debug|Any CPU.Build.0 = Debug|x64
+		{347B5BB0-810D-4083-BF0E-D920B14C4213}.Release|Any CPU.ActiveCfg = Release|x64
+		{347B5BB0-810D-4083-BF0E-D920B14C4213}.Release|Any CPU.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D932CF5E-10FC-4D3A-A1D9-FC39D1961D24}
+	EndGlobalSection
+EndGlobal
