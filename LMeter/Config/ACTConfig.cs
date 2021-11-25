@@ -13,16 +13,29 @@ namespace LMeter.Config
 
         public ACTConfig()
         {
-            this.ACTSocketAddress = "127.0.0.1:10501";
+            this.ACTSocketAddress = "localhost:10501";
         }
 
         public void DrawConfig(Vector2 size, float padX, float padY)
         {
             if (ImGui.BeginChild("##ACT", new Vector2(size.X, size.Y), true))
             {
-                ImGui.
+                Vector2 buttonSize = new Vector2(40, 0);
+                ImGui.Text("ACT Status: Not Connected");
+                ImGui.InputTextWithHint("ACT Websocket Address", "Default: 'localhost:10501'", ref this.ACTSocketAddress, 64);
+                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Sync, () => RetryACTConnection(), "Reconnect", buttonSize);
+
+                ImGui.SameLine();
+                ImGui.SetCursorPosY(ImGui.GetCursorPosY() - 1f);
+                ImGui.Text("Retry ACT Connection");
+
                 ImGui.EndChild();
             }
+        }
+
+        public static void RetryACTConnection()
+        {
+
         }
     }
 }
