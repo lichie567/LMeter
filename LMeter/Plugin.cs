@@ -110,7 +110,7 @@ namespace LMeter
             }
             catch (Exception ex)
             {
-                PluginLog.Warning($"Failed to load XIVAuras Icon {ex.ToString()}");
+                PluginLog.Warning($"Failed to load LMeter Icon {ex.ToString()}");
             }
 
             return texture;

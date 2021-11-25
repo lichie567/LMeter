@@ -1,4 +1,4 @@
-# XIVAuras
+# LMeter
 
 ![build status](https://github.com/lichie567/LMeter/actions/workflows/build-debug.yml/badge.svg?branch=main)
 [![ko-fi](https://img.shields.io/badge/donate-ko--fi-blue)](https://ko-fi.com/lichie)
