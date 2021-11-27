@@ -8,19 +8,26 @@ namespace LMeter.Config
     [JsonObject]
     public class LMeterConfig : IConfigurable, ILMeterDisposable
     {
-        public string Name => "LMeter";
+        public string Name
+        { 
+            get => "LMeter";
+            set {}
+        }
 
         public string Version => Plugin.Version;
 
-        public ACTConfig ACTConfig { get; set; }
+        public MeterListConfig MeterList { get; init; }
 
-        public FontConfig FontConfig { get; set; }
+        public ACTConfig ACTConfig { get; init; }
+
+        public FontConfig FontConfig { get; init; }
 
         [JsonIgnore]
         private AboutPage AboutPage { get; } = new AboutPage();
 
         public LMeterConfig()
         {
+            this.MeterList = new MeterListConfig();
             this.ACTConfig = new ACTConfig();
             this.FontConfig = new FontConfig();
         }
@@ -41,6 +48,7 @@ namespace LMeter.Config
 
         public IEnumerable<IConfigPage> GetConfigPages()
         {
+            yield return this.MeterList;
             yield return this.ACTConfig;
             yield return this.FontConfig;
             yield return this.AboutPage;

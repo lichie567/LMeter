@@ -5,7 +5,6 @@ using System.Runtime.InteropServices;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Logging;
-using LMeter.Config;
 
 namespace LMeter.Helpers
 {

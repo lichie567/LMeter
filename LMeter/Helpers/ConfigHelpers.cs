@@ -21,6 +21,78 @@ namespace LMeter.Helpers
             SerializationBinder = new LMeterSerializationBinder()
         };
 
+        public static void ExportToClipboard<T>(T toExport)
+        {
+            string? exportString = ConfigHelpers.GetExportString(toExport);
+
+            if (exportString is not null)
+            {
+                ImGui.SetClipboardText(exportString);
+                DrawHelpers.DrawNotification("Export string copied to clipboard.");
+            }
+            else
+            {
+                DrawHelpers.DrawNotification("Failed to Export!", NotificationType.Error);
+            }
+        }
+
+        public static string? GetExportString<T>(T toExport)
+        {
+            try
+            {
+                string jsonString = JsonConvert.SerializeObject(toExport, Formatting.None, _serializerSettings);
+                using (MemoryStream outputStream = new MemoryStream())
+                {
+                    using (DeflateStream compressionStream = new DeflateStream(outputStream, CompressionLevel.Optimal))
+                    {
+                        using (StreamWriter writer = new StreamWriter(compressionStream, Encoding.UTF8))
+                        {
+                            writer.Write(jsonString);
+                        }
+                    }
+
+                    return Convert.ToBase64String(outputStream.ToArray());
+                }
+            }
+            catch (Exception ex)
+            {
+                PluginLog.Error(ex.ToString());
+            }
+
+            return null;
+        }
+
+        public static T? GetFromImportString<T>(string importString)
+        {
+            if (string.IsNullOrEmpty(importString)) return default;
+
+            try
+            {
+                byte[] bytes = Convert.FromBase64String(importString);
+
+                string decodedJsonString;
+                using (MemoryStream inputStream = new MemoryStream(bytes))
+                {
+                    using (DeflateStream compressionStream = new DeflateStream(inputStream, CompressionMode.Decompress))
+                    {
+                        using (StreamReader reader = new StreamReader(compressionStream, Encoding.UTF8))
+                        {
+                            decodedJsonString = reader.ReadToEnd();
+                        }
+                    }
+                }
+
+                T? importedObj = JsonConvert.DeserializeObject<T>(decodedJsonString, _serializerSettings);
+                return importedObj;
+            }
+            catch (Exception ex)
+            {
+                PluginLog.Error(ex.ToString());
+            }
+
+            return default;
+        }
+
         public static LMeterConfig LoadConfig(string path)
         {
             LMeterConfig? config = null;

@@ -1,6 +1,7 @@
 using System.Numerics;
 using Dalamud.Interface;
 using ImGuiNET;
+using LMeter.ACT;
 using LMeter.Helpers;
 
 namespace LMeter.Config
@@ -13,16 +14,17 @@ namespace LMeter.Config
 
         public ACTConfig()
         {
-            this.ACTSocketAddress = "localhost:10501";
+            this.ACTSocketAddress = "ws://localhost:10501/ws";
         }
 
         public void DrawConfig(Vector2 size, float padX, float padY)
         {
-            if (ImGui.BeginChild("##ACT", new Vector2(size.X, size.Y), true))
+            if (ImGui.BeginChild($"##{this.Name}", new Vector2(size.X, size.Y), true))
             {
                 Vector2 buttonSize = new Vector2(40, 0);
-                ImGui.Text("ACT Status: Not Connected");
-                ImGui.InputTextWithHint("ACT Websocket Address", "Default: 'localhost:10501'", ref this.ACTSocketAddress, 64);
+                ACTClient client = Singletons.Get<ACTClient>();
+                ImGui.Text($"ACT Status: {client.Status}");
+                ImGui.InputTextWithHint("ACT Websocket Address", "Default: 'ws://localhost:10501/ws'", ref this.ACTSocketAddress, 64);
                 DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Sync, () => RetryACTConnection(), "Reconnect", buttonSize);
 
                 ImGui.SameLine();
@@ -33,9 +35,11 @@ namespace LMeter.Config
             }
         }
 
-        public static void RetryACTConnection()
+        public void RetryACTConnection()
         {
-
+            ACTClient client = Singletons.Get<ACTClient>();
+            client.Reset();
+            client.Start(this.ACTSocketAddress);
         }
     }
 }

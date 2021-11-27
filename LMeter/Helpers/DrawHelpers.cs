@@ -113,11 +113,11 @@ namespace LMeter.Helpers
             string name,
             Vector2 pos,
             Vector2 size,
-            bool preview,
+            bool needsInput,
             bool setPosition,
             Action<ImDrawListPtr> drawAction)
         {
-            DrawInWindow(name, pos, size, preview, false, preview, setPosition, drawAction);
+            DrawInWindow(name, pos, size, needsInput, false, setPosition, drawAction);
         }
 
         public static void DrawInWindow(
@@ -126,20 +126,7 @@ namespace LMeter.Helpers
             Vector2 size,
             bool needsInput,
             bool needsFocus,
-            bool needsWindow,
-            Action<ImDrawListPtr> drawAction)
-        {
-            DrawInWindow(name, pos, size, needsInput, needsFocus, needsWindow, true, drawAction, ImGuiWindowFlags.NoMove);
-        }
-
-        public static void DrawInWindow(
-            string name,
-            Vector2 pos,
-            Vector2 size,
-            bool needsInput,
-            bool needsFocus,
-            bool needsWindow,
-            bool setPosition,
+            bool locked,
             Action<ImDrawListPtr> drawAction,
             ImGuiWindowFlags extraFlags = ImGuiWindowFlags.None)
         {
@@ -148,7 +135,6 @@ namespace LMeter.Helpers
                 ImGuiWindowFlags.NoTitleBar |
                 ImGuiWindowFlags.NoScrollbar |
                 ImGuiWindowFlags.NoBackground |
-                ImGuiWindowFlags.NoResize |
                 extraFlags;
 
             if (!needsInput)
@@ -161,15 +147,10 @@ namespace LMeter.Helpers
                 windowFlags |= ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.NoBringToFrontOnFocus;
             }
 
-            if (!needsInput && !needsWindow)
+            if (locked)
             {
-                drawAction(ImGui.GetWindowDrawList());
-                return;
-            }
-
-            ImGui.SetNextWindowSize(size);
-            if (setPosition)
-            {
+                windowFlags |= ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize;
+                ImGui.SetNextWindowSize(size);
                 ImGui.SetNextWindowPos(pos);
             }
 

@@ -30,6 +30,15 @@ namespace LMeter
 
         private readonly Vector2 _configSize = new Vector2(550, 400);
 
+        private readonly ImGuiWindowFlags _mainWindowFlags = 
+            ImGuiWindowFlags.NoTitleBar |
+            ImGuiWindowFlags.NoScrollbar |
+            ImGuiWindowFlags.AlwaysAutoResize |
+            ImGuiWindowFlags.NoBackground |
+            ImGuiWindowFlags.NoInputs |
+            ImGuiWindowFlags.NoBringToFrontOnFocus |
+            ImGuiWindowFlags.NoSavedSettings;
+
         public PluginManager(
             ClientState clientState,
             CommandManager commandManager,
@@ -68,6 +77,24 @@ namespace LMeter
             }
 
             this.WindowSystem.Draw();
+
+            ImGuiHelpers.ForceNextWindowMainViewport();
+            ImGui.SetNextWindowPos(Vector2.Zero);
+            ImGui.SetNextWindowSize(ImGui.GetMainViewport().Size);
+            if (ImGui.Begin("LMeter_Root", this._mainWindowFlags))
+            {
+                foreach (var meter in this.Config.MeterList.Meters)
+                {
+                    meter.Draw(_origin);
+                }
+
+                ImGui.End();
+            }
+        }
+
+        public void Edit(IConfigurable configItem)
+        {
+            this.ConfigRoot.PushConfig(configItem);
         }
 
         private void OpenConfigUi()

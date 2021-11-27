@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using System;
+﻿using System;
 using System.IO;
 using System.Reflection;
 using Dalamud.Data;
@@ -18,6 +17,7 @@ using LMeter.Config;
 using LMeter.Helpers;
 using SigScanner = Dalamud.Game.SigScanner;
 using Dalamud.Logging;
+using LMeter.ACT;
 
 namespace LMeter
 {
@@ -84,6 +84,11 @@ namespace LMeter
             // Initialize Fonts
             FontsManager.CopyPluginFontsToUserPath();
             Singletons.Register(new FontsManager(pluginInterface.UiBuilder, config.FontConfig.Fonts.Values));
+
+            // Connect to ACT
+            ACTClient actClient = new ACTClient();
+            actClient.Start(config.ACTConfig.ACTSocketAddress);
+            Singletons.Register(actClient);
 
             // Start the plugin
             Singletons.Register(new PluginManager(clientState, commandManager, pluginInterface, config));

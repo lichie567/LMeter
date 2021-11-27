@@ -1,5 +1,4 @@
 ﻿using System.Numerics;
-using Dalamud.Interface;
 using ImGuiNET;
 using LMeter.Helpers;
 
