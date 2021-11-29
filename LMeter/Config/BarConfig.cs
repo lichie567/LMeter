@@ -28,6 +28,7 @@ namespace LMeter.Config
         public ConfigColor BarNameOutlineColor = new ConfigColor(0, 0, 0, 0.5f);
         public string BarNameFontKey = FontsManager.DalamudFontKey;
         public int BarNameFontId = 0;
+        public bool UseCharacterName = false;
 
         public string BarDataFormat = "[damagetotal]  ([encdps], [damagepct])  ";
         public ConfigColor BarDataColor = new ConfigColor(1, 1, 1, 1);
@@ -75,7 +76,9 @@ namespace LMeter.Config
                     string tooltip = $"Available Data Tags:\n\n{string.Join("\n", Combatant.GetTags())}";
                     ImGui.SetTooltip(tooltip);
                 }
-                
+
+                ImGui.Checkbox("Use your name instead of 'YOU'", ref this.UseCharacterName);
+
                 if (!FontsManager.ValidateFont(fontOptions, this.BarNameFontId, this.BarNameFontKey))
                 {
                     this.BarNameFontId = 0;

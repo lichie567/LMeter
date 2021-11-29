@@ -185,6 +185,12 @@ namespace LMeter.Meter
 
                             bool fontPushed = FontsManager.PushFont(this.BarConfig.BarNameFontKey);
                             string nameText = combatant.GetFormattedString(this.BarConfig.BarNameFormat);
+                            if (this.BarConfig.UseCharacterName)
+                            {
+                                string characterName = Singletons.Get<ClientState>().LocalPlayer?.Name.ToString() ?? "YOU";
+                                nameText = nameText.Replace("YOU", characterName);
+                            }
+
                             Vector2 nameTextSize = ImGui.CalcTextSize(nameText);
                             Vector2 namePos = Utils.GetAnchoredPosition(localPos, -barSize, DrawAnchor.Left);
                             namePos = Utils.GetAnchoredPosition(namePos, nameTextSize, DrawAnchor.Left);
