@@ -234,10 +234,10 @@ namespace LMeter.Meter
             {
                 string xData = dataType switch
                 {
-                    MeterDataType.Damage => x.EncDps,
-                    MeterDataType.Healing => x.EncHps,
+                    MeterDataType.Damage => x.DamageTotal,
+                    MeterDataType.Healing => x.HealingTotal,
                     MeterDataType.DamageTaken => x.DamageTaken,
-                    _ => x.EncDps
+                    _ => x.DamageTotal
                 };
 
                 string yData = dataType switch

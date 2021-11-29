@@ -132,6 +132,9 @@ namespace LMeter.ACT
         [JsonProperty("healed")]
         public string HealingTotal { get; private set; } = string.Empty;
 
+        [JsonProperty("healed%")]
+        public string HealingPct { get; private set; } = string.Empty;
+
         [JsonProperty("damagetaken")]
         public string DamageTaken { get; private set; } = string.Empty;
 
