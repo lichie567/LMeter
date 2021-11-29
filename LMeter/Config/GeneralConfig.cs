@@ -3,6 +3,7 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using ImGuiNET;
 using LMeter.Helpers;
+using Newtonsoft.Json;
 
 namespace LMeter.Config
 {
@@ -15,12 +16,13 @@ namespace LMeter.Config
 
     public class GeneralConfig : IConfigPage
     {
+        [JsonIgnore]
         private static string[] _meterTypeOptions = Enum.GetNames(typeof(MeterDataType));
 
         public string Name => "General";
 
         public Vector2 Position = Vector2.Zero;
-        public Vector2 Size = new Vector2(300, 200);
+        public Vector2 Size = ImGui.GetMainViewport().Size / 10;
         public bool Lock = false;
         public bool ClickThrough = false;
         public ConfigColor BackgroundColor = new ConfigColor(0, 0, 0, 0.5f);

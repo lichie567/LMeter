@@ -147,9 +147,9 @@ namespace LMeter.Windows
 
                 DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Upload, () => Export(), "Export", buttonsize);
                 ImGui.SameLine();
-
-                ImGui.EndChild();
             }
+
+            ImGui.EndChild();
         }
 
         private void Export()

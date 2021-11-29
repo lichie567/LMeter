@@ -34,7 +34,7 @@ namespace LMeter.Helpers
 
         public const string DalamudFontKey = "Dalamud Font";
 
-        public static readonly List<string> DefaultFontKeys = new List<string>() { "big-noodle-too_24", "big-noodle-too_20", "big-noodle-too_16" };
+        public static readonly List<string> DefaultFontKeys = new List<string>() { "Expressway_24", "Expressway_20", "Expressway_16" };
         public static string DefaultBigFontKey => DefaultFontKeys[0];
         public static string DefaultMediumFontKey => DefaultFontKeys[1];
         public static string DefaultSmallFontKey => DefaultFontKeys[2];
@@ -42,7 +42,7 @@ namespace LMeter.Helpers
         public FontsManager(UiBuilder uiBuilder, IEnumerable<FontData> fonts)
         {
             this.FontData = fonts;
-            this.FontList = new string[0];
+            this.FontList = new string[] { DalamudFontKey };
             this.ImGuiFonts = new Dictionary<string, ImFontPtr>();
 
             this.UiBuilder = uiBuilder;
@@ -92,16 +92,22 @@ namespace LMeter.Helpers
             this.FontList = fontList.ToArray();
         }
 
-        public bool PushFont(string fontKey)
+        public static bool ValidateFont(string[] fontOptions, int fontId, string fontKey)
         {
+            return fontId < fontOptions.Length && fontOptions[fontId].Equals(fontKey);
+        }
+
+        public static bool PushFont(string fontKey)
+        {
+            FontsManager manager = Singletons.Get<FontsManager>();
             if (string.IsNullOrEmpty(fontKey) ||
                 fontKey.Equals(DalamudFontKey) ||
-                !this.ImGuiFonts.Keys.Contains(fontKey))
+                !manager.ImGuiFonts.Keys.Contains(fontKey))
             {
                 return false;
             }
 
-            ImGui.PushFont(this.ImGuiFonts[fontKey]);
+            ImGui.PushFont(manager.ImGuiFonts[fontKey]);
             return true;
         }
 
@@ -111,9 +117,9 @@ namespace LMeter.Helpers
             Singletons.Get<UiBuilder>().RebuildFonts();
         }
 
-        public string[] GetFontList()
+        public static string[] GetFontList()
         {
-            return this.FontList;
+            return Singletons.Get<FontsManager>().FontList;
         }
 
         public int GetFontIndex(string fontKey)
@@ -272,9 +278,8 @@ namespace LMeter.Helpers
         {
             if (disposing)
             {
-                this.ImGuiFonts.Clear();
                 this.UiBuilder.BuildFonts -= BuildFonts;
-                this.UiBuilder.RebuildFonts();
+                this.ImGuiFonts.Clear();
             }
         }
     }

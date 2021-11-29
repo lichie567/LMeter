@@ -71,6 +71,9 @@ namespace LMeter
             Singletons.Register(targetManager);
             Singletons.Register(pluginInterface.UiBuilder);
 
+            // Init TexturesCache
+            Singletons.Register(new TexturesCache(pluginInterface));
+
             // Load Icon Texure
             Plugin.IconTexture = LoadIconTexture(pluginInterface.UiBuilder);
 

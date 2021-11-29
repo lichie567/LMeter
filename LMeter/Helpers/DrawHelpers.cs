@@ -66,7 +66,23 @@ namespace LMeter.Helpers
         }
 
         public static void DrawIcon(
-            ushort iconId,
+            uint iconId,
+            Vector2 position,
+            Vector2 size,
+            ImDrawListPtr drawList)
+        {
+            TextureWrap? tex = Singletons.Get<TexturesCache>().GetTextureFromIconId(iconId, 0, true);
+
+            if (tex is null)
+            {
+                return;
+            }
+
+            drawList.AddImage(tex.ImGuiHandle, position, position + size, Vector2.Zero, Vector2.One);
+        }
+
+        public static void DrawIcon(
+            uint iconId,
             Vector2 position,
             Vector2 size,
             bool cropIcon,
@@ -161,25 +177,35 @@ namespace LMeter.Helpers
             if (ImGui.Begin(name, windowFlags))
             {
                 drawAction(ImGui.GetWindowDrawList());
-                ImGui.End();
             }
 
             ImGui.PopStyleVar(3);
+            ImGui.End();
         }
 
-        public static void DrawOutlinedText(string text, Vector2 pos, uint color, uint outlineColor, ImDrawListPtr drawList, int thickness = 1)
+        public static void DrawText(
+            ImDrawListPtr drawList,
+            string text,
+            Vector2 pos,
+            uint color,
+            bool outline,
+            uint outlineColor = 0xFF000000,
+            int thickness = 1)
         {
             // outline
-            for (int i = 1; i < thickness + 1; i++)
+            if (outline)
             {
-                drawList.AddText(new Vector2(pos.X - i, pos.Y + i), outlineColor, text);
-                drawList.AddText(new Vector2(pos.X, pos.Y + i), outlineColor, text);
-                drawList.AddText(new Vector2(pos.X + i, pos.Y + i), outlineColor, text);
-                drawList.AddText(new Vector2(pos.X - i, pos.Y), outlineColor, text);
-                drawList.AddText(new Vector2(pos.X + i, pos.Y), outlineColor, text);
-                drawList.AddText(new Vector2(pos.X - i, pos.Y - i), outlineColor, text);
-                drawList.AddText(new Vector2(pos.X, pos.Y - i), outlineColor, text);
-                drawList.AddText(new Vector2(pos.X + i, pos.Y - i), outlineColor, text);
+                for (int i = 1; i < thickness + 1; i++)
+                {
+                    drawList.AddText(new Vector2(pos.X - i, pos.Y + i), outlineColor, text);
+                    drawList.AddText(new Vector2(pos.X, pos.Y + i), outlineColor, text);
+                    drawList.AddText(new Vector2(pos.X + i, pos.Y + i), outlineColor, text);
+                    drawList.AddText(new Vector2(pos.X - i, pos.Y), outlineColor, text);
+                    drawList.AddText(new Vector2(pos.X + i, pos.Y), outlineColor, text);
+                    drawList.AddText(new Vector2(pos.X - i, pos.Y - i), outlineColor, text);
+                    drawList.AddText(new Vector2(pos.X, pos.Y - i), outlineColor, text);
+                    drawList.AddText(new Vector2(pos.X + i, pos.Y - i), outlineColor, text);
+                }
             }
 
             // text

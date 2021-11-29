@@ -114,7 +114,7 @@ namespace LMeter.Config
         {
             if (!string.IsNullOrEmpty(name))
             {
-                this.Meters.Add(new MeterWindow(name));
+                this.Meters.Add(MeterWindow.GetDefaultMeter(name));
             }
 
             this._input = string.Empty;

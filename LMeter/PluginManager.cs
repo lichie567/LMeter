@@ -87,9 +87,9 @@ namespace LMeter
                 {
                     meter.Draw(_origin);
                 }
-
-                ImGui.End();
             }
+
+            ImGui.End();
         }
 
         public void Edit(IConfigurable configItem)
