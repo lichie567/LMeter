@@ -28,9 +28,9 @@ namespace LMeter.ACT
 
         private Task? ReceiveTask { get; set; }
 
-        public ConnectionStatus Status { get; private set; }
-
         private ACTEvent? LastEvent { get; set; }
+
+        public ConnectionStatus Status { get; private set; }
 
         public ACTClient()
         {
@@ -136,6 +136,7 @@ namespace LMeter.ACT
 
                                     if (actEvent is not null)
                                     {
+                                        actEvent.Timestamp = DateTime.UtcNow;
                                         this.LastEvent = actEvent;
                                     }
                                 }

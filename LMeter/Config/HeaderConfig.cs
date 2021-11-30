@@ -46,7 +46,7 @@ namespace LMeter.Config
         public Vector2 StatsOffset = new Vector2(0, 0);
         public int StatsFontId = 0;
         public string StatsFontKey = FontsManager.DalamudFontKey;
-        public string StatsFormat = "[encdps]rdps [enchps]rhps Deaths: [deaths] ";
+        public string StatsFormat = "[dps]rdps [hps]rhps Deaths: [deaths] ";
 
         public Vector2 DrawHeader(Vector2 pos, Vector2 size, Encounter? encounter, ImDrawListPtr drawList)
         {

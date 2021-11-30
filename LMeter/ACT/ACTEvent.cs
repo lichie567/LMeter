@@ -2,11 +2,15 @@ using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using System;
 
 namespace LMeter.ACT
 {
     public class ACTEvent
     {
+        [JsonIgnore]
+        public DateTime Timestamp;
+
         [JsonProperty("type")]
         public string EventType { get; private set; } = string.Empty;
         

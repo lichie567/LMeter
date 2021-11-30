@@ -39,7 +39,7 @@
     <PropertyGroup>
         <DalamudVersion>dev</DalamudVersion>
         <DalamudLocal>../dalamud/</DalamudLocal>
-        <DalamudXIVLauncher>$(APPDATA)\XIVLauncher\addon\Hooks\$(DalamudVersion)</DalamudXIVLauncher>
+        <DalamudXIVLauncher>/home/tyler/Games/final-fantasy-xiv-online/drive_c/users/tyler/AppData/Roaming/XIVLauncher/addon/Hooks/dev/</DalamudXIVLauncher>
     </PropertyGroup>
 
     <!-- Assembly Reference Locations -->

@@ -75,20 +75,23 @@ namespace LMeter.Helpers
 
                 if (!string.IsNullOrEmpty(resolvedPath) && !resolvedPath.Equals(path))
                 {
-                    textureWrap = this.LoadPenumbraTexture(resolvedPath);
+                    return this.LoadPenumbraTexture(resolvedPath);
                 }
-                
-                if (textureWrap is null)
-                {
-                    TexFile? iconFile = Singletons.Get<DataManager>().GetFile<TexFile>(path);
-                    if (iconFile is null)
-                    {
-                        return null;
-                    }
+            }
+            catch
+            {
+            }
 
-                    IconData newIcon = new IconData(iconFile);
-                    textureWrap = newIcon.GetTextureWrap(greyScale, opacity);
+            try
+            {
+                TexFile? iconFile = Singletons.Get<DataManager>().GetFile<TexFile>(path);
+                if (iconFile is null)
+                {
+                    return null;
                 }
+
+                IconData newIcon = new IconData(iconFile);
+                return newIcon.GetTextureWrap(greyScale, opacity);
             }
             catch (Exception ex)
             {

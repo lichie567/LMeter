@@ -3,18 +3,22 @@ using Dalamud.Interface;
 using ImGuiNET;
 using LMeter.ACT;
 using LMeter.Helpers;
+using Newtonsoft.Json;
 
 namespace LMeter.Config
 {
     public class ACTConfig : IConfigPage
     {
+        [JsonIgnore]
+        private string _defaultSocketAddress = "ws://127.0.0.1:10501/ws";
+
         public string Name => "ACT";
 
         public string ACTSocketAddress;
 
         public ACTConfig()
         {
-            this.ACTSocketAddress = "ws://localhost:10501/ws";
+            this.ACTSocketAddress = _defaultSocketAddress;
         }
 
         public void DrawConfig(Vector2 size, float padX, float padY)
@@ -24,7 +28,7 @@ namespace LMeter.Config
                 Vector2 buttonSize = new Vector2(40, 0);
                 ACTClient client = Singletons.Get<ACTClient>();
                 ImGui.Text($"ACT Status: {client.Status}");
-                ImGui.InputTextWithHint("ACT Websocket Address", "Default: 'ws://localhost:10501/ws'", ref this.ACTSocketAddress, 64);
+                ImGui.InputTextWithHint("ACT Websocket Address", $"Default: '{_defaultSocketAddress}'", ref this.ACTSocketAddress, 64);
                 DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Sync, () => RetryACTConnection(), "Reconnect", buttonSize);
 
                 ImGui.SameLine();

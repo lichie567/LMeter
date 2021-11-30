@@ -16,12 +16,15 @@ namespace LMeter.Meter
     public class MeterWindow : IConfigurable
     {
         [JsonIgnore] public readonly string ID;
-        [JsonIgnore] protected bool LastFrameWasPreview = false;
-        [JsonIgnore] protected bool LastFrameWasDragging = false;
-        [JsonIgnore] public bool Preview = false;
-        [JsonIgnore] public bool Hovered = false;
-        [JsonIgnore] public bool Dragging = false;
-        [JsonIgnore] public bool Locked = false;
+        [JsonIgnore] private bool LastFrameWasPreview = false;
+        [JsonIgnore] private bool LastFrameWasDragging = false;
+        [JsonIgnore] private bool Preview = false;
+        [JsonIgnore] private bool Hovered = false;
+        [JsonIgnore] private bool Dragging = false;
+        [JsonIgnore] private bool Locked = false;
+
+        [JsonIgnore] private DateTime? LastSortedTimestamp = null;
+        [JsonIgnore] private List<Combatant> LastSortedCombatants = new List<Combatant>();
 
         public string Name { get; set; }
 
@@ -128,7 +131,7 @@ namespace LMeter.Meter
 
                 if (actEvent is not null && actEvent.Combatants.Any())
                 {
-                    List<Combatant> sortedCombatants = this.GetSortedCombatants(actEvent.Combatants.Values, this.GeneralConfig.DataType);
+                    List<Combatant> sortedCombatants = this.GetSortedCombatants(actEvent, this.GeneralConfig.DataType);
                     
                     string topDataSource = this.GeneralConfig.DataType switch
                     {
@@ -232,9 +235,14 @@ namespace LMeter.Meter
             this.LastFrameWasPreview = this.Preview;
         }
 
-        private List<Combatant> GetSortedCombatants(IEnumerable<Combatant> combatants, MeterDataType dataType)
+        private List<Combatant> GetSortedCombatants(ACTEvent actEvent, MeterDataType dataType)
         {
-            List<Combatant> sortedCombatants = combatants.ToList();
+            if (this.LastSortedTimestamp.HasValue && this.LastSortedTimestamp.Value == actEvent.Timestamp)
+            {
+                return this.LastSortedCombatants;
+            }
+
+            List<Combatant> sortedCombatants = actEvent.Combatants.Values.ToList();
 
             sortedCombatants.Sort((x, y) =>
             {
@@ -267,6 +275,8 @@ namespace LMeter.Meter
                 return (int)(xFloat - yFloat);
             });
 
+            this.LastSortedTimestamp = actEvent.Timestamp;
+            this.LastSortedCombatants = sortedCombatants;
             return sortedCombatants;
         }
     }
