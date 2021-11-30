@@ -83,12 +83,14 @@ namespace LMeter.Windows
                 size -= new Vector2(0, NavBarHeight + spacing.Y);
             }
 
+            IConfigPage? openPage = null;
             if (ImGui.BeginTabBar($"##{this.WindowName}"))
             {
                 foreach (IConfigPage page in configItem.GetConfigPages())
                 {
                     if (ImGui.BeginTabItem($"{page.Name}##{this.WindowName}"))
                     {
+                        openPage = page;
                         page.DrawConfig(size.AddY(-ImGui.GetCursorPosY()), spacing.X, spacing.Y);
                         ImGui.EndTabItem();
                     }
@@ -99,14 +101,14 @@ namespace LMeter.Windows
 
             if (drawNavBar)
             {
-                this.DrawNavBar(size, spacing.X);
+                this.DrawNavBar(openPage, size, spacing.X);
             }
 
             this.Position = ImGui.GetWindowPos();
             this.WindowSize = ImGui.GetWindowSize();
         }
                 
-        private void DrawNavBar(Vector2 size, float padX)
+        private void DrawNavBar(IConfigPage? openPage, Vector2 size, float padX)
         {
             Vector2 buttonsize = new Vector2(40, 0);
             float textInputWidth = 150;
@@ -127,7 +129,7 @@ namespace LMeter.Windows
                 }
 
                 // calculate empty horizontal space based on size of buttons and text box
-                float offset = size.X - buttonsize.X * 3 - textInputWidth - padX * 5;
+                float offset = size.X - buttonsize.X * 4 - textInputWidth - padX * 6;
 
                 ImGui.SetCursorPosX(ImGui.GetCursorPosX() + offset);
 
@@ -145,19 +147,31 @@ namespace LMeter.Windows
                 ImGui.PopItemWidth();
                 ImGui.SameLine();
 
-                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Upload, () => Export(), "Export", buttonsize);
+                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Upload, () => Export(openPage), $"Export {openPage?.Name ?? ""}", buttonsize);
                 ImGui.SameLine();
+
+                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Download, () => Import(), $"Import {openPage?.Name ?? ""}", buttonsize);
             }
 
             ImGui.EndChild();
         }
 
-        private void Export()
+        private void Export(IConfigPage? openPage)
         {
-            if (this.ConfigStack.Any() &&
-                this.ConfigStack.Peek() is MeterWindow meter)
+            if (openPage is not null)
             {
-                ConfigHelpers.ExportToClipboard(meter);
+                ConfigHelpers.ExportToClipboard<IConfigPage>(openPage);
+            }
+        }
+
+        private void Import()
+        {
+            string importString = ImGui.GetClipboardText();
+            IConfigPage? page = ConfigHelpers.GetFromImportString<IConfigPage>(importString);
+
+            if (page is not null)
+            {
+                this.ConfigStack.Peek().ImportPage(page);
             }
         }
 

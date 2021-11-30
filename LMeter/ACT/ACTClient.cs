@@ -7,7 +7,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Dalamud.Logging;
 using Newtonsoft.Json;
-using System.Diagnostics.CodeAnalysis;
 
 namespace LMeter.ACT
 {
@@ -39,19 +38,16 @@ namespace LMeter.ACT
             this.Status = ConnectionStatus.NotConnected;
         }
 
-        public static bool GetLastEvent([MaybeNullWhen(false)] out ACTEvent actEvent)
+        public static ACTEvent? GetLastEvent()
         {
-            actEvent = null!;
-
             ACTClient client = Singletons.Get<ACTClient>();
             if (client.Status != ConnectionStatus.Connected ||
                 client.LastEvent is null)
             {
-                return false;
+                return null;
             }
 
-            actEvent = client.LastEvent;
-            return true;
+            return client.LastEvent;
         }
 
         public void Start(string host)
