@@ -66,7 +66,7 @@ namespace LMeter.Helpers
 
             if (type == JobType.Tanks)
             {
-                return new List<Job>() { Job.GLD, Job.MRD, Job.PLD, Job.WAR, Job.DRK, Job.GNB };
+                return new List<Job>() { Job.GLA, Job.MRD, Job.PLD, Job.WAR, Job.DRK, Job.GNB };
             }
 
             if (type == JobType.Casters)
@@ -127,7 +127,7 @@ namespace LMeter.Helpers
 
     public enum Job
     {
-        GLD = 1,
+        GLA = 1,
         MRD = 3,
         PLD = 19,
         WAR = 21,
