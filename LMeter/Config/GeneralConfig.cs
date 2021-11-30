@@ -18,6 +18,9 @@ namespace LMeter.Config
     {
         [JsonIgnore]
         private static string[] _meterTypeOptions = Enum.GetNames(typeof(MeterDataType));
+        
+        [JsonIgnore]
+        public bool Preview = false;
 
         public string Name => "General";
 
@@ -28,7 +31,7 @@ namespace LMeter.Config
         public ConfigColor BackgroundColor = new ConfigColor(0, 0, 0, 0.5f);
         public bool ShowBorder = false;
         public ConfigColor BorderColor = new ConfigColor(0, 0, 0, 1f);
-        public int BorderThickness = 1;
+        public int BorderThickness = 2;
         public MeterDataType DataType = MeterDataType.Damage;
 
         public void DrawConfig(Vector2 size, float padX, float padY)
@@ -60,7 +63,9 @@ namespace LMeter.Config
                 }
 
                 ImGui.NewLine();
-                ImGui.Combo("Meter Data Type", ref Unsafe.As<MeterDataType, int>(ref this.DataType), _meterTypeOptions, _meterTypeOptions.Length);
+                ImGui.Combo("Sort Type", ref Unsafe.As<MeterDataType, int>(ref this.DataType), _meterTypeOptions, _meterTypeOptions.Length);
+
+                ImGui.Checkbox("Preview", ref this.Preview);
 
                 ImGui.EndChild();
             }

@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using System.Linq;
 using System;
 using System.Collections.Generic;
@@ -9,34 +8,35 @@ using LMeter.Helpers;
 using LMeter.ACT;
 using Newtonsoft.Json;
 using System.Globalization;
-using Dalamud.Game.ClientState;
 
 namespace LMeter.Meter
 {
     public class MeterWindow : IConfigurable
     {
         [JsonIgnore] public readonly string ID;
-        [JsonIgnore] private bool LastFrameWasPreview = false;
+        [JsonIgnore] private bool LastFrameWasUnlocked = false;
         [JsonIgnore] private bool LastFrameWasDragging = false;
-        [JsonIgnore] private bool Preview = false;
+        [JsonIgnore] private bool LastFrameWasPreview = false;
+        [JsonIgnore] private bool Unlocked = false;
         [JsonIgnore] private bool Hovered = false;
         [JsonIgnore] private bool Dragging = false;
         [JsonIgnore] private bool Locked = false;
+        [JsonIgnore] private ACTEvent? PreviewEvent = null;
 
         [JsonIgnore] private DateTime? LastSortedTimestamp = null;
         [JsonIgnore] private List<Combatant> LastSortedCombatants = new List<Combatant>();
 
         public string Name { get; set; }
 
-        public GeneralConfig GeneralConfig { get; init; }
+        public GeneralConfig GeneralConfig { get; set; }
 
-        public HeaderConfig HeaderConfig { get; init; }
+        public HeaderConfig HeaderConfig { get; set; }
 
-        public BarConfig BarConfig { get; init; }
+        public BarConfig BarConfig { get; set; }
 
-        public BarColorsConfig BarColorsConfig { get; init; }
+        public BarColorsConfig BarColorsConfig { get; set; }
 
-        public VisibilityConfig VisibilityConfig { get; init; }
+        public VisibilityConfig VisibilityConfig { get; set; }
 
         public MeterWindow(string name)
         {
@@ -56,6 +56,34 @@ namespace LMeter.Meter
             yield return this.BarConfig;
             yield return this.BarColorsConfig;
             yield return this.VisibilityConfig;
+        }
+
+        public void ImportPage(IConfigPage page)
+        {
+            if (page is GeneralConfig)
+            {
+                this.GeneralConfig = (GeneralConfig)page;
+            }
+
+            if (page is HeaderConfig)
+            {
+                this.HeaderConfig = (HeaderConfig)page;
+            }
+            
+            if (page is BarConfig)
+            {
+                this.BarConfig = (BarConfig)page;
+            }
+            
+            if (page is BarColorsConfig)
+            {
+                this.BarColorsConfig = (BarColorsConfig)page;
+            }
+            
+            if (page is VisibilityConfig)
+            {
+                this.VisibilityConfig = (VisibilityConfig)page;
+            }
         }
 
         public static MeterWindow GetDefaultMeter(string name)
@@ -79,10 +107,10 @@ namespace LMeter.Meter
         // Dont ask
         protected void UpdateDragData(Vector2 pos, Vector2 size, bool locked)
         {
-            this.Preview = !locked;
+            this.Unlocked = !locked;
             this.Hovered = ImGui.IsMouseHoveringRect(pos, pos + size);
             this.Dragging = this.LastFrameWasDragging && ImGui.IsMouseDown(ImGuiMouseButton.Left);
-            this.Locked = (this.Preview && !this.LastFrameWasPreview || !this.Hovered) && !this.Dragging;
+            this.Locked = (this.Unlocked && !this.LastFrameWasUnlocked || !this.Hovered) && !this.Dragging;
             this.LastFrameWasDragging = this.Hovered || this.Dragging;
         }
 
@@ -97,10 +125,10 @@ namespace LMeter.Meter
             Vector2 size = this.GeneralConfig.Size;
 
             this.UpdateDragData(localPos, size, this.GeneralConfig.Lock);
-            bool needsInput = this.Preview || !this.GeneralConfig.ClickThrough;
+            bool needsInput = this.Unlocked || !this.GeneralConfig.ClickThrough;
             DrawHelpers.DrawInWindow($"##{this.ID}", localPos, size, needsInput, this.Locked || this.GeneralConfig.Lock, (drawList) =>
             {
-                if (this.Preview)
+                if (this.Unlocked)
                 {
                     if (this.LastFrameWasDragging)
                     {
@@ -124,120 +152,84 @@ namespace LMeter.Meter
                     size -= Vector2.One * this.GeneralConfig.BorderThickness * 2;
                 }
 
-                ACTClient.GetLastEvent(out ACTEvent? actEvent);
+                if (this.GeneralConfig.Preview && !this.LastFrameWasPreview)
+                {
+                    this.PreviewEvent = ACTEvent.GetTestData();
+                }
+
+                ACTEvent? actEvent = this.GeneralConfig.Preview ? this.PreviewEvent : ACTClient.GetLastEvent();
                 localPos = this.HeaderConfig.DrawHeader(localPos, size, actEvent?.Encounter, drawList);
 
                 drawList.AddRectFilled(localPos, localPos + size.AddY(-this.HeaderConfig.HeaderHeight), this.GeneralConfig.BackgroundColor.Base);
 
-                if (actEvent is not null && actEvent.Combatants.Any())
+                this.DrawBars(drawList, localPos, size, actEvent);
+            });
+
+            this.LastFrameWasUnlocked = this.Unlocked;
+            this.LastFrameWasPreview = this.GeneralConfig.Preview;
+        }
+
+        private void DrawBars(ImDrawListPtr drawList, Vector2 localPos, Vector2 size, ACTEvent? actEvent)
+        {                
+            if (actEvent is not null && actEvent.Combatants.Any())
+            {
+                Vector2 scrollSize = new Vector2(size.X, actEvent.Combatants.Count() * this.BarConfig.BarHeight + this.HeaderConfig.HeaderHeight);
+                List<Combatant> sortedCombatants = this.GetSortedCombatants(actEvent, this.GeneralConfig.DataType);
+                
+                string topDataSource = this.GeneralConfig.DataType switch
                 {
-                    List<Combatant> sortedCombatants = this.GetSortedCombatants(actEvent, this.GeneralConfig.DataType);
-                    
-                    string topDataSource = this.GeneralConfig.DataType switch
-                    {
-                        MeterDataType.Damage => sortedCombatants[0].DamageTotal,
-                        MeterDataType.Healing => sortedCombatants[0].HealingTotal,
-                        MeterDataType.DamageTaken => sortedCombatants[0].DamageTaken,
-                        _ => sortedCombatants[0].DamageTotal
-                    };
+                    MeterDataType.Damage => sortedCombatants[0].DamageTotal,
+                    MeterDataType.Healing => sortedCombatants[0].HealingTotal,
+                    MeterDataType.DamageTaken => sortedCombatants[0].DamageTaken,
+                    _ => sortedCombatants[0].DamageTotal
+                };
 
-                    if (float.TryParse(topDataSource, NumberStyles.Float, CultureInfo.InvariantCulture, out float top) && !float.IsNaN(top))
+                if (float.TryParse(topDataSource, NumberStyles.Float, CultureInfo.InvariantCulture, out float top) && !float.IsNaN(top))
+                {
+                    foreach (Combatant combatant in sortedCombatants)
                     {
-                        foreach (Combatant combatant in sortedCombatants)
+                        string currentDataSource = this.GeneralConfig.DataType switch
                         {
-                            string currentDataSource = this.GeneralConfig.DataType switch
-                            {
-                                MeterDataType.Damage => combatant.DamageTotal,
-                                MeterDataType.Healing => combatant.HealingTotal,
-                                MeterDataType.DamageTaken => combatant.DamageTaken,
-                                _ => combatant.DamageTotal
-                            };
+                            MeterDataType.Damage => combatant.DamageTotal,
+                            MeterDataType.Healing => combatant.HealingTotal,
+                            MeterDataType.DamageTaken => combatant.DamageTaken,
+                            _ => combatant.DamageTotal
+                        };
 
-                            if (!float.TryParse(currentDataSource, NumberStyles.Float, CultureInfo.InvariantCulture, out float current) || float.IsNaN(current))
-                            {
-                                continue;
-                            }
+                        if (!float.TryParse(currentDataSource, NumberStyles.Float, CultureInfo.InvariantCulture, out float current) || float.IsNaN(current))
+                        {
+                            return;
+                        }
 
-                            Vector2 barSize = new Vector2(size.X, this.BarConfig.BarHeight);
-                            ConfigColor barColor;
-                            if (this.BarConfig.UseJobColor)
+                        ConfigColor barColor;
+                        if (this.BarConfig.UseJobColor)
+                        {
+                            if (Enum.TryParse<Job>(combatant.Job, true, out Job job))
                             {
-                                if (Enum.TryParse<Job>(combatant.Job, true, out Job job))
-                                {
-                                    barColor = this.BarColorsConfig.GetColor(job);
-                                }
-                                else
-                                {
-                                    barColor = this.BarColorsConfig.UKNColor;
-                                }
+                                barColor = this.BarColorsConfig.GetColor(job);
                             }
                             else
                             {
-                                barColor = this.BarConfig.BarColor;
+                                barColor = this.BarColorsConfig.UKNColor;
                             }
-
-                            Vector2 barFillSize = new Vector2(size.X * (current / top), this.BarConfig.BarHeight);
-                            drawList.AddRectFilled(localPos, localPos + barFillSize, barColor.Base);
-
-                            if (this.BarConfig.ShowJobIcon && Enum.TryParse<Job>(combatant.Job, true, out Job j))
-                            {
-                                uint jobIconId = 62000u + (uint)j + 100u * (uint)this.BarConfig.JobIconStyle;
-                                Vector2 jobIconSize = new Vector2(this.BarConfig.BarHeight, this.BarConfig.BarHeight);
-                                DrawHelpers.DrawIcon(jobIconId, localPos + this.BarConfig.JobIconOffset, jobIconSize, drawList);
-                            }
-
-                            bool fontPushed = FontsManager.PushFont(this.BarConfig.BarNameFontKey);
-                            string nameText = combatant.GetFormattedString(this.BarConfig.BarNameFormat);
-                            if (this.BarConfig.UseCharacterName)
-                            {
-                                string characterName = Singletons.Get<ClientState>().LocalPlayer?.Name.ToString() ?? "YOU";
-                                nameText = nameText.Replace("YOU", characterName);
-                            }
-
-                            Vector2 nameTextSize = ImGui.CalcTextSize(nameText);
-                            Vector2 namePos = Utils.GetAnchoredPosition(localPos, -barSize, DrawAnchor.Left);
-                            namePos = Utils.GetAnchoredPosition(namePos, nameTextSize, DrawAnchor.Left);
-                            DrawHelpers.DrawText(drawList,
-                                nameText,
-                                namePos,
-                                this.BarConfig.BarNameColor.Base,
-                                this.BarConfig.BarNameShowOutline,
-                                this.BarConfig.BarNameOutlineColor.Base);
-
-                            if (fontPushed)
-                            {
-                                ImGui.PopFont();
-                            }
-
-                            fontPushed = FontsManager.PushFont(this.BarConfig.BarDataFontKey);
-                            string dataText = combatant.GetFormattedString(this.BarConfig.BarDataFormat);
-                            Vector2 dataTextSize = ImGui.CalcTextSize(dataText);
-                            Vector2 dataPos = Utils.GetAnchoredPosition(localPos, -barSize, DrawAnchor.Right);
-                            dataPos = Utils.GetAnchoredPosition(dataPos, dataTextSize, DrawAnchor.Right);
-                            DrawHelpers.DrawText(drawList,
-                                dataText,
-                                dataPos,
-                                this.BarConfig.BarDataColor.Base,
-                                this.BarConfig.BarDataShowOutline,
-                                this.BarConfig.BarDataOutlineColor.Base);
-
-                            if (fontPushed)
-                            {
-                                ImGui.PopFont();
-                            }
-
-                            localPos += new Vector2(0, this.BarConfig.BarHeight);
                         }
+                        else
+                        {
+                            barColor = this.BarConfig.BarColor;
+                        }
+
+                        this.BarConfig.DrawBar(drawList, localPos, size, combatant, barColor, top, current);
+                        localPos += new Vector2(0, this.BarConfig.BarHeight);
                     }
                 }
-            });
-
-            this.LastFrameWasPreview = this.Preview;
+            }
         }
 
         private List<Combatant> GetSortedCombatants(ACTEvent actEvent, MeterDataType dataType)
         {
-            if (this.LastSortedTimestamp.HasValue && this.LastSortedTimestamp.Value == actEvent.Timestamp)
+            if (this.LastSortedTimestamp.HasValue &&
+                this.LastSortedTimestamp.Value == actEvent.Timestamp &&
+                !this.GeneralConfig.Preview)
             {
                 return this.LastSortedCombatants;
             }
@@ -256,10 +248,10 @@ namespace LMeter.Meter
 
                 string yData = dataType switch
                 {
-                    MeterDataType.Damage => x.EncDps,
-                    MeterDataType.Healing => x.EncHps,
-                    MeterDataType.DamageTaken => x.DamageTaken,
-                    _ => x.EncDps
+                    MeterDataType.Damage => y.DamageTotal,
+                    MeterDataType.Healing => y.HealingTotal,
+                    MeterDataType.DamageTaken => y.DamageTaken,
+                    _ => y.DamageTotal
                 };
 
                 if (!float.TryParse(yData, NumberStyles.Float, CultureInfo.InvariantCulture, out float yFloat))
@@ -271,8 +263,8 @@ namespace LMeter.Meter
                 {
                     return 1;
                 }
-
-                return (int)(xFloat - yFloat);
+                
+                return (int)(yFloat - xFloat);
             });
 
             this.LastSortedTimestamp = actEvent.Timestamp;

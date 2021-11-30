@@ -3,7 +3,7 @@ using System.Numerics;
 using ImGuiNET;
 using LMeter.Helpers;
 using LMeter.ACT;
-using System.Collections.Generic;
+using Dalamud.Game.ClientState;
 
 namespace LMeter.Config
 {
@@ -22,7 +22,7 @@ namespace LMeter.Config
         public bool UseJobColor = true;
         public ConfigColor BarColor = new ConfigColor(.3f, .3f, .3f, 1f);
 
-        public string BarNameFormat = "      [name]";
+        public string BarNameFormat = " [name]";
         public ConfigColor BarNameColor = new ConfigColor(1, 1, 1, 1);
         public bool BarNameShowOutline = true;
         public ConfigColor BarNameOutlineColor = new ConfigColor(0, 0, 0, 0.5f);
@@ -36,6 +36,67 @@ namespace LMeter.Config
         public ConfigColor BarDataOutlineColor = new ConfigColor(0, 0, 0, 0.5f);
         public string BarDataFontKey = FontsManager.DalamudFontKey;
         public int BarDataFontId = 0;
+
+        public void DrawBar(
+            ImDrawListPtr drawList,
+            Vector2 localPos,
+            Vector2 size,
+            Combatant combatant,
+            ConfigColor barColor,
+            float top,
+            float current)
+        {
+            Vector2 barSize = new Vector2(size.X, this.BarHeight);
+            Vector2 barFillSize = new Vector2(size.X * (current / top), this.BarHeight);
+            drawList.AddRectFilled(localPos, localPos + barFillSize, barColor.Base);
+
+            if (this.ShowJobIcon && Enum.TryParse<Job>(combatant.Job, true, out Job job))
+            {
+                uint jobIconId = 62000u + (uint)job + 100u * (uint)this.JobIconStyle;
+                Vector2 jobIconSize = new Vector2(this.BarHeight, this.BarHeight);
+                DrawHelpers.DrawIcon(jobIconId, localPos + this.JobIconOffset, jobIconSize, drawList);
+            }
+
+            bool fontPushed = FontsManager.PushFont(this.BarNameFontKey);
+            string nameText = combatant.GetFormattedString(this.BarNameFormat);
+            if (this.UseCharacterName && combatant.Name.Contains("YOU"))
+            {
+                string characterName = Singletons.Get<ClientState>().LocalPlayer?.Name.ToString() ?? "YOU";
+                nameText = nameText.Replace("YOU", characterName);
+            }
+
+            Vector2 nameTextSize = ImGui.CalcTextSize(nameText);
+            Vector2 namePos = Utils.GetAnchoredPosition(localPos, -barSize, DrawAnchor.Left);
+            namePos = Utils.GetAnchoredPosition(namePos, nameTextSize, DrawAnchor.Left);
+            DrawHelpers.DrawText(drawList,
+                nameText,
+                namePos.AddX(this.ShowJobIcon ? this.BarHeight : 5),
+                this.BarNameColor.Base,
+                this.BarNameShowOutline,
+                this.BarNameOutlineColor.Base);
+
+            if (fontPushed)
+            {
+                ImGui.PopFont();
+            }
+
+            fontPushed = FontsManager.PushFont(this.BarDataFontKey);
+            string dataText = combatant.GetFormattedString(this.BarDataFormat);
+            Vector2 dataTextSize = ImGui.CalcTextSize(dataText);
+            Vector2 dataPos = Utils.GetAnchoredPosition(localPos, -barSize, DrawAnchor.Right);
+            dataPos = Utils.GetAnchoredPosition(dataPos, dataTextSize, DrawAnchor.Right);
+            DrawHelpers.DrawText(drawList,
+                dataText,
+                dataPos,
+                this.BarDataColor.Base,
+                this.BarDataShowOutline,
+                this.BarDataOutlineColor.Base);
+
+            if (fontPushed)
+            {
+                ImGui.PopFont();
+            }
+        }
 
         public void DrawConfig(Vector2 size, float padX, float padY)
         {            

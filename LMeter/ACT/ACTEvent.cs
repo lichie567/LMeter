@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using System;
+using LMeter.Helpers;
 
 namespace LMeter.ACT
 {
@@ -22,6 +23,15 @@ namespace LMeter.ACT
         
         [JsonProperty("Combatant")]
         public Dictionary<string, Combatant> Combatants { get; private set; } = new Dictionary<string, Combatant>();
+
+        public static ACTEvent GetTestData()
+        {
+            return new ACTEvent()
+            {
+                Encounter = LMeter.ACT.Encounter.GetTestData(),
+                Combatants = Combatant.GetTestData()
+            };
+        }
     }
 
     public class Encounter
@@ -74,10 +84,27 @@ namespace LMeter.ACT
 
         [JsonProperty("kills")]
         public string Kills { get; private set; } = string.Empty;
+
+        public static Encounter GetTestData()
+        {
+            return new Encounter()
+            {
+                Duration = "00:15",
+                Title = "Preview",
+                Dps = "69420",
+                Hps = "42069",
+                Deaths = "0",
+                DamageTotal = "69420",
+                HealingTotal = "42069"
+            };
+        }
     }
 
     public class Combatant
     {
+        [JsonIgnore]
+        private static Random _rand = new Random();
+
         public static string[] GetTags()
         {
             return typeof(Combatant).GetProperties().Select(x => $"[{x.Name.ToLower()}]").ToArray();
@@ -150,7 +177,52 @@ namespace LMeter.ACT
 
         [JsonProperty("maxhit")]
         public string MaxHit { get; private set; } = string.Empty;
+
         [JsonProperty("MAXHIT")]
         private string _maxHit { get; set; } = string.Empty;
+
+        public static Dictionary<string, Combatant> GetTestData()
+        {
+            Dictionary<string, Combatant> mockCombatants = new Dictionary<string, Combatant>();
+            mockCombatants.Add("1", GetCombatant("GNB", "DRK", "WAR", "PLD"));
+            mockCombatants.Add("2", GetCombatant("GNB", "DRK", "WAR", "PLD"));
+
+            mockCombatants.Add("3", GetCombatant("WHM", "AST", "SCH"));
+            mockCombatants.Add("4", GetCombatant("WHM", "AST", "SCH"));
+
+            mockCombatants.Add("5", GetCombatant("SAM", "DRG", "MNK", "NIN"));
+            mockCombatants.Add("6", GetCombatant("SAM", "DRG", "MNK", "NIN"));
+            mockCombatants.Add("7", GetCombatant("BLM", "SMN", "RDM"));
+            mockCombatants.Add("8", GetCombatant("DNC", "MCH", "BRD"));
+
+            return mockCombatants;
+        }
+
+        private static Combatant GetCombatant(params string[] jobs)
+        {
+            int damage = _rand.Next(200000);
+            int healing = _rand.Next(50000);
+
+            return new Combatant()
+            {
+                Name = "Fake Name",
+                Duration = "00:15",
+                Job = jobs.Select(x => x.ToString()).ElementAt(_rand.Next(jobs.Length)),
+                DamageTotal = damage.ToString(),
+                Dps = (damage / 15).ToString(),
+                EncDps = (damage / 15).ToString(),
+                HealingTotal = healing.ToString(),
+                Hps = (healing / 15).ToString(),
+                EncHps = (healing / 15).ToString(),
+                DamagePct = "100%",
+                HealingPct = "100%",
+                CritHitPct = "20%",
+                DirectHitPct = "25%",
+                CritDirectHitPct = "5%",
+                DamageTaken = (damage / 20).ToString(),
+                Deaths = _rand.Next(2).ToString(),
+                MaxHit = "Full Thrust-42069"
+            };
+        }
     }
 }

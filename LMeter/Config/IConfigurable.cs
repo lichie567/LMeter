@@ -7,5 +7,7 @@ namespace LMeter.Config
         string Name { get; set; }
 
         IEnumerable<IConfigPage> GetConfigPages();
+
+        void ImportPage(IConfigPage page);
     }
 }
