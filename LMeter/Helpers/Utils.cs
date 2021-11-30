@@ -82,6 +82,42 @@ namespace LMeter.Helpers
                 }
             }
         }
+        private static uint FCColor(uint baseoffset, uint job)
+        {
+            uint totaloffset = job;
+            // This looks like a mess, but it's because of two reasons:
+            // 1. There are unrelated icons between jobs/classes randomly.
+            // 2. Arcanist and Machinist are simply in a different location than their job order.
+            if (job >= 6) totaloffset += 1u;
+            if (job >= 19) totaloffset += 38u;
+            if (job == 26) totaloffset -= 56u;
+            if (job >= 27) totaloffset -= 1u;
+            if (job >= 29) totaloffset += 33u;
+            if (job == 31) totaloffset += 2u;
+            if (job >= 32) totaloffset -= 1u;
+            if (job >= 34) totaloffset += 2u;
+            return baseoffset + totaloffset;
+        }
+
+        public static uint StyleToOffset(uint job, int style)
+        {
+            return style switch
+            {
+                11 => FCColor(94521u, job), // FC Green
+                10 => FCColor(94021u, job), // FC Blue
+                9  => FCColor(93521u, job), // FC Purple
+                8  => FCColor(93021u, job), // FC Red
+                7  => FCColor(92521u, job), // FC Orange
+                6  => FCColor(92021u, job), // FC Gold
+                5  => FCColor(91521u, job), // FC Black
+                4  => FCColor(91021u, job), // FC Silver
+                3  => 62800u + job, // Gear Set
+                2  => (job >= 19u ? (62401u - 19u) : 62300u) + job, // Glowing
+                1  => 62100u + job, // Framed
+                0  => 62000u + job, // Filled Gold
+                _  => 62000u + job, // Default to Filled Gold
+            };
+        }
     }
         
     public enum DrawAnchor
