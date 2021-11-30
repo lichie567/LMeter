@@ -12,7 +12,7 @@ namespace LMeter.Config
         public ConfigColor DRKColor = new ConfigColor(209f / 255f, 38f / 255f, 204f / 255f, 1f);
         public ConfigColor WARColor = new ConfigColor(207f / 255f, 38f / 255f, 33f / 255f, 1f);
         public ConfigColor GNBColor = new ConfigColor(121f / 255f, 109f / 255f, 48f / 255f, 1f);
-        public ConfigColor GLDColor = new ConfigColor(168f / 255f, 210f / 255f, 230f / 255f, 1f);
+        public ConfigColor GLAColor = new ConfigColor(168f / 255f, 210f / 255f, 230f / 255f, 1f);
         public ConfigColor MRDColor = new ConfigColor(207f / 255f, 38f / 255f, 33f / 255f, 1f);
 
         public ConfigColor SCHColor = new ConfigColor(134f / 255f, 87f / 255f, 255f / 255f, 1f);
@@ -44,7 +44,7 @@ namespace LMeter.Config
 
         public ConfigColor GetColor(Job job) => job switch
         {
-            Job.GLD => this.GLDColor,
+            Job.GLA => this.GLAColor,
             Job.MRD => this.MRDColor,
             Job.PLD => this.PLDColor,
             Job.WAR => this.WARColor,
@@ -163,9 +163,9 @@ namespace LMeter.Config
 
                 ImGui.NewLine();
                 
-                vector = GLDColor.Vector;
-                ImGui.ColorEdit4("GLD", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
-                this.GLDColor.Vector = vector;
+                vector = GLAColor.Vector;
+                ImGui.ColorEdit4("GLA", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
+                this.GLAColor.Vector = vector;
                 
                 vector = MRDColor.Vector;
                 ImGui.ColorEdit4("MRD", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
