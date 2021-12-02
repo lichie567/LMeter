@@ -13,10 +13,10 @@ namespace LMeter.Config
 
         private static string[] _jobIconStyleOptions = new string[] { "Style 1", "Style 2" };
 
-        public int BarHeight = 25;
+        public int BarCount = 8;
 
         public bool ShowJobIcon = true;
-        public int JobIconStyle = 1;
+        public int JobIconStyle = 0;
         public Vector2 JobIconOffset = new Vector2(0, 0);
 
         public bool UseJobColor = true;
@@ -37,7 +37,7 @@ namespace LMeter.Config
         public string BarDataFontKey = FontsManager.DalamudFontKey;
         public int BarDataFontId = 0;
 
-        public void DrawBar(
+        public Vector2 DrawBar(
             ImDrawListPtr drawList,
             Vector2 localPos,
             Vector2 size,
@@ -46,14 +46,15 @@ namespace LMeter.Config
             float top,
             float current)
         {
-            Vector2 barSize = new Vector2(size.X, this.BarHeight);
-            Vector2 barFillSize = new Vector2(size.X * (current / top), this.BarHeight);
+            float barHeight = size.Y / this.BarCount;
+            Vector2 barSize = new Vector2(size.X, barHeight);
+            Vector2 barFillSize = new Vector2(size.X * (current / top), barHeight);
             drawList.AddRectFilled(localPos, localPos + barFillSize, barColor.Base);
 
             if (this.ShowJobIcon && Enum.TryParse<Job>(combatant.Job, true, out Job job))
             {
                 uint jobIconId = 62000u + (uint)job + 100u * (uint)this.JobIconStyle;
-                Vector2 jobIconSize = new Vector2(this.BarHeight, this.BarHeight);
+                Vector2 jobIconSize = Vector2.One * barHeight;
                 DrawHelpers.DrawIcon(jobIconId, localPos + this.JobIconOffset, jobIconSize, drawList);
             }
 
@@ -70,7 +71,7 @@ namespace LMeter.Config
             namePos = Utils.GetAnchoredPosition(namePos, nameTextSize, DrawAnchor.Left);
             DrawHelpers.DrawText(drawList,
                 nameText,
-                namePos.AddX(this.ShowJobIcon ? this.BarHeight : 5),
+                namePos.AddX(this.ShowJobIcon ? barHeight : 5),
                 this.BarNameColor.Base,
                 this.BarNameShowOutline,
                 this.BarNameOutlineColor.Base);
@@ -96,6 +97,8 @@ namespace LMeter.Config
             {
                 ImGui.PopFont();
             }
+
+            return localPos.AddY(barHeight);
         }
 
         public void DrawConfig(Vector2 size, float padX, float padY)
@@ -108,7 +111,7 @@ namespace LMeter.Config
 
             if (ImGui.BeginChild($"##{this.Name}", new Vector2(size.X, size.Y), true))
             {
-                ImGui.DragInt("Bar Height", ref this.BarHeight);
+                ImGui.DragInt("Num Bars to Display", ref this.BarCount, 1, 1, 48);
                 ImGui.Checkbox("Show Job Icon", ref this.ShowJobIcon);
                 if (this.ShowJobIcon)
                 {
@@ -130,6 +133,7 @@ namespace LMeter.Config
                 }
 
                 ImGui.NewLine();
+                ImGui.Checkbox("Use your name instead of 'YOU'", ref this.UseCharacterName);
                 ImGui.InputText("Name Format", ref this.BarNameFormat, 128);
 
                 if (ImGui.IsItemHovered())
@@ -137,8 +141,6 @@ namespace LMeter.Config
                     string tooltip = $"Available Data Tags:\n\n{string.Join("\n", Combatant.GetTags())}";
                     ImGui.SetTooltip(tooltip);
                 }
-
-                ImGui.Checkbox("Use your name instead of 'YOU'", ref this.UseCharacterName);
 
                 if (!FontsManager.ValidateFont(fontOptions, this.BarNameFontId, this.BarNameFontKey))
                 {
