@@ -18,12 +18,14 @@ namespace LMeter.Config
         public ConfigColor SCHColor = new ConfigColor(134f / 255f, 87f / 255f, 255f / 255f, 1f);
         public ConfigColor WHMColor = new ConfigColor(255f / 255f, 240f / 255f, 220f / 255f, 1f);
         public ConfigColor ASTColor = new ConfigColor(255f / 255f, 231f / 255f, 74f / 255f, 1f);
+        public ConfigColor SGEColor = new ConfigColor(144f / 255f, 176f / 255f, 255f / 255f, 1f);
         public ConfigColor CNJColor = new ConfigColor(255f / 255f, 240f / 255f, 220f / 255f, 1f);
 
         public ConfigColor MNKColor = new ConfigColor(214f / 255f, 156f / 255f, 0f / 255f, 1f);
         public ConfigColor NINColor = new ConfigColor(175f / 255f, 25f / 255f, 100f / 255f, 1f);
         public ConfigColor DRGColor = new ConfigColor(65f / 255f, 100f / 255f, 205f / 255f, 1f);
         public ConfigColor SAMColor = new ConfigColor(228f / 255f, 109f / 255f, 4f / 255f, 1f);
+        public ConfigColor RPRColor = new ConfigColor(150f / 255f, 90f / 255f, 144f / 255f, 1f);
         public ConfigColor PGLColor = new ConfigColor(214f / 255f, 156f / 255f, 0f / 255f, 1f);
         public ConfigColor ROGColor = new ConfigColor(175f / 255f, 25f / 255f, 100f / 255f, 1f);
         public ConfigColor LNCColor = new ConfigColor(65f / 255f, 100f / 255f, 205f / 255f, 1f);
@@ -55,6 +57,7 @@ namespace LMeter.Config
             Job.WHM => this.WHMColor,
             Job.SCH => this.SCHColor,
             Job.AST => this.ASTColor,
+            Job.SGE => this.SGEColor,
 
             Job.PGL => this.PGLColor,
             Job.LNC => this.LNCColor,
@@ -63,6 +66,7 @@ namespace LMeter.Config
             Job.DRG => this.DRGColor,
             Job.NIN => this.NINColor,
             Job.SAM => this.SAMColor,
+            Job.RPR => this.RPRColor,
 
             Job.ARC => this.ARCColor,
             Job.BRD => this.BRDColor,
@@ -110,6 +114,10 @@ namespace LMeter.Config
                 vector = ASTColor.Vector;
                 ImGui.ColorEdit4("AST", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                 this.ASTColor.Vector = vector;
+                
+                vector = SGEColor.Vector;
+                ImGui.ColorEdit4("SGE", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
+                this.SGEColor.Vector = vector;
 
                 ImGui.NewLine();
                 
@@ -128,6 +136,10 @@ namespace LMeter.Config
                 vector = SAMColor.Vector;
                 ImGui.ColorEdit4("SAM", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                 this.SAMColor.Vector = vector;
+                
+                vector = RPRColor.Vector;
+                ImGui.ColorEdit4("RPR", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
+                this.RPRColor.Vector = vector;
 
                 ImGui.NewLine();
                 
