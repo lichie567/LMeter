@@ -22,6 +22,7 @@ namespace LMeter.Meter
         [JsonIgnore] private bool Dragging = false;
         [JsonIgnore] private bool Locked = false;
         [JsonIgnore] private ACTEvent? PreviewEvent = null;
+        [JsonIgnore] private int ScrollPosition = 0;
 
         [JsonIgnore] private DateTime? LastSortedTimestamp = null;
         [JsonIgnore] private List<Combatant> LastSortedCombatants = new List<Combatant>();
@@ -124,6 +125,11 @@ namespace LMeter.Meter
             Vector2 localPos = pos + this.GeneralConfig.Position;
             Vector2 size = this.GeneralConfig.Size;
 
+            if (ImGui.IsMouseHoveringRect(localPos, localPos + size))
+            {
+                this.ScrollPosition -= (int)ImGui.GetIO().MouseWheel;
+            }
+
             this.UpdateDragData(localPos, size, this.GeneralConfig.Lock);
             bool needsInput = this.Unlocked || !this.GeneralConfig.ClickThrough;
             DrawHelpers.DrawInWindow($"##{this.ID}", localPos, size, needsInput, this.Locked || this.GeneralConfig.Lock, (drawList) =>
@@ -159,8 +165,9 @@ namespace LMeter.Meter
 
                 ACTEvent? actEvent = this.GeneralConfig.Preview ? this.PreviewEvent : ACTClient.GetLastEvent();
                 localPos = this.HeaderConfig.DrawHeader(localPos, size, actEvent?.Encounter, drawList);
+                size = size.AddY(-this.HeaderConfig.HeaderHeight);
 
-                drawList.AddRectFilled(localPos, localPos + size.AddY(-this.HeaderConfig.HeaderHeight), this.GeneralConfig.BackgroundColor.Base);
+                drawList.AddRectFilled(localPos, localPos + size, this.GeneralConfig.BackgroundColor.Base);
 
                 this.DrawBars(drawList, localPos, size, actEvent);
             });
@@ -173,7 +180,6 @@ namespace LMeter.Meter
         {                
             if (actEvent is not null && actEvent.Combatants.Any())
             {
-                Vector2 scrollSize = new Vector2(size.X, actEvent.Combatants.Count() * this.BarConfig.BarHeight + this.HeaderConfig.HeaderHeight);
                 List<Combatant> sortedCombatants = this.GetSortedCombatants(actEvent, this.GeneralConfig.DataType);
                 
                 string topDataSource = this.GeneralConfig.DataType switch
@@ -186,8 +192,18 @@ namespace LMeter.Meter
 
                 if (float.TryParse(topDataSource, NumberStyles.Float, CultureInfo.InvariantCulture, out float top) && !float.IsNaN(top))
                 {
-                    foreach (Combatant combatant in sortedCombatants)
+                    int i = 0;
+                    if (sortedCombatants.Count > this.BarConfig.BarCount)
                     {
+                        i = Math.Clamp(this.ScrollPosition, 0, sortedCombatants.Count - this.BarConfig.BarCount);
+                        this.ScrollPosition = i;
+                    }
+
+                    int max = Math.Min(i + this.BarConfig.BarCount, sortedCombatants.Count);
+                    for (; i < max; i++)
+                    {
+                        Combatant combatant = sortedCombatants[i];
+
                         string currentDataSource = this.GeneralConfig.DataType switch
                         {
                             MeterDataType.Damage => combatant.DamageTotal,
@@ -217,9 +233,8 @@ namespace LMeter.Meter
                         {
                             barColor = this.BarConfig.BarColor;
                         }
-
-                        this.BarConfig.DrawBar(drawList, localPos, size, combatant, barColor, top, current);
-                        localPos += new Vector2(0, this.BarConfig.BarHeight);
+                        
+                        localPos = this.BarConfig.DrawBar(drawList, localPos, size, combatant, barColor, top, current);
                     }
                 }
             }

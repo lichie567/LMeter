@@ -66,7 +66,7 @@ namespace LMeter.Helpers
 
             if (type == JobType.Tanks)
             {
-                return new List<Job>() { Job.GLD, Job.MRD, Job.PLD, Job.WAR, Job.DRK, Job.GNB };
+                return new List<Job>() { Job.GLA, Job.MRD, Job.PLD, Job.WAR, Job.DRK, Job.GNB };
             }
 
             if (type == JobType.Casters)
@@ -76,7 +76,7 @@ namespace LMeter.Helpers
 
             if (type == JobType.Melee)
             {
-                return new List<Job>() { Job.PGL, Job.LNC, Job.ROG, Job.MNK, Job.DRG, Job.NIN, Job.SAM };
+                return new List<Job>() { Job.PGL, Job.LNC, Job.ROG, Job.MNK, Job.DRG, Job.NIN, Job.SAM, Job.RPR };
             }
 
             if (type == JobType.Ranged)
@@ -86,7 +86,7 @@ namespace LMeter.Helpers
 
             if (type == JobType.Healers)
             {
-                return new List<Job>() { Job.CNJ, Job.WHM, Job.SCH, Job.AST };
+                return new List<Job>() { Job.CNJ, Job.WHM, Job.SCH, Job.AST, Job.SGE };
             }
 
             if (type == JobType.DoH)
@@ -127,7 +127,7 @@ namespace LMeter.Helpers
 
     public enum Job
     {
-        GLD = 1,
+        GLA = 1,
         MRD = 3,
         PLD = 19,
         WAR = 21,
@@ -138,6 +138,7 @@ namespace LMeter.Helpers
         WHM = 24,
         SCH = 28,
         AST = 33,
+        SGE = 40,
 
         PGL = 2,
         LNC = 4,
@@ -146,6 +147,7 @@ namespace LMeter.Helpers
         DRG = 22,
         NIN = 30,
         SAM = 34,
+        RPR = 39,
 
         ARC = 5,
         BRD = 23,

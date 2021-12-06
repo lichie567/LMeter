@@ -187,11 +187,11 @@ namespace LMeter.ACT
             mockCombatants.Add("1", GetCombatant("GNB", "DRK", "WAR", "PLD"));
             mockCombatants.Add("2", GetCombatant("GNB", "DRK", "WAR", "PLD"));
 
-            mockCombatants.Add("3", GetCombatant("WHM", "AST", "SCH"));
-            mockCombatants.Add("4", GetCombatant("WHM", "AST", "SCH"));
+            mockCombatants.Add("3", GetCombatant("WHM", "AST", "SCH", "SGE"));
+            mockCombatants.Add("4", GetCombatant("WHM", "AST", "SCH", "SGE"));
 
-            mockCombatants.Add("5", GetCombatant("SAM", "DRG", "MNK", "NIN"));
-            mockCombatants.Add("6", GetCombatant("SAM", "DRG", "MNK", "NIN"));
+            mockCombatants.Add("5", GetCombatant("SAM", "DRG", "MNK", "NIN", "RPR"));
+            mockCombatants.Add("6", GetCombatant("SAM", "DRG", "MNK", "NIN", "RPR"));
             mockCombatants.Add("7", GetCombatant("BLM", "SMN", "RDM"));
             mockCombatants.Add("8", GetCombatant("DNC", "MCH", "BRD"));
 
