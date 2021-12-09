@@ -9,6 +9,7 @@ using ImGuiNET;
 using LMeter.Config;
 using LMeter.Helpers;
 using LMeter.Windows;
+using LMeter.ACT;
 
 namespace LMeter
 {
@@ -29,6 +30,8 @@ namespace LMeter
         private readonly Vector2 _origin = ImGui.GetMainViewport().Size / 2f;
 
         private readonly Vector2 _configSize = new Vector2(550, 400);
+
+        private DateTime? LastCombatTime { get; set; } = null;
 
         private readonly ImGuiWindowFlags _mainWindowFlags = 
             ImGuiWindowFlags.NoTitleBar |
@@ -78,6 +81,18 @@ namespace LMeter
 
             this.WindowSystem.Draw();
 
+            if (this.Config.ACTConfig.AutoEnd &&
+                CharacterState.IsInCombat())
+            {
+                this.LastCombatTime = DateTime.UtcNow;
+            }
+            else if (this.LastCombatTime is not null && 
+                     this.LastCombatTime < DateTime.UtcNow - TimeSpan.FromSeconds(this.Config.ACTConfig.AutoEndDelay))
+            {
+                ACTClient.EndEncounter();
+                this.LastCombatTime = null;
+            }
+
             ImGuiHelpers.ForceNextWindowMainViewport();
             ImGui.SetNextWindowPos(Vector2.Zero);
             ImGui.SetNextWindowSize(ImGui.GetMainViewport().Size);
@@ -90,6 +105,15 @@ namespace LMeter
             }
 
             ImGui.End();
+        }
+
+        public void Clear()
+        {
+            ACTClient.ClearAct();
+            foreach (var meter in this.Config.MeterList.Meters)
+            {
+                meter.Clear();
+            }
         }
 
         public void Edit(IConfigurable configItem)

@@ -104,6 +104,12 @@ namespace LMeter.Meter
 
             return newMeter;
         }
+
+        public void Clear()
+        {
+            this.LastSortedCombatants = new List<Combatant>();
+            this.LastSortedTimestamp = null;
+        }
         
         // Dont ask
         protected void UpdateDragData(Vector2 pos, Vector2 size, bool locked)

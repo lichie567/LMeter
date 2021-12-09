@@ -15,6 +15,8 @@ namespace LMeter.Config
         public string Name => "ACT";
 
         public string ACTSocketAddress;
+        public bool AutoEnd = true;
+        public int AutoEndDelay = 3;
 
         public ACTConfig()
         {
@@ -35,8 +37,29 @@ namespace LMeter.Config
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() - 1f);
                 ImGui.Text("Retry ACT Connection");
 
-                ImGui.EndChild();
+                ImGui.NewLine();
+                ImGui.Checkbox("Automatically end ACT encounter after combat", ref this.AutoEnd);
+                if (this.AutoEnd)
+                {
+                    DrawHelpers.DrawNestIndicator(1);
+                    ImGui.PushItemWidth(30);
+                    ImGui.InputInt("Seconds delay after combat", ref this.AutoEndDelay, 0, 0);
+                    ImGui.PopItemWidth();
+                }
+
+                ImGui.NewLine();
+                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Stop, () => ACTClient.EndEncounter(), null, buttonSize);
+                ImGui.SameLine();
+                ImGui.SetCursorPosY(ImGui.GetCursorPosY() - 1f);
+                ImGui.Text("Force End Combat");
+
+                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Trash, () => ACTClient.ClearAct(), null, buttonSize);
+                ImGui.SameLine();
+                ImGui.SetCursorPosY(ImGui.GetCursorPosY() - 1f);
+                ImGui.Text("Clear ACT Encounters");
             }
+            
+            ImGui.EndChild();
         }
 
         public void RetryACTConnection()

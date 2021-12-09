@@ -7,6 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Dalamud.Logging;
 using Newtonsoft.Json;
+using Dalamud.Game.Gui;
+using Dalamud.Game.Text;
 
 namespace LMeter.ACT
 {
@@ -48,6 +50,31 @@ namespace LMeter.ACT
             }
 
             return client.LastEvent;
+        }
+
+        public static void EndEncounter()
+        {
+            ChatGui chat = Singletons.Get<ChatGui>();
+            XivChatEntry message = new XivChatEntry()
+            {
+                Message = "end",
+                Type = XivChatType.Echo
+            };
+
+            chat.PrintChat(message);
+        }
+
+        public static void ClearAct()
+        {
+            ChatGui chat = Singletons.Get<ChatGui>();
+            XivChatEntry message = new XivChatEntry()
+            {
+                Message = "clear",
+                Type = XivChatType.Echo
+            };
+
+            chat.PrintChat(message);
+            Singletons.Get<ACTClient>().LastEvent = null;
         }
 
         public void Start(string host)
@@ -130,7 +157,7 @@ namespace LMeter.ACT
                                 {
                                     ACTEvent? actEvent = JsonConvert.DeserializeObject<ACTEvent>(data);
 
-                                    if (actEvent is not null)
+                                    if (actEvent is not null && (CharacterState.IsInCombat() || (this.LastEvent?.IsEncounterActive() ?? false)))
                                     {
                                         actEvent.Timestamp = DateTime.UtcNow;
                                         this.LastEvent = actEvent;
