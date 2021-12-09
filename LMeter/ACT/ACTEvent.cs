@@ -24,6 +24,8 @@ namespace LMeter.ACT
         [JsonProperty("Combatant")]
         public Dictionary<string, Combatant> Combatants { get; private set; } = new Dictionary<string, Combatant>();
 
+        public bool IsEncounterActive() => bool.TryParse(this.IsActive, out bool active) && active;
+
         public static ACTEvent GetTestData()
         {
             return new ACTEvent()

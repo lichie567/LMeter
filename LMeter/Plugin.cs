@@ -49,7 +49,8 @@ namespace LMeter
             ObjectTable objectTable,
             PartyList partyList,
             SigScanner sigScanner,
-            TargetManager targetManager
+            TargetManager targetManager,
+            ChatGui chatGui
         )
         {
             Plugin.Version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? Plugin.Version;
@@ -69,6 +70,7 @@ namespace LMeter
             Singletons.Register(partyList);
             Singletons.Register(sigScanner);
             Singletons.Register(targetManager);
+            Singletons.Register(chatGui);
             Singletons.Register(pluginInterface.UiBuilder);
 
             // Init TexturesCache
