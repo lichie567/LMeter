@@ -15,7 +15,7 @@ namespace LMeter.Config
         public string Name => "ACT";
 
         public string ACTSocketAddress;
-        public bool AutoEnd = true;
+        public bool AutoEnd = false;
         public int AutoEndDelay = 3;
 
         public ACTConfig()
@@ -38,7 +38,12 @@ namespace LMeter.Config
                 ImGui.Text("Retry ACT Connection");
 
                 ImGui.NewLine();
-                ImGui.Checkbox("Automatically end ACT encounter after combat", ref this.AutoEnd);
+                ImGui.Checkbox("Force ACT to end encounter after combat", ref this.AutoEnd);
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.SetTooltip("Only enable this if ACT's auto encounter ending isn't working");
+                }
+                
                 if (this.AutoEnd)
                 {
                     DrawHelpers.DrawNestIndicator(1);

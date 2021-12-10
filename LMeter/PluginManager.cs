@@ -62,7 +62,9 @@ namespace LMeter
                 "/lm",
                 new CommandInfo(PluginCommand)
                 {
-                    HelpMessage = "Opens the LMeter configuration window.",
+                    HelpMessage = "Opens the LMeter configuration window.\n"
+                                + "/lm end → Ends current ACT Encounter.\n"
+                                + "/lm clear → Clears all ACT encounter log data.",
                     ShowInHelp = true
                 }
             );
@@ -135,6 +137,22 @@ namespace LMeter
         }
 
         private void PluginCommand(string command, string arguments)
+        {
+            switch (arguments)
+            {
+                case "end":
+                    ACTClient.EndEncounter();
+                    break;
+                case "clear":
+                    this.Clear();
+                    break;
+                default:
+                    this.ToggleWindow();
+                    break;
+            }
+        }
+
+        private void ToggleWindow()
         {
             if (this.ConfigRoot.IsOpen)
             {
