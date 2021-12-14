@@ -16,7 +16,7 @@ namespace LMeter.Config
 
         [JsonIgnore] private string _input = string.Empty;
 
-        public string Name => "Meters";
+        public string Name => "Profiles";
 
         public List<MeterWindow> Meters { get; init; }
 
@@ -39,7 +39,7 @@ namespace LMeter.Config
             if (ImGui.BeginChild("##Buttons", new Vector2(size.X, MenuBarHeight), true))
             {
                 ImGui.PushItemWidth(textInputWidth);
-                ImGui.InputTextWithHint("##Input", "Meter Name/Import String", ref _input, 10000);
+                ImGui.InputTextWithHint("##Input", "Profile Name/Import String", ref _input, 10000);
                 ImGui.PopItemWidth();
 
                 ImGui.SameLine();
@@ -63,13 +63,14 @@ namespace LMeter.Config
                 ImGuiTableFlags.ScrollY |
                 ImGuiTableFlags.NoSavedSettings;
 
-            if (ImGui.BeginTable("##Meter_Table", 2, flags, new Vector2(size.X, size.Y - MenuBarHeight)))
+            if (ImGui.BeginTable("##Meter_Table", 3, flags, new Vector2(size.X, size.Y - MenuBarHeight)))
             {
                 Vector2 buttonsize = new Vector2(30, 0);
                 float actionsWidth = buttonsize.X * 3 + padX * 2;
 
-                ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.WidthStretch, 0, 0);
-                ImGui.TableSetupColumn("Actions", ImGuiTableColumnFlags.WidthFixed, actionsWidth, 1);
+                ImGui.TableSetupColumn("   #", ImGuiTableColumnFlags.WidthFixed, 18, 0);
+                ImGui.TableSetupColumn("Profile Name", ImGuiTableColumnFlags.WidthStretch, 0, 1);
+                ImGui.TableSetupColumn("Actions", ImGuiTableColumnFlags.WidthFixed, actionsWidth, 2);
 
                 ImGui.TableSetupScrollFreeze(0, 1);
                 ImGui.TableHeadersRow();
@@ -89,11 +90,21 @@ namespace LMeter.Config
 
                     if (ImGui.TableSetColumnIndex(0))
                     {
+                        string num = $"  {i + 1}.";
+                        float columnWidth = ImGui.GetColumnWidth();
+                        Vector2 cursorPos = ImGui.GetCursorPos();
+                        Vector2 textSize = ImGui.CalcTextSize(num);
+                        ImGui.SetCursorPos(new Vector2(cursorPos.X + columnWidth - textSize.X, cursorPos.Y + 3f));
+                        ImGui.Text(num);
+                    }
+
+                    if (ImGui.TableSetColumnIndex(1))
+                    {
                         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 3f);
                         ImGui.Text(meter.Name);
                     }
 
-                    if (ImGui.TableSetColumnIndex(1))
+                    if (ImGui.TableSetColumnIndex(2))
                     {
                         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 1f);
                         DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Pen, () => EditMeter(meter), "Edit", buttonsize);
@@ -118,6 +129,14 @@ namespace LMeter.Config
             }
 
             this._input = string.Empty;
+        }
+        
+        public void ToggleMeter(int meterIndex)
+        {
+            if (meterIndex >= 0 && meterIndex < this.Meters.Count)
+            {
+                this.Meters[meterIndex].VisibilityConfig.AlwaysHide ^= true;
+            }
         }
 
         private void EditMeter(MeterWindow meter)

@@ -24,8 +24,6 @@ namespace LMeter.Config
         public ConfigColor DurationColor = new ConfigColor(0f / 255f, 190f / 255f, 225f / 255f, 1f);
         public bool DurationShowOutline = true;
         public ConfigColor DurationOutlineColor = new ConfigColor(0, 0, 0, 0.5f);
-        public DrawAnchor DurationAlign = DrawAnchor.Left;
-        public Vector2 DurationOffset = new Vector2(0, 0);
         public int DurationFontId = 0;
         public string DurationFontKey = FontsManager.DalamudFontKey;
 
@@ -33,8 +31,6 @@ namespace LMeter.Config
         public ConfigColor NameColor = new ConfigColor(1, 1, 1, 1);
         public bool NameShowOutline = true;
         public ConfigColor NameOutlineColor = new ConfigColor(0, 0, 0, 0.5f);
-        public DrawAnchor NameAlign = DrawAnchor.Left;
-        public Vector2 NameOffset = new Vector2(0, 0);
         public int NameFontId = 0;
         public string NameFontKey = FontsManager.DalamudFontKey;
         
@@ -47,6 +43,7 @@ namespace LMeter.Config
         public int StatsFontId = 0;
         public string StatsFontKey = FontsManager.DalamudFontKey;
         public string StatsFormat = "[dps]rdps [hps]rhps Deaths: [deaths] ";
+        public bool ThousandsSeparators = true;
 
         public Vector2 DrawHeader(Vector2 pos, Vector2 size, Encounter? encounter, ImDrawListPtr drawList)
         {
@@ -58,15 +55,15 @@ namespace LMeter.Config
             Vector2 headerSize = new Vector2(size.X, this.HeaderHeight);
             drawList.AddRectFilled(pos, pos + headerSize, this.BackgroundColor.Base);
             
-            Vector2 durationPos = Vector2.Zero;
+            Vector2 durationPos = pos;
             Vector2 durationSize = Vector2.Zero;
             if (this.ShowEncounterDuration)
             {
                 bool fontPushed = FontsManager.PushFont(this.DurationFontKey);
-                string duration = encounter is null ? $" LMeter v{Plugin.Version} " : $"  {encounter.Duration} ";
+                string duration = encounter is null ? $" LMeter v{Plugin.Version}" : $" {encounter.Duration}";
                 durationSize = ImGui.CalcTextSize(duration);
-                durationPos = Utils.GetAnchoredPosition(pos + this.DurationOffset, -headerSize, DrawAnchor.Left);
-                durationPos = Utils.GetAnchoredPosition(durationPos, durationSize, this.DurationAlign);
+                durationPos = Utils.GetAnchoredPosition(durationPos, -headerSize, DrawAnchor.Left);
+                durationPos = Utils.GetAnchoredPosition(durationPos, durationSize, DrawAnchor.Left);
                 DrawHelpers.DrawText(drawList, duration, durationPos, this.DurationColor.Base, this.DurationShowOutline, this.DurationOutlineColor.Base);
                 if (fontPushed)
                 {
@@ -74,33 +71,49 @@ namespace LMeter.Config
                 }
             }
 
-            if (this.ShowEncounterName && encounter is not null)
-            {
-                bool fontPushed = FontsManager.PushFont(this.NameFontKey);
-                string name = encounter.Title;
-                Vector2 namePos = durationPos.AddX(durationSize.X) + this.NameOffset;
-                DrawHelpers.DrawText(drawList, name, namePos, this.NameColor.Base, this.NameShowOutline, this.NameOutlineColor.Base);
-                if (fontPushed)
-                {
-                    ImGui.PopFont();
-                }
-            }
-
+            Vector2 raidStatsSize = Vector2.Zero;
             if (this.ShowRaidStats && encounter is not null)
             {
-                string text = encounter.GetFormattedString(this.StatsFormat);
+                string text = encounter.GetFormattedString(this.StatsFormat, this.ThousandsSeparators ? "N" : "F");
 
                 if (!string.IsNullOrEmpty(text))
                 {
                     bool fontPushed = FontsManager.PushFont(this.StatsFontKey);
-                    Vector2 statsSize = ImGui.CalcTextSize(text);
+                    raidStatsSize = ImGui.CalcTextSize(text);
                     Vector2 statsPos = Utils.GetAnchoredPosition(pos + this.StatsOffset, -headerSize, DrawAnchor.Right);
-                    statsPos = Utils.GetAnchoredPosition(statsPos, statsSize, this.StatsAlign);
+                    statsPos = Utils.GetAnchoredPosition(statsPos, raidStatsSize, this.StatsAlign);
                     DrawHelpers.DrawText(drawList, text, statsPos, this.RaidStatsColor.Base, this.StatsShowOutline, this.StatsOutlineColor.Base);                  
                     if (fontPushed)
                     {
                         ImGui.PopFont();
                     }
+                }
+            }
+
+            if (this.ShowEncounterName && encounter is not null)
+            {
+                bool fontPushed = FontsManager.PushFont(this.NameFontKey);
+                string name = $" {encounter.Title}";
+                Vector2 nameSize = ImGui.CalcTextSize(name);
+
+                if (durationSize.X + raidStatsSize.X + nameSize.X > size.X)
+                {
+                    float elipsesWidth = ImGui.CalcTextSize("...").X;
+                    do
+                    {
+                        name = new string(name.AsSpan(0, name.Length - 1));
+                        nameSize = ImGui.CalcTextSize(name);
+                    }
+                    while (durationSize.X + raidStatsSize.X + nameSize.X + elipsesWidth > size.X);
+                    name += "...";
+                }
+
+                Vector2 namePos = Utils.GetAnchoredPosition(new Vector2(durationPos.X + durationSize.X, pos.Y), -headerSize, DrawAnchor.Left);
+                namePos = Utils.GetAnchoredPosition(namePos, nameSize, DrawAnchor.Left);
+                DrawHelpers.DrawText(drawList, name, namePos, this.NameColor.Base, this.NameShowOutline, this.NameOutlineColor.Base);
+                if (fontPushed)
+                {
+                    ImGui.PopFont();
                 }
             }
             
@@ -133,9 +146,6 @@ namespace LMeter.Config
                     ImGui.Checkbox("Show Encounter Duration", ref this.ShowEncounterDuration);
                     if (this.ShowEncounterDuration)
                     {
-                        DrawHelpers.DrawNestIndicator(2);
-                        ImGui.DragFloat2("Position Offset##Duration", ref this.DurationOffset);
-
                         if (!FontsManager.ValidateFont(fontOptions, this.DurationFontId, this.DurationFontKey))
                         {
                             this.DurationFontId = 0;
@@ -145,9 +155,6 @@ namespace LMeter.Config
                         DrawHelpers.DrawNestIndicator(2);
                         ImGui.Combo("Font##Duration", ref this.DurationFontId, fontOptions, fontOptions.Length);
                         this.DurationFontKey = fontOptions[this.DurationFontId];
-
-                        DrawHelpers.DrawNestIndicator(2);
-                        ImGui.Combo("Text Align##Duration", ref Unsafe.As<DrawAnchor, int>(ref this.DurationAlign), _anchorOptions, _anchorOptions.Length);
 
                         DrawHelpers.DrawNestIndicator(2);
                         vector = this.DurationColor.Vector;
@@ -170,9 +177,6 @@ namespace LMeter.Config
                     ImGui.Checkbox("Show Encounter Name", ref this.ShowEncounterName);
                     if (this.ShowEncounterName)
                     {
-                        DrawHelpers.DrawNestIndicator(2);
-                        ImGui.DragFloat2("Position Offset##Name", ref this.NameOffset);
-
                         if (!FontsManager.ValidateFont(fontOptions, this.NameFontId, this.NameFontKey))
                         {
                             this.NameFontId = 0;
@@ -182,9 +186,6 @@ namespace LMeter.Config
                         DrawHelpers.DrawNestIndicator(2);
                         ImGui.Combo("Font##Name", ref this.NameFontId, fontOptions, fontOptions.Length);
                         this.NameFontKey = fontOptions[this.NameFontId];
-
-                        DrawHelpers.DrawNestIndicator(2);
-                        ImGui.Combo("Text Align##Name", ref Unsafe.As<DrawAnchor, int>(ref this.NameAlign), _anchorOptions, _anchorOptions.Length);
 
                         DrawHelpers.DrawNestIndicator(2);
                         vector = this.NameColor.Vector;
@@ -209,6 +210,9 @@ namespace LMeter.Config
                     {
                         DrawHelpers.DrawNestIndicator(2);
                         ImGui.InputText("Raid Stats Format", ref this.StatsFormat, 128);
+                        
+                        DrawHelpers.DrawNestIndicator(2);
+                        ImGui.Checkbox("Use Thousands Separators for Numbers", ref this.ThousandsSeparators);
 
                         if (ImGui.IsItemHovered())
                         {

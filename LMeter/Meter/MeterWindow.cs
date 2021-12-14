@@ -188,60 +188,52 @@ namespace LMeter.Meter
             {
                 List<Combatant> sortedCombatants = this.GetSortedCombatants(actEvent, this.GeneralConfig.DataType);
                 
-                string topDataSource = this.GeneralConfig.DataType switch
+                float top = this.GeneralConfig.DataType switch
                 {
-                    MeterDataType.Damage => sortedCombatants[0].DamageTotal,
-                    MeterDataType.Healing => sortedCombatants[0].HealingTotal,
-                    MeterDataType.DamageTaken => sortedCombatants[0].DamageTaken,
-                    _ => sortedCombatants[0].DamageTotal
+                    MeterDataType.Damage => sortedCombatants[0].DamageTotal?.Value ?? 0,
+                    MeterDataType.Healing => sortedCombatants[0].HealingTotal?.Value ?? 0,
+                    MeterDataType.DamageTaken => sortedCombatants[0].DamageTaken?.Value ?? 0,
+                    _ => 0
                 };
 
-                if (float.TryParse(topDataSource, NumberStyles.Float, CultureInfo.InvariantCulture, out float top) && !float.IsNaN(top))
+                int i = 0;
+                if (sortedCombatants.Count > this.BarConfig.BarCount)
                 {
-                    int i = 0;
-                    if (sortedCombatants.Count > this.BarConfig.BarCount)
+                    i = Math.Clamp(this.ScrollPosition, 0, sortedCombatants.Count - this.BarConfig.BarCount);
+                    this.ScrollPosition = i;
+                }
+
+                int maxIndex = Math.Min(i + this.BarConfig.BarCount, sortedCombatants.Count);
+                for (; i < maxIndex; i++)
+                {
+                    Combatant combatant = sortedCombatants[i];
+
+                    float current = this.GeneralConfig.DataType switch
                     {
-                        i = Math.Clamp(this.ScrollPosition, 0, sortedCombatants.Count - this.BarConfig.BarCount);
-                        this.ScrollPosition = i;
-                    }
+                        MeterDataType.Damage => combatant.DamageTotal?.Value ?? 0,
+                        MeterDataType.Healing => combatant.HealingTotal?.Value ?? 0,
+                        MeterDataType.DamageTaken => combatant.DamageTaken?.Value ?? 0,
+                        _ => 0
+                    };
 
-                    int max = Math.Min(i + this.BarConfig.BarCount, sortedCombatants.Count);
-                    for (; i < max; i++)
+                    ConfigColor barColor;
+                    if (this.BarConfig.UseJobColor)
                     {
-                        Combatant combatant = sortedCombatants[i];
-
-                        string currentDataSource = this.GeneralConfig.DataType switch
+                        if (Enum.TryParse<Job>(combatant.Job, true, out Job job))
                         {
-                            MeterDataType.Damage => combatant.DamageTotal,
-                            MeterDataType.Healing => combatant.HealingTotal,
-                            MeterDataType.DamageTaken => combatant.DamageTaken,
-                            _ => combatant.DamageTotal
-                        };
-
-                        if (!float.TryParse(currentDataSource, NumberStyles.Float, CultureInfo.InvariantCulture, out float current) || float.IsNaN(current))
-                        {
-                            return;
-                        }
-
-                        ConfigColor barColor;
-                        if (this.BarConfig.UseJobColor)
-                        {
-                            if (Enum.TryParse<Job>(combatant.Job, true, out Job job))
-                            {
-                                barColor = this.BarColorsConfig.GetColor(job);
-                            }
-                            else
-                            {
-                                barColor = this.BarColorsConfig.UKNColor;
-                            }
+                            barColor = this.BarColorsConfig.GetColor(job);
                         }
                         else
                         {
-                            barColor = this.BarConfig.BarColor;
+                            barColor = this.BarColorsConfig.UKNColor;
                         }
-                        
-                        localPos = this.BarConfig.DrawBar(drawList, localPos, size, combatant, barColor, top, current);
                     }
+                    else
+                    {
+                        barColor = this.BarConfig.BarColor;
+                    }
+                    
+                    localPos = this.BarConfig.DrawBar(drawList, localPos, size, combatant, barColor, top, current);
                 }
             }
         }
@@ -259,31 +251,21 @@ namespace LMeter.Meter
 
             sortedCombatants.Sort((x, y) =>
             {
-                string xData = dataType switch
+                float xFloat = dataType switch
                 {
-                    MeterDataType.Damage => x.DamageTotal,
-                    MeterDataType.Healing => x.HealingTotal,
-                    MeterDataType.DamageTaken => x.DamageTaken,
-                    _ => x.DamageTotal
+                    MeterDataType.Damage => x.DamageTotal?.Value ?? 0,
+                    MeterDataType.Healing => x.HealingTotal?.Value ?? 0,
+                    MeterDataType.DamageTaken => x.DamageTaken?.Value ?? 0,
+                    _ => 0
                 };
 
-                string yData = dataType switch
+                float yFloat = dataType switch
                 {
-                    MeterDataType.Damage => y.DamageTotal,
-                    MeterDataType.Healing => y.HealingTotal,
-                    MeterDataType.DamageTaken => y.DamageTaken,
-                    _ => y.DamageTotal
+                    MeterDataType.Damage => y.DamageTotal?.Value ?? 0,
+                    MeterDataType.Healing => y.HealingTotal?.Value ?? 0,
+                    MeterDataType.DamageTaken => y.DamageTaken?.Value ?? 0,
+                    _ => 0
                 };
-
-                if (!float.TryParse(yData, NumberStyles.Float, CultureInfo.InvariantCulture, out float yFloat))
-                {
-                    return -1;
-                }
-
-                if (!float.TryParse(xData, NumberStyles.Float, CultureInfo.InvariantCulture, out float xFloat))
-                {
-                    return 1;
-                }
                 
                 return (int)(yFloat - xFloat);
             });

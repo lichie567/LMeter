@@ -29,9 +29,7 @@ namespace LMeter
 
         private readonly Vector2 _origin = ImGui.GetMainViewport().Size / 2f;
 
-        private readonly Vector2 _configSize = new Vector2(550, 400);
-
-        private DateTime? LastCombatTime { get; set; } = null;
+        private readonly Vector2 _configSize = new Vector2(550, 550);
 
         private readonly ImGuiWindowFlags _mainWindowFlags = 
             ImGuiWindowFlags.NoTitleBar |
@@ -64,7 +62,8 @@ namespace LMeter
                 {
                     HelpMessage = "Opens the LMeter configuration window.\n"
                                 + "/lm end → Ends current ACT Encounter.\n"
-                                + "/lm clear → Clears all ACT encounter log data.",
+                                + "/lm clear → Clears all ACT encounter log data.\n"
+                                + "/lm toggle <number> → Toggles visibility for the given profile.",
                     ShowInHelp = true
                 }
             );
@@ -83,17 +82,8 @@ namespace LMeter
 
             this.WindowSystem.Draw();
 
-            if (this.Config.ACTConfig.AutoEnd &&
-                CharacterState.IsInCombat())
-            {
-                this.LastCombatTime = DateTime.UtcNow;
-            }
-            else if (this.LastCombatTime is not null && 
-                     this.LastCombatTime < DateTime.UtcNow - TimeSpan.FromSeconds(this.Config.ACTConfig.AutoEndDelay))
-            {
-                ACTClient.EndEncounter();
-                this.LastCombatTime = null;
-            }
+            this.Config.ACTConfig.TryReconnect();
+            this.Config.ACTConfig.TryEndEncounter();
 
             ImGuiHelpers.ForceNextWindowMainViewport();
             ImGui.SetNextWindowPos(Vector2.Zero);
@@ -109,9 +99,9 @@ namespace LMeter
             ImGui.End();
         }
 
-        public void Clear()
+        public void Clear(bool clearAct = false)
         {
-            ACTClient.ClearAct();
+            ACTClient.Clear(clearAct);
             foreach (var meter in this.Config.MeterList.Meters)
             {
                 meter.Clear();
@@ -144,12 +134,22 @@ namespace LMeter
                     ACTClient.EndEncounter();
                     break;
                 case "clear":
-                    this.Clear();
+                    this.Clear(this.Config.ACTConfig.ClearACT);
+                    break;
+                case { } argument when argument.StartsWith("toggle"):
+                    string[] args = argument.Split(" ");
+                    if (args.Length > 1 && int.TryParse(args[1], out int num))
+                        this.ToggleMeter(num - 1);
                     break;
                 default:
                     this.ToggleWindow();
                     break;
             }
+        }
+
+        private void ToggleMeter(int meterIndex)
+        {
+            this.Config.MeterList.ToggleMeter(meterIndex);
         }
 
         private void ToggleWindow()

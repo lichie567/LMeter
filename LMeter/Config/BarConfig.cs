@@ -14,10 +14,13 @@ namespace LMeter.Config
         private static string[] _jobIconStyleOptions = new string[] { "Style 1", "Style 2" };
 
         public int BarCount = 8;
+        public int BarGaps = 0;
 
         public bool ShowJobIcon = true;
         public int JobIconStyle = 0;
         public Vector2 JobIconOffset = new Vector2(0, 0);
+        
+        public bool ThousandsSeparators = true;
 
         public bool UseJobColor = true;
         public ConfigColor BarColor = new ConfigColor(.3f, .3f, .3f, 1f);
@@ -30,7 +33,7 @@ namespace LMeter.Config
         public int BarNameFontId = 0;
         public bool UseCharacterName = false;
 
-        public string BarDataFormat = "[damagetotal]  ([encdps], [damagepct])  ";
+        public string BarDataFormat = "[damagetotal-k.1]  ([encdps-k.1], [damagepct])  ";
         public ConfigColor BarDataColor = new ConfigColor(1, 1, 1, 1);
         public bool BarDataShowOutline = true;
         public ConfigColor BarDataOutlineColor = new ConfigColor(0, 0, 0, 0.5f);
@@ -46,7 +49,7 @@ namespace LMeter.Config
             float top,
             float current)
         {
-            float barHeight = size.Y / this.BarCount;
+            float barHeight = (size.Y - (this.BarCount - 1) * this.BarGaps) / this.BarCount;
             Vector2 barSize = new Vector2(size.X, barHeight);
             Vector2 barFillSize = new Vector2(size.X * (current / top), barHeight);
             drawList.AddRectFilled(localPos, localPos + barFillSize, barColor.Base);
@@ -59,7 +62,7 @@ namespace LMeter.Config
             }
 
             bool fontPushed = FontsManager.PushFont(this.BarNameFontKey);
-            string nameText = combatant.GetFormattedString(this.BarNameFormat);
+            string nameText = combatant.GetFormattedString(this.BarNameFormat, this.ThousandsSeparators ? "N" : "F");
             if (this.UseCharacterName && combatant.Name.Contains("YOU"))
             {
                 string characterName = Singletons.Get<ClientState>().LocalPlayer?.Name.ToString() ?? "YOU";
@@ -82,7 +85,7 @@ namespace LMeter.Config
             }
 
             fontPushed = FontsManager.PushFont(this.BarDataFontKey);
-            string dataText = combatant.GetFormattedString(this.BarDataFormat);
+            string dataText = combatant.GetFormattedString(this.BarDataFormat, this.ThousandsSeparators ? "N" : "F");
             Vector2 dataTextSize = ImGui.CalcTextSize(dataText);
             Vector2 dataPos = Utils.GetAnchoredPosition(localPos, -barSize, DrawAnchor.Right);
             dataPos = Utils.GetAnchoredPosition(dataPos, dataTextSize, DrawAnchor.Right);
@@ -98,7 +101,7 @@ namespace LMeter.Config
                 ImGui.PopFont();
             }
 
-            return localPos.AddY(barHeight);
+            return localPos.AddY(barHeight + this.BarGaps);
         }
 
         public void DrawConfig(Vector2 size, float padX, float padY)
@@ -112,6 +115,8 @@ namespace LMeter.Config
             if (ImGui.BeginChild($"##{this.Name}", new Vector2(size.X, size.Y), true))
             {
                 ImGui.DragInt("Num Bars to Display", ref this.BarCount, 1, 1, 48);
+                ImGui.DragInt("Bar Gap Size", ref this.BarGaps, 1, 0, 20);
+
                 ImGui.Checkbox("Show Job Icon", ref this.ShowJobIcon);
                 if (this.ShowJobIcon)
                 {
@@ -131,6 +136,8 @@ namespace LMeter.Config
                     ImGui.ColorEdit4("Bar Color", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                     this.BarColor.Vector = vector;
                 }
+                
+                ImGui.Checkbox("Use Thousands Separators for Numbers", ref this.ThousandsSeparators);
 
                 ImGui.NewLine();
                 ImGui.Checkbox("Use your name instead of 'YOU'", ref this.UseCharacterName);

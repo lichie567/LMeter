@@ -57,9 +57,9 @@ namespace LMeter.Config
                 }
 
                 ImGui.SameLine();
-                if (ImGui.Button("Donate", buttonSize))
+                if (ImGui.Button("Discord", buttonSize))
                 {
-                    Utils.OpenUrl("https://ko-fi.com/lichie");
+                    Utils.OpenUrl("https://discord.gg/delvui");
                 }
 
                 ImGui.PopStyleVar();
