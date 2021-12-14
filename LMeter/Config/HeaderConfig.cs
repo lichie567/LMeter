@@ -44,6 +44,18 @@ namespace LMeter.Config
         public string StatsFontKey = FontsManager.DalamudFontKey;
         public string StatsFormat = "[dps]rdps [hps]rhps Deaths: [deaths] ";
         public bool ThousandsSeparators = true;
+        
+        public IConfigPage GetDefault()
+        {
+            HeaderConfig defaultConfig = new HeaderConfig();
+            defaultConfig.DurationFontKey = FontsManager.DefaultSmallFontKey;
+            defaultConfig.DurationFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey);
+            defaultConfig.NameFontKey = FontsManager.DefaultSmallFontKey;
+            defaultConfig.NameFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey);
+            defaultConfig.StatsFontKey = FontsManager.DefaultSmallFontKey;
+            defaultConfig.StatsFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey);
+            return defaultConfig;
+        }
 
         public Vector2 DrawHeader(Vector2 pos, Vector2 size, Encounter? encounter, ImDrawListPtr drawList)
         {
@@ -252,9 +264,9 @@ namespace LMeter.Config
                         }
                     }
                 }
-
-                ImGui.EndChild();
             }
+
+            ImGui.EndChild();
         }
     }
 }

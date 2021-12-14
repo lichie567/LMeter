@@ -129,9 +129,12 @@ namespace LMeter.Windows
                 }
 
                 // calculate empty horizontal space based on size of buttons and text box
-                float offset = size.X - buttonsize.X * 4 - textInputWidth - padX * 6;
+                float offset = size.X - buttonsize.X * 5 - textInputWidth - padX * 7;
 
                 ImGui.SetCursorPosX(ImGui.GetCursorPosX() + offset);
+
+                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.UndoAlt, () => Reset(openPage), $"Reset {openPage?.Name} to Defaults", buttonsize);
+                ImGui.SameLine();
 
                 ImGui.PushItemWidth(textInputWidth);
                 if (ImGui.InputText("##Input", ref _name, 64, ImGuiInputTextFlags.EnterReturnsTrue))
@@ -147,13 +150,21 @@ namespace LMeter.Windows
                 ImGui.PopItemWidth();
                 ImGui.SameLine();
 
-                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Upload, () => Export(openPage), $"Export {openPage?.Name ?? ""}", buttonsize);
+                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Upload, () => Export(openPage), $"Export {openPage?.Name}", buttonsize);
                 ImGui.SameLine();
 
-                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Download, () => Import(), $"Import {openPage?.Name ?? ""}", buttonsize);
+                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Download, () => Import(), $"Import {openPage?.Name}", buttonsize);
             }
 
             ImGui.EndChild();
+        }
+
+        private void Reset(IConfigPage? openPage)
+        {
+            if (openPage is not null)
+            {
+                this.ConfigStack.Peek().ImportPage(openPage.GetDefault());
+            }
         }
 
         private void Export(IConfigPage? openPage)

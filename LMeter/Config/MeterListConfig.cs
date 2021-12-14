@@ -17,6 +17,8 @@ namespace LMeter.Config
         [JsonIgnore] private string _input = string.Empty;
 
         public string Name => "Profiles";
+        
+        public IConfigPage GetDefault() => new MeterListConfig();
 
         public List<MeterWindow> Meters { get; init; }
 
@@ -48,9 +50,9 @@ namespace LMeter.Config
                 ImGui.SameLine();
                 DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Download, () => ImportMeter(_input), "Import new Meter", buttonSize);
                 ImGui.PopItemWidth();
-
-                ImGui.EndChild();
             }
+
+            ImGui.EndChild();
         }
 
         private void DrawMeterTable(Vector2 size, float padX)

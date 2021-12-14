@@ -90,18 +90,8 @@ namespace LMeter.Meter
         public static MeterWindow GetDefaultMeter(string name)
         {
             MeterWindow newMeter = new MeterWindow(name);
-            newMeter.HeaderConfig.DurationFontKey = FontsManager.DefaultSmallFontKey;
-            newMeter.HeaderConfig.DurationFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey);
-            newMeter.HeaderConfig.NameFontKey = FontsManager.DefaultSmallFontKey;
-            newMeter.HeaderConfig.NameFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey);
-            newMeter.HeaderConfig.StatsFontKey = FontsManager.DefaultSmallFontKey;
-            newMeter.HeaderConfig.StatsFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey);
-
-            newMeter.BarConfig.BarNameFontKey = FontsManager.DefaultSmallFontKey;
-            newMeter.BarConfig.BarNameFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey);
-            newMeter.BarConfig.BarDataFontKey = FontsManager.DefaultSmallFontKey;
-            newMeter.BarConfig.BarDataFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey);
-
+            newMeter.HeaderConfig = (HeaderConfig)newMeter.HeaderConfig.GetDefault();
+            newMeter.BarConfig = (BarConfig)newMeter.BarConfig.GetDefault();
             return newMeter;
         }
 

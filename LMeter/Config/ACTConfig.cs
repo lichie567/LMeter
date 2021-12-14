@@ -20,6 +20,8 @@ namespace LMeter.Config
         private DateTime? LastReconnectAttempt { get; set; } = null;
 
         public string Name => "ACT";
+        
+        public IConfigPage GetDefault() => new ACTConfig();
 
         public string ACTSocketAddress;
 

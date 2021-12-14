@@ -9,6 +9,8 @@ namespace LMeter.Config
 
         public string Name => "About";
 
+        public IConfigPage GetDefault() => new AboutPage();
+
         public void DrawConfig(Vector2 size, float padX, float padY)
         {
             if (ImGui.BeginChild("##AboutPage", new Vector2(size.X, size.Y), true))
@@ -63,8 +65,9 @@ namespace LMeter.Config
                 }
 
                 ImGui.PopStyleVar();
-                ImGui.EndChild();
             }
+
+            ImGui.EndChild();
         }
     }
 }

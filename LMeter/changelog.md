@@ -4,6 +4,7 @@
 - Added option to hide Meter if ACT is not connected
 - Added option to automatically attempt to reconnect to ACT
 - Added option to add gaps between bars
+- Added "Combat" job group to Visibility settings
 - Fixed various bugs
 
 # Version 0.1.3.1

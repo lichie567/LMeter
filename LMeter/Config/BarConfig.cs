@@ -39,6 +39,16 @@ namespace LMeter.Config
         public ConfigColor BarDataOutlineColor = new ConfigColor(0, 0, 0, 0.5f);
         public string BarDataFontKey = FontsManager.DalamudFontKey;
         public int BarDataFontId = 0;
+        
+        public IConfigPage GetDefault()
+        {
+            BarConfig defaultConfig = new BarConfig();
+            defaultConfig.BarNameFontKey = FontsManager.DefaultSmallFontKey;
+            defaultConfig.BarNameFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey);
+            defaultConfig.BarDataFontKey = FontsManager.DefaultSmallFontKey;
+            defaultConfig.BarDataFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey);
+            return defaultConfig;
+        }
 
         public Vector2 DrawBar(
             ImDrawListPtr drawList,
@@ -201,9 +211,9 @@ namespace LMeter.Config
                     ImGui.ColorEdit4("Outline Color##Data", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                     this.BarDataOutlineColor.Vector = vector;
                 }
-
-                ImGui.EndChild();
             }
+
+            ImGui.EndChild();
         }
     }
 }

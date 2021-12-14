@@ -14,6 +14,8 @@ namespace LMeter.Config
     public class VisibilityConfig : IConfigPage
     {
         public string Name => "Visibility";
+        
+        public IConfigPage GetDefault() => new VisibilityConfig();
 
         [JsonIgnore] private string _customJobInput = string.Empty;
         [JsonIgnore] private string _hideIfValueInput = string.Empty;
@@ -126,9 +128,9 @@ namespace LMeter.Config
                         this.CustomJobList = jobList;
                     }
                 }
-
-                ImGui.EndChild();
             }
+            
+            ImGui.EndChild();
         }
     }
 }

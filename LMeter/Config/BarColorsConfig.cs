@@ -8,6 +8,8 @@ namespace LMeter.Config
     {
         public string Name => "Colors";
         
+        public IConfigPage GetDefault() => new BarColorsConfig();
+        
         public ConfigColor PLDColor = new ConfigColor(168f / 255f, 210f / 255f, 230f / 255f, 1f);
         public ConfigColor DRKColor = new ConfigColor(209f / 255f, 38f / 255f, 204f / 255f, 1f);
         public ConfigColor WARColor = new ConfigColor(207f / 255f, 38f / 255f, 33f / 255f, 1f);
@@ -210,9 +212,9 @@ namespace LMeter.Config
                 vector = ACNColor.Vector;
                 ImGui.ColorEdit4("ACN", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                 this.ACNColor.Vector = vector;
-
-                ImGui.EndChild();
             }
+
+            ImGui.EndChild();
         }
     }
 }

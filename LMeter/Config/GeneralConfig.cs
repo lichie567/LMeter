@@ -23,6 +23,8 @@ namespace LMeter.Config
         public bool Preview = false;
 
         public string Name => "General";
+        
+        public IConfigPage GetDefault() => new GeneralConfig();
 
         public Vector2 Position = Vector2.Zero;
         public Vector2 Size = ImGui.GetMainViewport().Size / 10;
@@ -66,9 +68,9 @@ namespace LMeter.Config
                 ImGui.Combo("Sort Type", ref Unsafe.As<MeterDataType, int>(ref this.DataType), _meterTypeOptions, _meterTypeOptions.Length);
 
                 ImGui.Checkbox("Preview", ref this.Preview);
-
-                ImGui.EndChild();
             }
+
+            ImGui.EndChild();
         }
     }
 }

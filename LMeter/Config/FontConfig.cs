@@ -12,6 +12,8 @@ namespace LMeter.Config
     public class FontConfig : IConfigPage
     {
         public string Name => "Fonts";
+        
+        public IConfigPage GetDefault() => new FontConfig();
 
         [JsonIgnore] private static string? _fontPath = FontsManager.GetUserFontPath();
         [JsonIgnore] private int _selectedFont = 0;
@@ -140,9 +142,9 @@ namespace LMeter.Config
                         ImGui.EndTable();
                     }
                 }
-
-                ImGui.EndChild();
             }
+
+            ImGui.EndChild();
         }
 
         public void RefreshFontList()
