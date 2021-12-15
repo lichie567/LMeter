@@ -11,13 +11,13 @@ using Dalamud.Game.ClientState.Party;
 using Dalamud.Game.Command;
 using Dalamud.Game.Gui;
 using Dalamud.Interface;
+using Dalamud.Logging;
 using Dalamud.Plugin;
 using ImGuiScene;
+using LMeter.ACT;
 using LMeter.Config;
 using LMeter.Helpers;
 using SigScanner = Dalamud.Game.SigScanner;
-using Dalamud.Logging;
-using LMeter.ACT;
 
 namespace LMeter
 {
@@ -25,7 +25,7 @@ namespace LMeter
     {
         public const string ConfigFileName = "LMeter.json";
 
-        public static string Version { get; private set; } = "0.1.3.1";
+        public static string Version { get; private set; } = "0.1.4.0";
 
         public static string ConfigFileDir { get; private set; } = "";
 

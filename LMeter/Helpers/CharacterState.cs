@@ -9,7 +9,7 @@ namespace LMeter.Helpers
 
     public static class CharacterState
     {
-        private static readonly uint[] GoldSaucerIDs = { 144, 388, 389, 390, 391, 579, 792, 899, 941 };
+        private static readonly uint[] _goldenSaucerIDs = { 144, 388, 389, 390, 391, 579, 792, 899, 941 };
 
         public static bool IsCharacterBusy()
         {
@@ -43,7 +43,7 @@ namespace LMeter.Helpers
 
         public static bool IsInGoldenSaucer()
         {
-            return GoldSaucerIDs.Count(id => id == Singletons.Get<ClientState>().TerritoryType) > 0;
+            return _goldenSaucerIDs.Any(id => id == Singletons.Get<ClientState>().TerritoryType);
         }
 
         public static bool IsJob(IEnumerable<Job> jobs)
@@ -59,74 +59,51 @@ namespace LMeter.Helpers
 
         public static List<Job> GetJobsForJobType(JobType type)
         {
-            if (type == JobType.All)
+            switch (type)
             {
-                return Enum.GetValues(typeof(Job)).Cast<Job>().ToList();
+                case JobType.All:
+                    return Enum.GetValues(typeof(Job)).Cast<Job>().ToList();
+                case JobType.Tanks:
+                    return new List<Job>() { Job.GLA, Job.MRD, Job.PLD, Job.WAR, Job.DRK, Job.GNB };
+                case JobType.Casters:
+                    return new List<Job>() { Job.THM, Job.ACN, Job.BLM, Job.SMN, Job.RDM, Job.BLU };
+                case JobType.Melee:
+                    return new List<Job>() { Job.PGL, Job.LNC, Job.ROG, Job.MNK, Job.DRG, Job.NIN, Job.SAM, Job.RPR };
+                case JobType.Ranged:
+                    return new List<Job>() { Job.ARC, Job.BRD, Job.MCH, Job.DNC };
+                case JobType.Healers:
+                    return new List<Job>() { Job.CNJ, Job.WHM, Job.SCH, Job.AST, Job.SGE };
+                case JobType.DoH:
+                    return new List<Job>() { Job.CRP, Job.BSM, Job.ARM, Job.GSM, Job.LTW, Job.WVR, Job.ALC, Job.CUL };
+                case JobType.DoL:
+                    return new List<Job>() { Job.MIN, Job.BOT, Job.FSH };
+                case JobType.Combat:
+                    List<Job> combatList = GetJobsForJobType(JobType.DoW);
+                    combatList.AddRange(GetJobsForJobType(JobType.DoM));
+                    return combatList;
+                case JobType.DoW:
+                    List<Job> dowList = GetJobsForJobType(JobType.Tanks);
+                    dowList.AddRange(GetJobsForJobType(JobType.Melee));
+                    dowList.AddRange(GetJobsForJobType(JobType.Ranged));
+                    return dowList;
+                case JobType.DoM:
+                    List<Job> domList = GetJobsForJobType(JobType.Casters);
+                    domList.AddRange(GetJobsForJobType(JobType.Healers));
+                    return domList;
+                case JobType.Crafters:
+                    List<Job> crafterList = GetJobsForJobType(JobType.DoH);
+                    crafterList.AddRange(GetJobsForJobType(JobType.DoL));
+                    return crafterList;
+                default:
+                    return new List<Job>();
             }
-
-            if (type == JobType.Tanks)
-            {
-                return new List<Job>() { Job.GLA, Job.MRD, Job.PLD, Job.WAR, Job.DRK, Job.GNB };
-            }
-
-            if (type == JobType.Casters)
-            {
-                return new List<Job>() { Job.THM, Job.ACN, Job.BLM, Job.SMN, Job.RDM, Job.BLU };
-            }
-
-            if (type == JobType.Melee)
-            {
-                return new List<Job>() { Job.PGL, Job.LNC, Job.ROG, Job.MNK, Job.DRG, Job.NIN, Job.SAM, Job.RPR };
-            }
-
-            if (type == JobType.Ranged)
-            {
-                return new List<Job>() { Job.ARC, Job.BRD, Job.MCH, Job.DNC };
-            }
-
-            if (type == JobType.Healers)
-            {
-                return new List<Job>() { Job.CNJ, Job.WHM, Job.SCH, Job.AST, Job.SGE };
-            }
-
-            if (type == JobType.DoH)
-            {
-                return new List<Job>() { Job.CRP, Job.BSM, Job.ARM, Job.GSM, Job.LTW, Job.WVR, Job.ALC, Job.CUL };
-            }
-
-            if (type == JobType.DoL)
-            {
-                return new List<Job>() { Job.MIN, Job.BOT, Job.FSH };
-            }
-
-            if (type == JobType.DoW)
-            {
-                List<Job> jobList = GetJobsForJobType(JobType.Tanks);
-                jobList.AddRange(GetJobsForJobType(JobType.Melee));
-                jobList.AddRange(GetJobsForJobType(JobType.Ranged));
-                return jobList;
-            }
-
-            if (type == JobType.DoM)
-            {
-                List<Job> jobList = GetJobsForJobType(JobType.Casters);
-                jobList.AddRange(GetJobsForJobType(JobType.Healers));
-                return jobList;
-            }
-
-            if (type == JobType.Crafters)
-            {
-                List<Job> jobList = GetJobsForJobType(JobType.DoH);
-                jobList.AddRange(GetJobsForJobType(JobType.DoL));
-                return jobList;
-            }
-
-            return new List<Job>();
         }
     }
 
     public enum Job
     {
+        UKN = 0,
+
         GLA = 1,
         MRD = 3,
         PLD = 19,
@@ -186,6 +163,7 @@ namespace LMeter.Helpers
         Healers,
         DoW,
         DoM,
+        Combat,
         Crafters,
         DoH,
         DoL

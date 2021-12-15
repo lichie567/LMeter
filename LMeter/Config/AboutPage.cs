@@ -7,7 +7,9 @@ namespace LMeter.Config
     public class AboutPage : IConfigPage
     {
 
-        public string Name => "About";
+        public string Name => "Changelog";
+
+        public IConfigPage GetDefault() => new AboutPage();
 
         public void DrawConfig(Vector2 size, float padX, float padY)
         {
@@ -57,14 +59,15 @@ namespace LMeter.Config
                 }
 
                 ImGui.SameLine();
-                if (ImGui.Button("Donate", buttonSize))
+                if (ImGui.Button("Discord", buttonSize))
                 {
-                    Utils.OpenUrl("https://ko-fi.com/lichie");
+                    Utils.OpenUrl("https://discord.gg/delvui");
                 }
 
                 ImGui.PopStyleVar();
-                ImGui.EndChild();
             }
+
+            ImGui.EndChild();
         }
     }
 }

@@ -10,7 +10,6 @@ namespace LMeter.Helpers
 {
     public static class Utils
     {
-
         public static Vector2 GetAnchoredPosition(Vector2 position, Vector2 size, DrawAnchor anchor)
         {
             return anchor switch
@@ -81,6 +80,20 @@ namespace LMeter.Helpers
                     PluginLog.Error("Error trying to open url: " + e.Message);
                 }
             }
+        }
+
+        public static string GetTagsTooltip(string[] textTags)
+        {
+            return $"Available Text Tags:\n\n{string.Join("\n", textTags)}\n\n" +
+                    "Append the characters ':k' to a numeric tag to kilo-format it.\n" +
+                    "Append a '.' and a number to limit the number of characters,\n" +
+                    "or the number of decimals when used with numeric values.\n\nExamples:\n" +
+                    "[damagetotal]          =>    123,456\n" +
+                    "[damagetotal:k]      =>           123k\n" +
+                    "[damagetotal:k.1]  =>       123.4k\n\n" +
+                    "[name]                   =>    Firstname Lastname\n" +
+                    "[name_first.5]    =>    First\n" +
+                    "[name_last.1]     =>    L";
         }
     }
         

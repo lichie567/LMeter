@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using LMeter.Helpers;
 using System.Linq;
 using System.Collections.Generic;
+using LMeter.ACT;
 
 namespace LMeter.Config
 {
@@ -13,6 +14,8 @@ namespace LMeter.Config
     public class VisibilityConfig : IConfigPage
     {
         public string Name => "Visibility";
+        
+        public IConfigPage GetDefault() => new VisibilityConfig();
 
         [JsonIgnore] private string _customJobInput = string.Empty;
         [JsonIgnore] private string _hideIfValueInput = string.Empty;
@@ -23,6 +26,7 @@ namespace LMeter.Config
         public bool HideOutsideDuty = false;
         public bool HideWhilePerforming = false;
         public bool HideInGoldenSaucer = false;
+        public bool HideIfNotConnected = false;
 
         public JobType ShowForJobTypes = JobType.All;
         public string CustomJobString = string.Empty;
@@ -60,6 +64,11 @@ namespace LMeter.Config
                 return false;
             }
 
+            if (this.HideIfNotConnected && ACTClient.Status != ConnectionStatus.Connected)
+            {
+                return false;
+            }
+
             if (this.ShowForJobTypes == JobType.All)
             {
                 return true;
@@ -83,6 +92,7 @@ namespace LMeter.Config
                 ImGui.Checkbox("Hide Outside Duty", ref this.HideOutsideDuty);
                 ImGui.Checkbox("Hide While Performing", ref this.HideWhilePerforming);
                 ImGui.Checkbox("Hide In Golden Saucer", ref this.HideInGoldenSaucer);
+                ImGui.Checkbox("Hide While Not Connected to ACT", ref this.HideIfNotConnected);
                 
                 DrawHelpers.DrawSpacing(1);
                 string[] jobTypeOptions = Enum.GetNames(typeof(JobType));
@@ -118,9 +128,9 @@ namespace LMeter.Config
                         this.CustomJobList = jobList;
                     }
                 }
-
-                ImGui.EndChild();
             }
+            
+            ImGui.EndChild();
         }
     }
 }
