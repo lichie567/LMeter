@@ -1,3 +1,9 @@
+# Version 0.1.4.1
+- Fix potential plugin crash
+- Fix bug with lock/click through
+- Disable preview when config window is closed
+- Force show meter when previewing
+
 # Version 0.1.4.0
 - Added advanced text-tag formatting (kilo-format and decimal-format)
 - Text Format fields have been reset to default (please check out the new text tags!)

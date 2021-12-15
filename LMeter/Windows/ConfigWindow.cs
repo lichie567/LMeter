@@ -220,6 +220,12 @@ namespace LMeter.Windows
         {
             ConfigHelpers.SaveConfig();
             this.ConfigStack.Clear();
+
+            var config = Singletons.Get<LMeterConfig>();
+            foreach (var meter in config.MeterList.Meters)
+            {
+                meter.GeneralConfig.Preview = false;
+            }
         }
     }
 }

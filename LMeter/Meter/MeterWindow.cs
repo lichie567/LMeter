@@ -112,7 +112,7 @@ namespace LMeter.Meter
 
         public void Draw(Vector2 pos)
         {
-            if (!this.VisibilityConfig.IsVisible())
+            if (!this.GeneralConfig.Preview && !this.VisibilityConfig.IsVisible())
             {
                 return;
             }
