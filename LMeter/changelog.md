@@ -2,7 +2,7 @@
 - Added advanced text-tag formatting (kilo-format and decimal-format)
 - Text Format fields have been reset to default (please check out the new text tags!)
 - Added text command to show/hide Meters (/lm toggle <number>)
-- Added text command to show/hide Meters (/lm ct <number>)
+- Added text command to toggle click-though for Meters (/lm ct <number>)
 - Added option to hide Meter if ACT is not connected
 - Added option to automatically attempt to reconnect to ACT
 - Added option to add gaps between bars
