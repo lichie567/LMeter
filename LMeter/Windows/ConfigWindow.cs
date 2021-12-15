@@ -6,7 +6,6 @@ using Dalamud.Interface.Windowing;
 using ImGuiNET;
 using LMeter.Config;
 using LMeter.Helpers;
-using LMeter.Meter;
 
 namespace LMeter.Windows
 {

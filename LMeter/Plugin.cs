@@ -11,13 +11,13 @@ using Dalamud.Game.ClientState.Party;
 using Dalamud.Game.Command;
 using Dalamud.Game.Gui;
 using Dalamud.Interface;
+using Dalamud.Logging;
 using Dalamud.Plugin;
 using ImGuiScene;
+using LMeter.ACT;
 using LMeter.Config;
 using LMeter.Helpers;
 using SigScanner = Dalamud.Game.SigScanner;
-using Dalamud.Logging;
-using LMeter.ACT;
 
 namespace LMeter
 {
