@@ -105,7 +105,7 @@ namespace LMeter.Config
                 }
             }
 
-            if (this.ShowEncounterName && encounter is not null)
+            if (this.ShowEncounterName && encounter is not null && !string.IsNullOrEmpty(encounter.Title))
             {
                 bool fontPushed = FontsManager.PushFont(this.NameFontKey);
                 string name = $" {encounter.Title}";
