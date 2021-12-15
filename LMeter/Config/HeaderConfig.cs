@@ -97,7 +97,7 @@ namespace LMeter.Config
                     raidStatsSize = ImGui.CalcTextSize(text);
                     Vector2 statsPos = Utils.GetAnchoredPosition(pos + this.StatsOffset, -headerSize, DrawAnchor.Right);
                     statsPos = Utils.GetAnchoredPosition(statsPos, raidStatsSize, this.StatsAlign);
-                    DrawHelpers.DrawText(drawList, text, statsPos, this.RaidStatsColor.Base, this.StatsShowOutline, this.StatsOutlineColor.Base);                  
+                    DrawHelpers.DrawText(drawList, text, statsPos, this.RaidStatsColor.Base, this.StatsShowOutline, this.StatsOutlineColor.Base);
                     if (fontPushed)
                     {
                         ImGui.PopFont();
@@ -105,7 +105,7 @@ namespace LMeter.Config
                 }
             }
 
-            if (this.ShowEncounterName && encounter is not null)
+            if (this.ShowEncounterName && encounter is not null && !string.IsNullOrEmpty(encounter.Title))
             {
                 bool fontPushed = FontsManager.PushFont(this.NameFontKey);
                 string name = $" {encounter.Title}";
@@ -119,7 +119,7 @@ namespace LMeter.Config
                         name = name.AsSpan(0, name.Length - 1).ToString();
                         nameSize = ImGui.CalcTextSize(name);
                     }
-                    while (durationSize.X + raidStatsSize.X + nameSize.X + elipsesWidth > size.X);
+                    while (durationSize.X + raidStatsSize.X + nameSize.X + elipsesWidth > size.X && name.Length > 1);
                     name += "... ";
                 }
 

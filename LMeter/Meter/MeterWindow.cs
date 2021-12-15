@@ -112,7 +112,7 @@ namespace LMeter.Meter
 
         public void Draw(Vector2 pos)
         {
-            if (!this.VisibilityConfig.IsVisible())
+            if (!this.GeneralConfig.Preview && !this.VisibilityConfig.IsVisible())
             {
                 return;
             }
@@ -126,7 +126,7 @@ namespace LMeter.Meter
             }
 
             this.UpdateDragData(localPos, size, this.GeneralConfig.Lock);
-            bool needsInput = this._unlocked || !this.GeneralConfig.ClickThrough;
+            bool needsInput = !this.GeneralConfig.ClickThrough;
             DrawHelpers.DrawInWindow($"##{this.ID}", localPos, size, needsInput, this._locked || this.GeneralConfig.Lock, (drawList) =>
             {
                 if (this._unlocked)
