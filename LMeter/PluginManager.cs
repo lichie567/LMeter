@@ -15,21 +15,15 @@ namespace LMeter
 {
     public class PluginManager : ILMeterDisposable
     {
-        private ClientState ClientState { get; init; }
-
-        private DalamudPluginInterface PluginInterface { get; init; }
-
-        private CommandManager CommandManager { get; init; }
-
-        private WindowSystem WindowSystem { get; init; }
-
-        private ConfigWindow ConfigRoot { get; init; }
-
-        private LMeterConfig Config { get; init; }
-
         private readonly Vector2 _origin = ImGui.GetMainViewport().Size / 2f;
-
         private readonly Vector2 _configSize = new Vector2(550, 550);
+
+        private ClientState _clientState;
+        private DalamudPluginInterface _pluginInterface;
+        private CommandManager _commandManager;
+        private WindowSystem _windowSystem;
+        private ConfigWindow _configRoot;
+        private LMeterConfig _config;
 
         private readonly ImGuiWindowFlags _mainWindowFlags = 
             ImGuiWindowFlags.NoTitleBar |
@@ -46,51 +40,51 @@ namespace LMeter
             DalamudPluginInterface pluginInterface,
             LMeterConfig config)
         {
-            this.ClientState = clientState;
-            this.CommandManager = commandManager;
-            this.PluginInterface = pluginInterface;
-            this.Config = config;
+            this._clientState = clientState;
+            this._commandManager = commandManager;
+            this._pluginInterface = pluginInterface;
+            this._config = config;
 
-            this.ConfigRoot = new ConfigWindow("ConfigRoot", _origin, _configSize);
+            this._configRoot = new ConfigWindow("ConfigRoot", _origin, _configSize);
+            this._windowSystem = new WindowSystem("LMeter");
+            this._windowSystem.AddWindow(this._configRoot);
 
-            this.WindowSystem = new WindowSystem("LMeter");
-            this.WindowSystem.AddWindow(this.ConfigRoot);
-
-            this.CommandManager.AddHandler(
+            this._commandManager.AddHandler(
                 "/lm",
                 new CommandInfo(PluginCommand)
                 {
                     HelpMessage = "Opens the LMeter configuration window.\n"
                                 + "/lm end → Ends current ACT Encounter.\n"
                                 + "/lm clear → Clears all ACT encounter log data.\n"
+                                + "/lm ct <number> → Toggles clickthrough status for the given profile.\n"
                                 + "/lm toggle <number> → Toggles visibility for the given profile.",
                     ShowInHelp = true
                 }
             );
 
-            this.ClientState.Logout += OnLogout;
-            this.PluginInterface.UiBuilder.OpenConfigUi += OpenConfigUi;
-            this.PluginInterface.UiBuilder.Draw += Draw;
+            this._clientState.Logout += OnLogout;
+            this._pluginInterface.UiBuilder.OpenConfigUi += OpenConfigUi;
+            this._pluginInterface.UiBuilder.Draw += Draw;
         }
 
         private void Draw()
         {
-            if (this.ClientState.LocalPlayer == null || CharacterState.IsCharacterBusy())
+            if (this._clientState.LocalPlayer == null || CharacterState.IsCharacterBusy())
             {
                 return;
             }
 
-            this.WindowSystem.Draw();
+            this._windowSystem.Draw();
 
-            this.Config.ACTConfig.TryReconnect();
-            this.Config.ACTConfig.TryEndEncounter();
+            this._config.ACTConfig.TryReconnect();
+            this._config.ACTConfig.TryEndEncounter();
 
             ImGuiHelpers.ForceNextWindowMainViewport();
             ImGui.SetNextWindowPos(Vector2.Zero);
             ImGui.SetNextWindowSize(ImGui.GetMainViewport().Size);
             if (ImGui.Begin("LMeter_Root", this._mainWindowFlags))
             {
-                foreach (var meter in this.Config.MeterList.Meters)
+                foreach (var meter in this._config.MeterList.Meters)
                 {
                     meter.Draw(_origin);
                 }
@@ -102,7 +96,7 @@ namespace LMeter
         public void Clear(bool clearAct = false)
         {
             ACTClient.Clear(clearAct);
-            foreach (var meter in this.Config.MeterList.Meters)
+            foreach (var meter in this._config.MeterList.Meters)
             {
                 meter.Clear();
             }
@@ -110,14 +104,14 @@ namespace LMeter
 
         public void Edit(IConfigurable configItem)
         {
-            this.ConfigRoot.PushConfig(configItem);
+            this._configRoot.PushConfig(configItem);
         }
 
         private void OpenConfigUi()
         {
-            if (!this.ConfigRoot.IsOpen)
+            if (!this._configRoot.IsOpen)
             {
-                this.ConfigRoot.PushConfig(this.Config);
+                this._configRoot.PushConfig(this._config);
             }
         }
 
@@ -128,18 +122,20 @@ namespace LMeter
 
         private void PluginCommand(string command, string arguments)
         {
+
             switch (arguments)
             {
                 case "end":
                     ACTClient.EndEncounter();
                     break;
                 case "clear":
-                    this.Clear(this.Config.ACTConfig.ClearACT);
+                    this.Clear(this._config.ACTConfig.ClearACT);
                     break;
                 case { } argument when argument.StartsWith("toggle"):
-                    string[] args = argument.Split(" ");
-                    if (args.Length > 1 && int.TryParse(args[1], out int num))
-                        this.ToggleMeter(num - 1);
+                    this._config.MeterList.ToggleMeter(GetIntArg(argument) - 1);
+                    break;
+                case { } argument when argument.StartsWith("ct"):
+                    this._config.MeterList.ToggleClickThrough(GetIntArg(argument) - 1);
                     break;
                 default:
                     this.ToggleWindow();
@@ -147,20 +143,21 @@ namespace LMeter
             }
         }
 
-        private void ToggleMeter(int meterIndex)
+        private static int GetIntArg(string argument)
         {
-            this.Config.MeterList.ToggleMeter(meterIndex);
+            string[] args1 = argument.Split(" ");
+            return args1.Length > 1 && int.TryParse(args1[1], out int num) ? num : 0;
         }
 
         private void ToggleWindow()
         {
-            if (this.ConfigRoot.IsOpen)
+            if (this._configRoot.IsOpen)
             {
-                this.ConfigRoot.IsOpen = false;
+                this._configRoot.IsOpen = false;
             }
             else
             {
-                this.ConfigRoot.PushConfig(this.Config);
+                this._configRoot.PushConfig(this._config);
             }
         }
 
@@ -175,11 +172,11 @@ namespace LMeter
             if (disposing)
             {
                 // Don't modify order
-                this.PluginInterface.UiBuilder.Draw -= Draw;
-                this.PluginInterface.UiBuilder.OpenConfigUi -= OpenConfigUi;
-                this.ClientState.Logout -= OnLogout;
-                this.CommandManager.RemoveHandler("/lm");
-                this.WindowSystem.RemoveAllWindows();
+                this._pluginInterface.UiBuilder.Draw -= Draw;
+                this._pluginInterface.UiBuilder.OpenConfigUi -= OpenConfigUi;
+                this._clientState.Logout -= OnLogout;
+                this._commandManager.RemoveHandler("/lm");
+                this._windowSystem.RemoveAllWindows();
             }
         }
     }

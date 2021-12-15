@@ -15,7 +15,7 @@ namespace LMeter.ACT
         {
             get
             {
-                if(this.WasGenerated)
+                if (this.WasGenerated)
                 {
                     return this._value;
                 }

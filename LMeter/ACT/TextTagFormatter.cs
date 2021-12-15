@@ -1,23 +1,26 @@
 using System.Reflection;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System;
 
 namespace LMeter.ACT
 {
     public class TextTagFormatter
     {
-        private string Format { get; set; }
-        private Dictionary<string, PropertyInfo> Properties { get; set; }
-        private object Source { get; set; }
+        public static readonly Regex TextTagRegex = new Regex(@"\[(\w*)(:k)?\.?(\d+)?\]", RegexOptions.Compiled);
+
+        private string _format;
+        private Dictionary<string, FieldInfo> _fields;
+        private object _source;
 
         public TextTagFormatter(
             object source,
             string format,
-            Dictionary<string, PropertyInfo> properties)
+            Dictionary<string, FieldInfo> fields)
         {
-            this.Source = source;
-            this.Format = format;
-            this.Properties = properties;
+            this._source = source;
+            this._format = format;
+            this._fields = fields;
         }
 
         public string Evaluate(Match m)
@@ -28,15 +31,20 @@ namespace LMeter.ACT
             }
 
             string format = string.IsNullOrEmpty(m.Groups[3].Value)
-                ? $"{this.Format}0"
-                : $"{this.Format}{m.Groups[3].Value}";
+                ? $"{this._format}0"
+                : $"{this._format}{m.Groups[3].Value}";
             
             string? value = null;
             string key = m.Groups[1].Value;
             
-            if (this.Properties.ContainsKey(key))
+            if (this._fields.ContainsKey(key))
             {
-                object? propValue = this.Properties[m.Groups[1].Value].GetValue(this.Source);
+                object? propValue = this._fields[m.Groups[1].Value].GetValue(this._source);
+
+                if (propValue is null)
+                {
+                    return string.Empty;
+                }
 
                 if (propValue is LazyFloat lazyFloat)
                 {
@@ -45,7 +53,9 @@ namespace LMeter.ACT
                 }
                 else
                 {
-                    value = propValue?.ToString();
+                    value = int.TryParse(m.Groups[3].Value, out int trim)
+                        ? propValue?.ToString().AsSpan(0, trim).ToString()
+                        : propValue?.ToString();
                 }
             }
 

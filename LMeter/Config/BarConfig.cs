@@ -25,7 +25,7 @@ namespace LMeter.Config
         public bool UseJobColor = true;
         public ConfigColor BarColor = new ConfigColor(.3f, .3f, .3f, 1f);
 
-        public string BarNameFormat = " [name]";
+        public string LeftTextFormat = "[name]";
         public ConfigColor BarNameColor = new ConfigColor(1, 1, 1, 1);
         public bool BarNameShowOutline = true;
         public ConfigColor BarNameOutlineColor = new ConfigColor(0, 0, 0, 0.5f);
@@ -33,7 +33,7 @@ namespace LMeter.Config
         public int BarNameFontId = 0;
         public bool UseCharacterName = false;
 
-        public string BarDataFormat = "[damagetotal-k.1]  ([encdps-k.1], [damagepct])  ";
+        public string RightTextFormat = "[damagetotal:k.1]  ([encdps:k.1], [damagepct])";
         public ConfigColor BarDataColor = new ConfigColor(1, 1, 1, 1);
         public bool BarDataShowOutline = true;
         public ConfigColor BarDataOutlineColor = new ConfigColor(0, 0, 0, 0.5f);
@@ -64,26 +64,26 @@ namespace LMeter.Config
             Vector2 barFillSize = new Vector2(size.X * (current / top), barHeight);
             drawList.AddRectFilled(localPos, localPos + barFillSize, barColor.Base);
 
-            if (this.ShowJobIcon && Enum.TryParse<Job>(combatant.Job, true, out Job job))
+            if (this.ShowJobIcon && combatant.Job != Job.UKN)
             {
-                uint jobIconId = 62000u + (uint)job + 100u * (uint)this.JobIconStyle;
+                uint jobIconId = 62000u + (uint)combatant.Job + 100u * (uint)this.JobIconStyle;
                 Vector2 jobIconSize = Vector2.One * barHeight;
                 DrawHelpers.DrawIcon(jobIconId, localPos + this.JobIconOffset, jobIconSize, drawList);
             }
 
             bool fontPushed = FontsManager.PushFont(this.BarNameFontKey);
-            string nameText = combatant.GetFormattedString(this.BarNameFormat, this.ThousandsSeparators ? "N" : "F");
+            string leftText = combatant.GetFormattedString($" {this.LeftTextFormat} ", this.ThousandsSeparators ? "N" : "F");
             if (this.UseCharacterName && combatant.Name.Contains("YOU"))
             {
                 string characterName = Singletons.Get<ClientState>().LocalPlayer?.Name.ToString() ?? "YOU";
-                nameText = nameText.Replace("YOU", characterName);
+                leftText = leftText.Replace("YOU", characterName);
             }
 
-            Vector2 nameTextSize = ImGui.CalcTextSize(nameText);
+            Vector2 nameTextSize = ImGui.CalcTextSize(leftText);
             Vector2 namePos = Utils.GetAnchoredPosition(localPos, -barSize, DrawAnchor.Left);
             namePos = Utils.GetAnchoredPosition(namePos, nameTextSize, DrawAnchor.Left);
             DrawHelpers.DrawText(drawList,
-                nameText,
+                leftText,
                 namePos.AddX(this.ShowJobIcon ? barHeight : 5),
                 this.BarNameColor.Base,
                 this.BarNameShowOutline,
@@ -95,12 +95,12 @@ namespace LMeter.Config
             }
 
             fontPushed = FontsManager.PushFont(this.BarDataFontKey);
-            string dataText = combatant.GetFormattedString(this.BarDataFormat, this.ThousandsSeparators ? "N" : "F");
-            Vector2 dataTextSize = ImGui.CalcTextSize(dataText);
+            string rightText = combatant.GetFormattedString($" {this.RightTextFormat} ", this.ThousandsSeparators ? "N" : "F");
+            Vector2 dataTextSize = ImGui.CalcTextSize(rightText);
             Vector2 dataPos = Utils.GetAnchoredPosition(localPos, -barSize, DrawAnchor.Right);
             dataPos = Utils.GetAnchoredPosition(dataPos, dataTextSize, DrawAnchor.Right);
             DrawHelpers.DrawText(drawList,
-                dataText,
+                rightText,
                 dataPos,
                 this.BarDataColor.Base,
                 this.BarDataShowOutline,
@@ -151,12 +151,11 @@ namespace LMeter.Config
 
                 ImGui.NewLine();
                 ImGui.Checkbox("Use your name instead of 'YOU'", ref this.UseCharacterName);
-                ImGui.InputText("Name Format", ref this.BarNameFormat, 128);
+                ImGui.InputText("Left Text Format", ref this.LeftTextFormat, 128);
 
                 if (ImGui.IsItemHovered())
                 {
-                    string tooltip = $"Available Data Tags:\n\n{string.Join("\n", Combatant.GetTags())}";
-                    ImGui.SetTooltip(tooltip);
+                    ImGui.SetTooltip(Utils.GetTagsTooltip(Combatant.TextTags));
                 }
 
                 if (!FontsManager.ValidateFont(fontOptions, this.BarNameFontId, this.BarNameFontKey))
@@ -182,12 +181,11 @@ namespace LMeter.Config
                 }
 
                 ImGui.NewLine();
-                ImGui.InputText("Data Format", ref this.BarDataFormat, 128);
+                ImGui.InputText("Right Text Format", ref this.RightTextFormat, 128);
 
                 if (ImGui.IsItemHovered())
                 {
-                    string tooltip = $"Available Data Tags:\n\n{string.Join("\n", Combatant.GetTags())}";
-                    ImGui.SetTooltip(tooltip);
+                    ImGui.SetTooltip(Utils.GetTagsTooltip(Combatant.TextTags));
                 }
 
                 if (!FontsManager.ValidateFont(fontOptions, this.BarDataFontId, this.BarDataFontKey))

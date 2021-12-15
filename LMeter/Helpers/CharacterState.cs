@@ -9,7 +9,7 @@ namespace LMeter.Helpers
 
     public static class CharacterState
     {
-        private static readonly uint[] GoldenSaucerIDs = { 144, 388, 389, 390, 391, 579, 792, 899, 941 };
+        private static readonly uint[] _goldenSaucerIDs = { 144, 388, 389, 390, 391, 579, 792, 899, 941 };
 
         public static bool IsCharacterBusy()
         {
@@ -43,7 +43,7 @@ namespace LMeter.Helpers
 
         public static bool IsInGoldenSaucer()
         {
-            return GoldenSaucerIDs.Count(id => id == Singletons.Get<ClientState>().TerritoryType) > 0;
+            return _goldenSaucerIDs.Any(id => id == Singletons.Get<ClientState>().TerritoryType);
         }
 
         public static bool IsJob(IEnumerable<Job> jobs)
@@ -102,6 +102,8 @@ namespace LMeter.Helpers
 
     public enum Job
     {
+        UKN = 0,
+
         GLA = 1,
         MRD = 3,
         PLD = 19,
@@ -161,9 +163,9 @@ namespace LMeter.Helpers
         Healers,
         DoW,
         DoM,
+        Combat,
         Crafters,
         DoH,
-        DoL,
-        Combat
+        DoL
     }
 }

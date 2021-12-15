@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using System;
 using LMeter.Helpers;
-using System.Text.RegularExpressions;
+using Newtonsoft.Json.Converters;
 
 namespace LMeter.ACT
 {
@@ -14,16 +14,16 @@ namespace LMeter.ACT
         public DateTime Timestamp;
 
         [JsonProperty("type")]
-        public string EventType { get; private set; } = string.Empty;
+        public string EventType = string.Empty;
         
         [JsonProperty("isActive")]
-        public string IsActive { get; private set; } = string.Empty;
+        public string IsActive = string.Empty;
         
         [JsonProperty("Encounter")]
-        public Encounter Encounter { get; private set; } = new Encounter();
+        public Encounter? Encounter;
         
         [JsonProperty("Combatant")]
-        public Dictionary<string, Combatant> Combatants { get; private set; } = new Dictionary<string, Combatant>();
+        public Dictionary<string, Combatant>? Combatants;
 
         public bool IsEncounterActive() => bool.TryParse(this.IsActive, out bool active) && active;
 
@@ -40,58 +40,53 @@ namespace LMeter.ACT
     public class Encounter
     {
         [JsonIgnore]
-        private static readonly Random _rand = new Random();
+        public static string[] TextTags { get; } = typeof(Encounter).GetFields().Select(x => $"[{x.Name.ToLower()}]").ToArray();
 
         [JsonIgnore]
-        private static readonly Regex _regex = new Regex(@"\[(\w*)(-k)?\.?(\d+)?\]", RegexOptions.Compiled);
+        private static readonly Random _rand = new Random();
         
         [JsonIgnore]
-        private static readonly Dictionary<string, PropertyInfo> _properties = typeof(Encounter).GetProperties().ToDictionary((x) => x.Name.ToLower());
-
-        public static string[] GetTags()
-        {
-            return typeof(Encounter).GetProperties().Select(x => $"[{x.Name.ToLower()}]").ToArray();
-        }
+        private static readonly Dictionary<string, FieldInfo> _fields = typeof(Encounter).GetFields().ToDictionary((x) => x.Name.ToLower());
 
         public string GetFormattedString(string format, string numberFormat)
         {
-            return _regex.Replace(format, new TextTagFormatter(this, numberFormat, _properties).Evaluate);
+            return TextTagFormatter.TextTagRegex.Replace(format, new TextTagFormatter(this, numberFormat, _fields).Evaluate);
         }
 
         [JsonProperty("title")]
-        public string Title { get; private set; } = string.Empty;
+        public string Title = string.Empty;
 
         [JsonProperty("duration")]
-        public string Duration { get; private set; } = string.Empty;
+        public string Duration = string.Empty;
 
         [JsonProperty("DURATION")]
-        private string _duration { get; set; } = string.Empty;
+        private string _duration = string.Empty;
         
         [JsonProperty("encdps")]
         [JsonConverter(typeof(LazyFloatConverter))]
-        public LazyFloat? Dps { get; private set; }
+        public LazyFloat? Dps;
 
         [JsonProperty("damage")]
         [JsonConverter(typeof(LazyFloatConverter))]
-        public LazyFloat? DamageTotal { get; private set; }
+        public LazyFloat? DamageTotal;
         
         [JsonProperty("enchps")]
         [JsonConverter(typeof(LazyFloatConverter))]
-        public LazyFloat? Hps { get; private set; }
+        public LazyFloat? Hps;
 
         [JsonProperty("healed")]
         [JsonConverter(typeof(LazyFloatConverter))]
-        public LazyFloat? HealingTotal { get; private set; }
+        public LazyFloat? HealingTotal;
 
         [JsonProperty("damagetaken")]
         [JsonConverter(typeof(LazyFloatConverter))]
-        public LazyFloat? DamageTaken { get; private set; }
+        public LazyFloat? DamageTaken;
 
         [JsonProperty("deaths")]
-        public string? Deaths { get; private set; }
+        public string? Deaths;
 
         [JsonProperty("kills")]
-        public string? Kills { get; private set; }
+        public string? Kills;
 
         public static Encounter GetTestData()
         {
@@ -114,87 +109,99 @@ namespace LMeter.ACT
     public class Combatant
     {
         [JsonIgnore]
+        public static string[] TextTags { get; } = typeof(Combatant).GetFields().Select(x => $"[{x.Name.ToLower()}]").ToArray();
+
+        [JsonIgnore]
         private static readonly Random _rand = new Random();
 
         [JsonIgnore]
-        private static readonly Regex _regex = new Regex(@"\[(\w*)(-k)?\.?(\d+)?\]", RegexOptions.Compiled);
-
-        [JsonIgnore]
-        private static readonly Dictionary<string, PropertyInfo> _properties = typeof(Combatant).GetProperties().ToDictionary((x) => x.Name.ToLower());
-
-        public static string[] GetTags()
-        {
-            return typeof(Combatant).GetProperties().Select(x => $"[{x.Name.ToLower()}]").ToArray();
-        }
+        private static readonly Dictionary<string, FieldInfo> _fields = typeof(Combatant).GetFields().ToDictionary((x) => x.Name.ToLower());
 
         public string GetFormattedString(string format, string numberFormat)
         {
-            return _regex.Replace(format, new TextTagFormatter(this, numberFormat, _properties).Evaluate);
+            return TextTagFormatter.TextTagRegex.Replace(format, new TextTagFormatter(this, numberFormat, _fields).Evaluate);
         }
 
         [JsonProperty("name")]
-        public string Name { get; private set; } = string.Empty;
+        public string Name = string.Empty;
+
+        [JsonIgnore]
+        public LazyString<string?>? Name_First;
+
+        [JsonIgnore]
+        public LazyString<string?>? Name_Last;
 
         [JsonProperty("job")]
-        public string Job { get; private set; } = string.Empty;
+        [JsonConverter(typeof(StringEnumConverter))]
+        public Job Job;
+
+        [JsonIgnore]
+        public LazyString<Job>? JobName;
 
         [JsonProperty("duration")]
-        public string Duration { get; private set; } = string.Empty;
+        public string Duration = string.Empty;
         
         [JsonProperty("encdps")]
         [JsonConverter(typeof(LazyFloatConverter))]
-        public LazyFloat? EncDps { get; private set; }
+        public LazyFloat? EncDps;
 
         [JsonProperty("dps")]
         [JsonConverter(typeof(LazyFloatConverter))]
-        public LazyFloat? Dps { get; private set; }
+        public LazyFloat? Dps;
 
         [JsonProperty("damage")]
         [JsonConverter(typeof(LazyFloatConverter))]
-        public LazyFloat? DamageTotal { get; private set; }
+        public LazyFloat? DamageTotal;
 
         [JsonProperty("damage%")]
-        public string DamagePct { get; private set; } = string.Empty;
+        public string DamagePct = string.Empty;
 
         [JsonProperty("crithit%")]
-        public string CritHitPct { get; private set; } = string.Empty;
+        public string CritHitPct = string.Empty;
 
         [JsonProperty("DirectHitPct")]
-        public string DirectHitPct { get; private set; } = string.Empty;
+        public string DirectHitPct = string.Empty;
 
         [JsonProperty("CritDirectHitPct")]
-        public string CritDirectHitPct { get; private set; } = string.Empty;
+        public string CritDirectHitPct = string.Empty;
         
         [JsonProperty("enchps")]
         [JsonConverter(typeof(LazyFloatConverter))]
-        public LazyFloat? EncHps { get; private set; }
+        public LazyFloat? EncHps;
         
         [JsonProperty("hps")]
         [JsonConverter(typeof(LazyFloatConverter))]
-        public LazyFloat? Hps { get; private set; }
+        public LazyFloat? Hps;
 
         [JsonProperty("healed")]
         [JsonConverter(typeof(LazyFloatConverter))]
-        public LazyFloat? HealingTotal { get; private set; }
+        public LazyFloat? HealingTotal;
 
         [JsonProperty("healed%")]
-        public string HealingPct { get; private set; } = string.Empty;
+        public string HealingPct = string.Empty;
 
         [JsonProperty("damagetaken")]
         [JsonConverter(typeof(LazyFloatConverter))]
-        public LazyFloat? DamageTaken { get; private set; }
+        public LazyFloat? DamageTaken;
 
         [JsonProperty("deaths")]
-        public string Deaths { get; private set; } = string.Empty;
+        public string Deaths = string.Empty;
 
         [JsonProperty("kills")]
-        public string Kills { get; private set; } = string.Empty;
+        public string Kills = string.Empty;
 
         [JsonProperty("maxhit")]
-        public string MaxHit { get; private set; } = string.Empty;
+        public string MaxHit = string.Empty;
 
         [JsonProperty("MAXHIT")]
-        private string _maxHit { get; set; } = string.Empty;
+        private string _maxHit = string.Empty;
+
+        public Combatant()
+        {
+            this.Name_First = new LazyString<string?>(() => this.Name, LazyStringConverters.FirstName);
+            this.Name_Last = new LazyString<string?>(() => this.Name, LazyStringConverters.LastName);
+            this.JobName = new LazyString<Job>(() => this.Job, LazyStringConverters.JobName);
+        }
 
         public static Dictionary<string, Combatant> GetTestData()
         {
@@ -220,9 +227,9 @@ namespace LMeter.ACT
 
             return new Combatant()
             {
-                Name = "Fake Name",
+                Name = "Firstname Lastname",
                 Duration = "00:30",
-                Job = jobs.Select(x => x.ToString()).ElementAt(_rand.Next(jobs.Length)),
+                Job = Enum.Parse<Job>(jobs[_rand.Next(jobs.Length)]),
                 DamageTotal = new LazyFloat(damage.ToString()),
                 Dps = new LazyFloat((damage / 30).ToString()),
                 EncDps = new LazyFloat((damage / 30).ToString()),

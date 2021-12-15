@@ -17,8 +17,6 @@ namespace LMeter.Config
         [JsonIgnore] private string _input = string.Empty;
 
         public string Name => "Profiles";
-        
-        public IConfigPage GetDefault() => new MeterListConfig();
 
         public List<MeterWindow> Meters { get; init; }
 
@@ -26,11 +24,29 @@ namespace LMeter.Config
         {
             this.Meters = new List<MeterWindow>();
         }
+        
+        public IConfigPage GetDefault() => new MeterListConfig();
 
         public void DrawConfig(Vector2 size, float padX, float padY)
         {
             this.DrawCreateMenu(size, padX);
             this.DrawMeterTable(size.AddY(-padY), padX);
+        }
+        
+        public void ToggleMeter(int meterIndex)
+        {
+            if (meterIndex >= 0 && meterIndex < this.Meters.Count)
+            {
+                this.Meters[meterIndex].VisibilityConfig.AlwaysHide ^= true;
+            }
+        }
+        
+        public void ToggleClickThrough(int meterIndex)
+        {
+            if (meterIndex >= 0 && meterIndex < this.Meters.Count)
+            {
+                this.Meters[meterIndex].GeneralConfig.ClickThrough ^= true;
+            }
         }
 
         private void DrawCreateMenu(Vector2 size, float padX)
@@ -132,14 +148,6 @@ namespace LMeter.Config
 
             this._input = string.Empty;
         }
-        
-        public void ToggleMeter(int meterIndex)
-        {
-            if (meterIndex >= 0 && meterIndex < this.Meters.Count)
-            {
-                this.Meters[meterIndex].VisibilityConfig.AlwaysHide ^= true;
-            }
-        }
 
         private void EditMeter(MeterWindow meter)
         {
@@ -154,7 +162,7 @@ namespace LMeter.Config
         private void ImportMeter(string input)
         {
             string importString = input;
-            if (string.IsNullOrEmpty(importString))
+            if (string.IsNullOrWhiteSpace(importString))
             {
                 importString = ImGui.GetClipboardText();
             }

@@ -1,11 +1,13 @@
 # Version 0.1.4.0
 - Added advanced text-tag formatting (kilo-format and decimal-format)
-- Added text command to show/hide Meters (/lm toggle)
+- Text Format fields have been reset to default (please check out the new text tags!)
+- Added text command to show/hide Meters (/lm toggle <number>)
+- Added text command to show/hide Meters (/lm ct <number>)
 - Added option to hide Meter if ACT is not connected
 - Added option to automatically attempt to reconnect to ACT
 - Added option to add gaps between bars
 - Added "Combat" job group to Visibility settings
-- Fixed various bugs
+- Fixed various bugs and improved performance
 
 # Version 0.1.3.1
 - Make auto-end disabled by default
