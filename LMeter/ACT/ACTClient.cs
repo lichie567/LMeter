@@ -1,14 +1,14 @@
-using System.Threading;
 using System;
-using System.Net.WebSockets;
-using LMeter.Helpers;
 using System.IO;
+using System.Net.WebSockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using Dalamud.Logging;
-using Newtonsoft.Json;
 using Dalamud.Game.Gui;
 using Dalamud.Game.Text;
+using Dalamud.Logging;
+using LMeter.Helpers;
+using Newtonsoft.Json;
 
 namespace LMeter.ACT
 {
@@ -23,20 +23,16 @@ namespace LMeter.ACT
 
     public class ACTClient : ILMeterDisposable
     {
-        private ClientWebSocket Socket { get; set; }
-
-        private CancellationTokenSource CancellationTokenSource { get; set; }
-
-        private Task? ReceiveTask { get; set; }
-
-        private ACTEvent? LastEvent { get; set; }
-
-        private ConnectionStatus _status { get; set; }
+        private ClientWebSocket _socket;
+        private CancellationTokenSource _cancellationTokenSource;
+        private Task? _receiveTask;
+        private ACTEvent? _lastEvent;
+        private ConnectionStatus _status;
 
         public ACTClient()
         {
-            this.Socket = new ClientWebSocket();
-            this.CancellationTokenSource = new CancellationTokenSource();
+            this._socket = new ClientWebSocket();
+            this._cancellationTokenSource = new CancellationTokenSource();
             this._status = ConnectionStatus.NotConnected;
         }
 
@@ -46,12 +42,12 @@ namespace LMeter.ACT
         {
             ACTClient client = Singletons.Get<ACTClient>();
             if (client._status != ConnectionStatus.Connected ||
-                client.LastEvent is null)
+                client._lastEvent is null)
             {
                 return null;
             }
 
-            return client.LastEvent;
+            return client._lastEvent;
         }
 
         public static void EndEncounter()
@@ -68,7 +64,7 @@ namespace LMeter.ACT
 
         public static void Clear(bool clearAct)
         {
-            Singletons.Get<ACTClient>().LastEvent = null;
+            Singletons.Get<ACTClient>()._lastEvent = null;
             if (clearAct)
             {
                 ChatGui chat = Singletons.Get<ChatGui>();
@@ -99,7 +95,7 @@ namespace LMeter.ACT
 
             try
             {
-                this.ReceiveTask = Task.Run(() => this.Connect(host));
+                this._receiveTask = Task.Run(() => this.Connect(host));
             }
             catch (Exception ex)
             {
@@ -113,14 +109,14 @@ namespace LMeter.ACT
             try
             {
                 this._status = ConnectionStatus.Connecting;
-                await this.Socket.ConnectAsync(new Uri(host), this.CancellationTokenSource.Token);
+                await this._socket.ConnectAsync(new Uri(host), this._cancellationTokenSource.Token);
 
                 string subscribe = "{\"call\":\"subscribe\",\"events\":[\"CombatData\"]}";
-                await this.Socket.SendAsync(
+                await this._socket.SendAsync(
                         Encoding.UTF8.GetBytes(subscribe),
                         WebSocketMessageType.Text,
                         endOfMessage: true,
-                        this.CancellationTokenSource.Token);
+                        this._cancellationTokenSource.Token);
             }
             catch (Exception ex)
             {
@@ -148,7 +144,7 @@ namespace LMeter.ACT
                     {
                         do
                         {
-                            result = await this.Socket.ReceiveAsync(buffer, this.CancellationTokenSource.Token);
+                            result = await this._socket.ReceiveAsync(buffer, this._cancellationTokenSource.Token);
                             ms.Write(buffer.Array, buffer.Offset, result.Count);
                         }
                         while (!result.EndOfMessage);
@@ -163,16 +159,19 @@ namespace LMeter.ACT
                         {
                             string data = await reader.ReadToEndAsync();
                             
+                            PluginLog.Verbose(data);
                             if (!string.IsNullOrEmpty(data))
                             {
                                 try
                                 {
                                     ACTEvent? actEvent = JsonConvert.DeserializeObject<ACTEvent>(data);
 
-                                    if (actEvent is not null && (CharacterState.IsInCombat() || (this.LastEvent?.IsEncounterActive() ?? false)))
+                                    if (actEvent?.Combatants is not null &&
+                                        actEvent.Combatants.Count > 0 &&
+                                        (CharacterState.IsInCombat() || !actEvent.IsEncounterActive()))
                                     {
                                         actEvent.Timestamp = DateTime.UtcNow;
-                                        this.LastEvent = actEvent;
+                                        this._lastEvent = actEvent;
                                     }
                                 }
                                 catch (Exception ex)
@@ -191,47 +190,50 @@ namespace LMeter.ACT
             }
             finally
             {
-                this.Shutdown();
+                if (this._status != ConnectionStatus.ShuttingDown)
+                {
+                    this.Shutdown();
+                }
             }
         }
 
         public void Shutdown()
         {
             this._status = ConnectionStatus.ShuttingDown;
-            this.LastEvent = null;
-            if (this.Socket.State == WebSocketState.Open ||
-                this.Socket.State == WebSocketState.Connecting)
+            this._lastEvent = null;
+            if (this._socket.State == WebSocketState.Open ||
+                this._socket.State == WebSocketState.Connecting)
             {
                 try
                 {
                     // Close the websocket
-                    this.Socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None)
+                    this._socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None)
                                .GetAwaiter()
                                .GetResult();
                 }
                 catch
                 {
                     // If closing the socket failed, force it with the cancellation token.
-                    this.CancellationTokenSource.Cancel();
+                    this._cancellationTokenSource.Cancel();
                 }
 
-                if (this.ReceiveTask is not null)
+                if (this._receiveTask is not null)
                 {
-                    this.ReceiveTask.Wait();
+                    this._receiveTask.Wait();
                 }
 
                 PluginLog.Information($"Closed ACT Connection");
             }
 
-            this.Socket.Dispose();
+            this._socket.Dispose();
             this._status = ConnectionStatus.NotConnected;
         }
 
         public void Reset()
         {
             this.Shutdown();
-            this.Socket = new ClientWebSocket();
-            this.CancellationTokenSource = new CancellationTokenSource();
+            this._socket = new ClientWebSocket();
+            this._cancellationTokenSource = new CancellationTokenSource();
             this._status = ConnectionStatus.NotConnected;
         }
 

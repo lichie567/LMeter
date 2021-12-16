@@ -1,15 +1,21 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Collections.Generic;
-using Newtonsoft.Json;
-using System;
 using LMeter.Helpers;
-using Newtonsoft.Json.Converters;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace LMeter.ACT
 {
     public class ACTEvent
     {
+        [JsonIgnore]
+        private bool _parsedActive = false;
+
+        [JsonIgnore]
+        private bool _active = false;
+
         [JsonIgnore]
         public DateTime Timestamp;
 
@@ -25,7 +31,17 @@ namespace LMeter.ACT
         [JsonProperty("Combatant")]
         public Dictionary<string, Combatant>? Combatants;
 
-        public bool IsEncounterActive() => bool.TryParse(this.IsActive, out bool active) && active;
+        public bool IsEncounterActive()
+        {
+            if (this._parsedActive)
+            {
+                return this._active;
+            }
+            
+            bool.TryParse(this.IsActive, out this._active);
+            this._parsedActive = true;
+            return _active;
+        }
 
         public static ACTEvent GetTestData()
         {
@@ -132,7 +148,7 @@ namespace LMeter.ACT
         public LazyString<string?>? Name_Last;
 
         [JsonProperty("job")]
-        [JsonConverter(typeof(StringEnumConverter))]
+        [JsonConverter(typeof(EnumConverter))]
         public Job Job;
 
         [JsonIgnore]
