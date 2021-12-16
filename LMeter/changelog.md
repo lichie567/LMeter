@@ -1,3 +1,7 @@
+# Version 0.1.4.2
+- Fix issue with ACT data not appearing in certain dungeons
+- Improve logic for splitting encounters
+
 # Version 0.1.4.1
 - Fix potential plugin crash
 - Fix bug with lock/click through
