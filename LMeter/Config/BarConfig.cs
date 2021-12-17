@@ -73,13 +73,12 @@ namespace LMeter.Config
             }
 
             bool fontPushed = FontsManager.PushFont(this.BarNameFontKey);
-            string leftText = combatant.GetFormattedString($" {this.LeftTextFormat} ", this.ThousandsSeparators ? "N" : "F");
             if (this.UseCharacterName && combatant.Name.Contains("YOU"))
             {
-                string characterName = Singletons.Get<ClientState>().LocalPlayer?.Name.ToString() ?? "YOU";
-                leftText = leftText.Replace("YOU", characterName);
+                combatant.Name = Singletons.Get<ClientState>().LocalPlayer?.Name.ToString() ?? "YOU";
             }
 
+            string leftText = combatant.GetFormattedString($" {this.LeftTextFormat} ", this.ThousandsSeparators ? "N" : "F");
             Vector2 nameTextSize = ImGui.CalcTextSize(leftText);
             Vector2 namePos = Utils.GetAnchoredPosition(localPos, -barSize, DrawAnchor.Left);
             namePos = Utils.GetAnchoredPosition(namePos, nameTextSize, DrawAnchor.Left) + this.LeftTextOffset;
