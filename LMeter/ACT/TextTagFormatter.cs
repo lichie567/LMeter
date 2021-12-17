@@ -49,13 +49,17 @@ namespace LMeter.ACT
                 if (propValue is LazyFloat lazyFloat)
                 {
                     bool kilo = !string.IsNullOrEmpty(m.Groups[2].Value);
-                    value = lazyFloat.ToString(format, kilo);
+                    return lazyFloat.ToString(format, kilo) ?? m.Value;
                 }
                 else
                 {
-                    value = int.TryParse(m.Groups[3].Value, out int trim)
-                        ? propValue?.ToString().AsSpan(0, trim).ToString()
-                        : propValue?.ToString();
+                    value = propValue?.ToString();
+                    if (!string.IsNullOrEmpty(value) &&
+                        int.TryParse(m.Groups[3].Value, out int trim) &&
+                        trim < value.Length)
+                    {
+                        value = propValue?.ToString().AsSpan(0, trim).ToString();
+                    }
                 }
             }
 

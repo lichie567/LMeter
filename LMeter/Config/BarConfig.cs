@@ -25,6 +25,7 @@ namespace LMeter.Config
         public ConfigColor BarColor = new ConfigColor(.3f, .3f, .3f, 1f);
 
         public string LeftTextFormat = "[name]";
+        public Vector2 LeftTextOffset = new Vector2(0, 0);
         public ConfigColor BarNameColor = new ConfigColor(1, 1, 1, 1);
         public bool BarNameShowOutline = true;
         public ConfigColor BarNameOutlineColor = new ConfigColor(0, 0, 0, 0.5f);
@@ -33,6 +34,7 @@ namespace LMeter.Config
         public bool UseCharacterName = false;
 
         public string RightTextFormat = "[damagetotal:k.1]  ([encdps:k.1], [damagepct])";
+        public Vector2 RightTextOffset = new Vector2(0, 0);
         public ConfigColor BarDataColor = new ConfigColor(1, 1, 1, 1);
         public bool BarDataShowOutline = true;
         public ConfigColor BarDataOutlineColor = new ConfigColor(0, 0, 0, 0.5f);
@@ -80,7 +82,7 @@ namespace LMeter.Config
 
             Vector2 nameTextSize = ImGui.CalcTextSize(leftText);
             Vector2 namePos = Utils.GetAnchoredPosition(localPos, -barSize, DrawAnchor.Left);
-            namePos = Utils.GetAnchoredPosition(namePos, nameTextSize, DrawAnchor.Left);
+            namePos = Utils.GetAnchoredPosition(namePos, nameTextSize, DrawAnchor.Left) + this.LeftTextOffset;
             DrawHelpers.DrawText(drawList,
                 leftText,
                 namePos.AddX(this.ShowJobIcon ? barHeight : 5),
@@ -97,7 +99,7 @@ namespace LMeter.Config
             string rightText = combatant.GetFormattedString($" {this.RightTextFormat} ", this.ThousandsSeparators ? "N" : "F");
             Vector2 dataTextSize = ImGui.CalcTextSize(rightText);
             Vector2 dataPos = Utils.GetAnchoredPosition(localPos, -barSize, DrawAnchor.Right);
-            dataPos = Utils.GetAnchoredPosition(dataPos, dataTextSize, DrawAnchor.Right);
+            dataPos = Utils.GetAnchoredPosition(dataPos, dataTextSize, DrawAnchor.Right) + this.RightTextOffset;
             DrawHelpers.DrawText(drawList,
                 rightText,
                 dataPos,
@@ -157,6 +159,8 @@ namespace LMeter.Config
                     ImGui.SetTooltip(Utils.GetTagsTooltip(Combatant.TextTags));
                 }
 
+                ImGui.DragFloat2("Left Text Offset", ref this.LeftTextOffset);
+
                 if (!FontsManager.ValidateFont(fontOptions, this.BarNameFontId, this.BarNameFontKey))
                 {
                     this.BarNameFontId = 0;
@@ -186,6 +190,8 @@ namespace LMeter.Config
                 {
                     ImGui.SetTooltip(Utils.GetTagsTooltip(Combatant.TextTags));
                 }
+
+                ImGui.DragFloat2("Right Text Offset", ref this.RightTextOffset);
 
                 if (!FontsManager.ValidateFont(fontOptions, this.BarDataFontId, this.BarDataFontKey))
                 {

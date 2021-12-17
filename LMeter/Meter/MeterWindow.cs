@@ -143,10 +143,18 @@ namespace LMeter.Meter
                 
                 if (this.GeneralConfig.ShowBorder)
                 {
+                    Vector2 borderPos = localPos;
+                    Vector2 borderSize = size;
+                    if (this.GeneralConfig.BorderAroundBars)
+                    {
+                        borderPos = borderPos.AddY(this.HeaderConfig.HeaderHeight);
+                        borderSize = borderSize.AddY(-this.HeaderConfig.HeaderHeight);
+                    }
+
                     for (int i = 0; i < this.GeneralConfig.BorderThickness; i++)
                     {
                         Vector2 offset = new Vector2(i, i);
-                        drawList.AddRect(localPos + offset, localPos + size - offset, this.GeneralConfig.BorderColor.Base);
+                        drawList.AddRect(borderPos + offset, borderPos + borderSize - offset, this.GeneralConfig.BorderColor.Base);
                     }
 
                     localPos += Vector2.One * this.GeneralConfig.BorderThickness;
@@ -161,9 +169,7 @@ namespace LMeter.Meter
                 ACTEvent? actEvent = this.GeneralConfig.Preview ? this._previewEvent : ACTClient.GetLastEvent();
                 localPos = this.HeaderConfig.DrawHeader(localPos, size, actEvent?.Encounter, drawList);
                 size = size.AddY(-this.HeaderConfig.HeaderHeight);
-
                 drawList.AddRectFilled(localPos, localPos + size, this.GeneralConfig.BackgroundColor.Base);
-
                 this.DrawBars(drawList, localPos, size, actEvent);
             });
 
