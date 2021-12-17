@@ -1,3 +1,8 @@
+# Version 0.1.4.3
+- Fix potential crash with certain text tags
+- Add position offsets for bar text
+- Add option for borders only around bars (not header)
+
 # Version 0.1.4.2
 - Fix issue with ACT data not appearing in certain dungeons
 - Improve logic for splitting encounters

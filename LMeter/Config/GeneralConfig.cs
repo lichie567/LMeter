@@ -32,6 +32,7 @@ namespace LMeter.Config
         public bool ClickThrough = false;
         public ConfigColor BackgroundColor = new ConfigColor(0, 0, 0, 0.5f);
         public bool ShowBorder = false;
+        public bool BorderAroundBars = false;
         public ConfigColor BorderColor = new ConfigColor(0, 0, 0, 1f);
         public int BorderThickness = 2;
         public MeterDataType DataType = MeterDataType.Damage;
@@ -62,6 +63,9 @@ namespace LMeter.Config
                     vector = this.BorderColor.Vector;
                     ImGui.ColorEdit4("Border Color", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                     this.BorderColor.Vector = vector;
+
+                    DrawHelpers.DrawNestIndicator(1);
+                    ImGui.Checkbox("Only draw border around bars", ref this.BorderAroundBars);
                 }
 
                 ImGui.NewLine();
