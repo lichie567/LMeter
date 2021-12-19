@@ -16,6 +16,8 @@ namespace LMeter.Config
 
         public string Version => Plugin.Version;
 
+        public bool FirstLoad = true;
+
         public MeterListConfig MeterList { get; init; }
 
         public ACTConfig ACTConfig { get; init; }

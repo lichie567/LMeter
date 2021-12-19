@@ -147,6 +147,9 @@ namespace LMeter.ACT
         [JsonIgnore]
         public LazyString<string?>? Name_Last;
 
+        [JsonIgnore]
+        public string Rank = string.Empty;
+
         [JsonProperty("job")]
         [JsonConverter(typeof(EnumConverter))]
         public Job Job;

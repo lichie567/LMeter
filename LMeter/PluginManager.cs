@@ -6,10 +6,11 @@ using Dalamud.Interface;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 using ImGuiNET;
+using LMeter.ACT;
 using LMeter.Config;
 using LMeter.Helpers;
+using LMeter.Meter;
 using LMeter.Windows;
-using LMeter.ACT;
 
 namespace LMeter
 {
@@ -40,16 +41,16 @@ namespace LMeter
             DalamudPluginInterface pluginInterface,
             LMeterConfig config)
         {
-            this._clientState = clientState;
-            this._commandManager = commandManager;
-            this._pluginInterface = pluginInterface;
-            this._config = config;
+            _clientState = clientState;
+            _commandManager = commandManager;
+            _pluginInterface = pluginInterface;
+            _config = config;
 
-            this._configRoot = new ConfigWindow("ConfigRoot", _origin, _configSize);
-            this._windowSystem = new WindowSystem("LMeter");
-            this._windowSystem.AddWindow(this._configRoot);
+            _configRoot = new ConfigWindow("ConfigRoot", _origin, _configSize);
+            _windowSystem = new WindowSystem("LMeter");
+            _windowSystem.AddWindow(_configRoot);
 
-            this._commandManager.AddHandler(
+            _commandManager.AddHandler(
                 "/lm",
                 new CommandInfo(PluginCommand)
                 {
@@ -62,29 +63,29 @@ namespace LMeter
                 }
             );
 
-            this._clientState.Logout += OnLogout;
-            this._pluginInterface.UiBuilder.OpenConfigUi += OpenConfigUi;
-            this._pluginInterface.UiBuilder.Draw += Draw;
+            _clientState.Logout += OnLogout;
+            _pluginInterface.UiBuilder.OpenConfigUi += OpenConfigUi;
+            _pluginInterface.UiBuilder.Draw += Draw;
         }
 
         private void Draw()
         {
-            if (this._clientState.LocalPlayer == null || CharacterState.IsCharacterBusy())
+            if (_clientState.LocalPlayer == null || CharacterState.IsCharacterBusy())
             {
                 return;
             }
 
-            this._windowSystem.Draw();
+            _windowSystem.Draw();
 
-            this._config.ACTConfig.TryReconnect();
-            this._config.ACTConfig.TryEndEncounter();
+            _config.ACTConfig.TryReconnect();
+            _config.ACTConfig.TryEndEncounter();
 
             ImGuiHelpers.ForceNextWindowMainViewport();
             ImGui.SetNextWindowPos(Vector2.Zero);
             ImGui.SetNextWindowSize(ImGui.GetMainViewport().Size);
-            if (ImGui.Begin("LMeter_Root", this._mainWindowFlags))
+            if (ImGui.Begin("LMeter_Root", _mainWindowFlags))
             {
-                foreach (var meter in this._config.MeterList.Meters)
+                foreach (var meter in _config.MeterList.Meters)
                 {
                     meter.Draw(_origin);
                 }
@@ -93,10 +94,10 @@ namespace LMeter
             ImGui.End();
         }
 
-        public void Clear(bool clearAct = false)
+        public void Clear()
         {
-            ACTClient.Clear(clearAct);
-            foreach (var meter in this._config.MeterList.Meters)
+            Singletons.Get<ACTClient>().Clear();
+            foreach (var meter in _config.MeterList.Meters)
             {
                 meter.Clear();
             }
@@ -104,14 +105,23 @@ namespace LMeter
 
         public void Edit(IConfigurable configItem)
         {
-            this._configRoot.PushConfig(configItem);
+            _configRoot.PushConfig(configItem);
+        }
+
+        public void ConfigureMeter(MeterWindow meter)
+        {
+            if (!_configRoot.IsOpen)
+            {
+                this.OpenConfigUi();
+                this.Edit(meter);
+            }
         }
 
         private void OpenConfigUi()
         {
-            if (!this._configRoot.IsOpen)
+            if (!_configRoot.IsOpen)
             {
-                this._configRoot.PushConfig(this._config);
+                _configRoot.PushConfig(_config);
             }
         }
 
@@ -129,13 +139,13 @@ namespace LMeter
                     ACTClient.EndEncounter();
                     break;
                 case "clear":
-                    this.Clear(this._config.ACTConfig.ClearACT);
+                    this.Clear();
                     break;
                 case { } argument when argument.StartsWith("toggle"):
-                    this._config.MeterList.ToggleMeter(GetIntArg(argument) - 1);
+                    _config.MeterList.ToggleMeter(GetIntArg(argument) - 1);
                     break;
                 case { } argument when argument.StartsWith("ct"):
-                    this._config.MeterList.ToggleClickThrough(GetIntArg(argument) - 1);
+                    _config.MeterList.ToggleClickThrough(GetIntArg(argument) - 1);
                     break;
                 default:
                     this.ToggleWindow();
@@ -151,13 +161,13 @@ namespace LMeter
 
         private void ToggleWindow()
         {
-            if (this._configRoot.IsOpen)
+            if (_configRoot.IsOpen)
             {
-                this._configRoot.IsOpen = false;
+                _configRoot.IsOpen = false;
             }
             else
             {
-                this._configRoot.PushConfig(this._config);
+                _configRoot.PushConfig(_config);
             }
         }
 
@@ -172,11 +182,11 @@ namespace LMeter
             if (disposing)
             {
                 // Don't modify order
-                this._pluginInterface.UiBuilder.Draw -= Draw;
-                this._pluginInterface.UiBuilder.OpenConfigUi -= OpenConfigUi;
-                this._clientState.Logout -= OnLogout;
-                this._commandManager.RemoveHandler("/lm");
-                this._windowSystem.RemoveAllWindows();
+                _pluginInterface.UiBuilder.Draw -= Draw;
+                _pluginInterface.UiBuilder.OpenConfigUi -= OpenConfigUi;
+                _clientState.Logout -= OnLogout;
+                _commandManager.RemoveHandler("/lm");
+                _windowSystem.RemoveAllWindows();
             }
         }
     }

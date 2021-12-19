@@ -12,19 +12,21 @@ namespace LMeter.Meter
 {
     public class MeterWindow : IConfigurable
     {
-        [JsonIgnore] public readonly string ID;
-
         [JsonIgnore] private bool _lastFrameWasUnlocked = false;
         [JsonIgnore] private bool _lastFrameWasDragging = false;
         [JsonIgnore] private bool _lastFrameWasPreview = false;
+        [JsonIgnore] private bool _lastFrameWasCombat = false;
         [JsonIgnore] private bool _unlocked = false;
         [JsonIgnore] private bool _hovered = false;
         [JsonIgnore] private bool _dragging = false;
         [JsonIgnore] private bool _locked = false;
+        [JsonIgnore] private int _eventIndex = -1;
         [JsonIgnore] private ACTEvent? _previewEvent = null;
         [JsonIgnore] private int _scrollPosition = 0;
         [JsonIgnore] private DateTime? _lastSortedTimestamp = null;
         [JsonIgnore] private List<Combatant> _lastSortedCombatants = new List<Combatant>();
+
+        [JsonIgnore] public string ID { get; init; }
 
         public string Name { get; set; }
 
@@ -96,18 +98,18 @@ namespace LMeter.Meter
 
         public void Clear()
         {
-            this._lastSortedCombatants = new List<Combatant>();
-            this._lastSortedTimestamp = null;
+            _lastSortedCombatants = new List<Combatant>();
+            _lastSortedTimestamp = null;
         }
         
         // Dont ask
         protected void UpdateDragData(Vector2 pos, Vector2 size, bool locked)
         {
-            this._unlocked = !locked;
-            this._hovered = ImGui.IsMouseHoveringRect(pos, pos + size);
-            this._dragging = this._lastFrameWasDragging && ImGui.IsMouseDown(ImGuiMouseButton.Left);
-            this._locked = (this._unlocked && !this._lastFrameWasUnlocked || !this._hovered) && !this._dragging;
-            this._lastFrameWasDragging = this._hovered || this._dragging;
+            _unlocked = !locked;
+            _hovered = ImGui.IsMouseHoveringRect(pos, pos + size);
+            _dragging = _lastFrameWasDragging && ImGui.IsMouseDown(ImGuiMouseButton.Left);
+            _locked = (_unlocked && !_lastFrameWasUnlocked || !_hovered) && !_dragging;
+            _lastFrameWasDragging = _hovered || _dragging;
         }
 
         public void Draw(Vector2 pos)
@@ -122,16 +124,34 @@ namespace LMeter.Meter
 
             if (ImGui.IsMouseHoveringRect(localPos, localPos + size))
             {
-                this._scrollPosition -= (int)ImGui.GetIO().MouseWheel;
+                _scrollPosition -= (int)ImGui.GetIO().MouseWheel;
+
+                if (ImGui.IsMouseClicked(ImGuiMouseButton.Right) && !this.GeneralConfig.Preview)
+                {
+                    ImGui.OpenPopup($"{this.ID}_ContextMenu", ImGuiPopupFlags.MouseButtonRight);
+                }
+            }
+
+            if (this.DrawContextMenu($"{this.ID}_ContextMenu", out int index))
+            {
+                _eventIndex = index;
+                _lastSortedTimestamp = null;
+                _lastSortedCombatants = new List<Combatant>();
+            }
+
+            bool combat = CharacterState.IsInCombat();
+            if (!_lastFrameWasCombat && combat)
+            {
+                _eventIndex = -1;
             }
 
             this.UpdateDragData(localPos, size, this.GeneralConfig.Lock);
             bool needsInput = !this.GeneralConfig.ClickThrough;
-            DrawHelpers.DrawInWindow($"##{this.ID}", localPos, size, needsInput, this._locked || this.GeneralConfig.Lock, (drawList) =>
+            DrawHelpers.DrawInWindow($"##{this.ID}", localPos, size, needsInput, _locked || this.GeneralConfig.Lock, (drawList) =>
             {
-                if (this._unlocked)
+                if (_unlocked)
                 {
-                    if (this._lastFrameWasDragging)
+                    if (_lastFrameWasDragging)
                     {
                         localPos = ImGui.GetWindowPos();
                         this.GeneralConfig.Position = localPos - pos;
@@ -161,20 +181,23 @@ namespace LMeter.Meter
                     size -= Vector2.One * this.GeneralConfig.BorderThickness * 2;
                 }
 
-                if (this.GeneralConfig.Preview && !this._lastFrameWasPreview)
+                if (this.GeneralConfig.Preview && !_lastFrameWasPreview)
                 {
-                    this._previewEvent = ACTEvent.GetTestData();
+                    _previewEvent = ACTEvent.GetTestData();
                 }
 
-                ACTEvent? actEvent = this.GeneralConfig.Preview ? this._previewEvent : ACTClient.GetLastEvent();
+                ACTEvent? actEvent = this.GeneralConfig.Preview ? _previewEvent : ACTClient.GetEvent(_eventIndex);
+
                 localPos = this.HeaderConfig.DrawHeader(localPos, size, actEvent?.Encounter, drawList);
                 size = size.AddY(-this.HeaderConfig.HeaderHeight);
+
                 drawList.AddRectFilled(localPos, localPos + size, this.GeneralConfig.BackgroundColor.Base);
                 this.DrawBars(drawList, localPos, size, actEvent);
             });
 
-            this._lastFrameWasUnlocked = this._unlocked;
-            this._lastFrameWasPreview = this.GeneralConfig.Preview;
+            _lastFrameWasUnlocked = _unlocked;
+            _lastFrameWasPreview = this.GeneralConfig.Preview;
+            _lastFrameWasCombat = combat;
         }
 
         private void DrawBars(ImDrawListPtr drawList, Vector2 localPos, Vector2 size, ACTEvent? actEvent)
@@ -194,14 +217,15 @@ namespace LMeter.Meter
                 int i = 0;
                 if (sortedCombatants.Count > this.BarConfig.BarCount)
                 {
-                    i = Math.Clamp(this._scrollPosition, 0, sortedCombatants.Count - this.BarConfig.BarCount);
-                    this._scrollPosition = i;
+                    i = Math.Clamp(_scrollPosition, 0, sortedCombatants.Count - this.BarConfig.BarCount);
+                    _scrollPosition = i;
                 }
 
                 int maxIndex = Math.Min(i + this.BarConfig.BarCount, sortedCombatants.Count);
                 for (; i < maxIndex; i++)
                 {
                     Combatant combatant = sortedCombatants[i];
+                    combatant.Rank = (i + 1).ToString();
 
                     float current = this.GeneralConfig.DataType switch
                     {
@@ -225,15 +249,66 @@ namespace LMeter.Meter
                 }
             }
         }
+        
+        private bool DrawContextMenu(string popupId, out int selectedIndex)
+        {
+            selectedIndex = -1;
+            bool selected = false;
+            
+            if (ImGui.BeginPopup(popupId))
+            {
+                if (!ImGui.IsAnyItemActive() && !ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+                {
+                    ImGui.SetKeyboardFocusHere(0);
+                }
+
+                if (ImGui.Selectable("Current Data"))
+                {
+                    selected = true;
+                }
+
+                List<ACTEvent> events = ACTClient.PastEvents;
+                if (events.Count > 0)
+                {
+                    ImGui.Separator();
+                }
+
+                for (int i = events.Count - 1; i >= 0; i--)
+                {
+                    if (ImGui.Selectable($"{events[i].Encounter?.Duration}\t—\t{events[i].Encounter?.Title}"))
+                    {
+                        selectedIndex = i;
+                        selected = true;
+                    }
+                }
+
+                ImGui.Separator();
+                if (ImGui.Selectable("Clear Data"))
+                {
+                    Singletons.Get<PluginManager>().Clear();
+                    selected = true;
+                }
+                
+                if (ImGui.Selectable("Configure"))
+                {
+                    Singletons.Get<PluginManager>().ConfigureMeter(this);
+                    selected = true;
+                }
+
+                ImGui.EndPopup();
+            }
+
+            return selected;
+        }
 
         private List<Combatant> GetSortedCombatants(ACTEvent actEvent, MeterDataType dataType)
         {
             if (actEvent.Combatants is null ||
-                this._lastSortedTimestamp.HasValue &&
-                this._lastSortedTimestamp.Value == actEvent.Timestamp &&
+                _lastSortedTimestamp.HasValue &&
+                _lastSortedTimestamp.Value == actEvent.Timestamp &&
                 !this.GeneralConfig.Preview)
             {
-                return this._lastSortedCombatants;
+                return _lastSortedCombatants;
             }
 
             List<Combatant> sortedCombatants = actEvent.Combatants.Values.ToList();
@@ -259,8 +334,8 @@ namespace LMeter.Meter
                 return (int)(yFloat - xFloat);
             });
 
-            this._lastSortedTimestamp = actEvent.Timestamp;
-            this._lastSortedCombatants = sortedCombatants;
+            _lastSortedTimestamp = actEvent.Timestamp;
+            _lastSortedCombatants = sortedCombatants;
             return sortedCombatants;
         }
     }
