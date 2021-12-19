@@ -25,6 +25,8 @@ namespace LMeter.Config
 
         public string ACTSocketAddress;
 
+        public int EncounterHistorySize = 15;
+
         public bool AutoReconnect = false;
         public int ReconnectDelay = 30;
 
@@ -49,6 +51,11 @@ namespace LMeter.Config
                 ImGui.SameLine();
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() - 1f);
                 ImGui.Text("Retry ACT Connection");
+
+                ImGui.NewLine();
+                ImGui.PushItemWidth(30);
+                ImGui.InputInt("Number of Encounters to save", ref this.EncounterHistorySize, 0, 0);
+                ImGui.PopItemWidth();
 
                 ImGui.NewLine();
                 ImGui.Checkbox("Automatically attempt to reconnect if connection fails", ref this.AutoReconnect);
@@ -84,7 +91,7 @@ namespace LMeter.Config
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() - 1f);
                 ImGui.Text("Force End Combat");
 
-                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Trash, () => Singletons.Get<PluginManager>().Clear(this.ClearACT), null, buttonSize);
+                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Trash, () => Singletons.Get<PluginManager>().Clear(), null, buttonSize);
                 ImGui.SameLine();
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() - 1f);
                 ImGui.Text("Clear LMeter");

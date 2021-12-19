@@ -27,15 +27,16 @@ namespace LMeter.Config
         public IConfigPage GetDefault() => new GeneralConfig();
 
         public Vector2 Position = Vector2.Zero;
-        public Vector2 Size = ImGui.GetMainViewport().Size / 10;
+        public Vector2 Size = new Vector2(ImGui.GetMainViewport().Size.Y * 16 / 90, ImGui.GetMainViewport().Size.Y / 10);
         public bool Lock = false;
         public bool ClickThrough = false;
         public ConfigColor BackgroundColor = new ConfigColor(0, 0, 0, 0.5f);
-        public bool ShowBorder = false;
+        public bool ShowBorder = true;
         public bool BorderAroundBars = false;
-        public ConfigColor BorderColor = new ConfigColor(0, 0, 0, 1f);
+        public ConfigColor BorderColor = new ConfigColor(30f / 255f, 30f / 255f, 30f / 255f, 230f / 255f);
         public int BorderThickness = 2;
         public MeterDataType DataType = MeterDataType.Damage;
+        public bool ReturnToCurrent = true;
 
         public void DrawConfig(Vector2 size, float padX, float padY)
         {
@@ -46,6 +47,7 @@ namespace LMeter.Config
                 ImGui.DragFloat2("Size", ref this.Size, 1, 0, screenSize.Y);
                 ImGui.Checkbox("Lock", ref this.Lock);
                 ImGui.Checkbox("Click Through", ref this.ClickThrough);
+                ImGui.Checkbox("Preview", ref this.Preview);
 
                 ImGui.NewLine();
 
@@ -65,13 +67,13 @@ namespace LMeter.Config
                     this.BorderColor.Vector = vector;
 
                     DrawHelpers.DrawNestIndicator(1);
-                    ImGui.Checkbox("Only draw border around bars", ref this.BorderAroundBars);
+                    ImGui.Checkbox("Show border around bars", ref this.BorderAroundBars);
                 }
 
                 ImGui.NewLine();
                 ImGui.Combo("Sort Type", ref Unsafe.As<MeterDataType, int>(ref this.DataType), _meterTypeOptions, _meterTypeOptions.Length);
 
-                ImGui.Checkbox("Preview", ref this.Preview);
+                ImGui.Checkbox("Return to Current Data when entering combat", ref this.ReturnToCurrent);
             }
 
             ImGui.EndChild();

@@ -1,3 +1,8 @@
+# Version 0.1.5.0
+- Added Encounter history right-click context menu
+- Added Rank text tag and Rank Text option under bar settings
+- Fix problem with name text tags when using your name instead of YOU
+
 # Version 0.1.4.3
 - Fix potential crash with certain text tags
 - Add position offsets for bar text

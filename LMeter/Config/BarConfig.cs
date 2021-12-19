@@ -1,13 +1,19 @@
+using System;
 using System.Numerics;
-using ImGuiNET;
-using LMeter.Helpers;
-using LMeter.ACT;
+using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
 using Dalamud.Game.ClientState;
+using ImGuiNET;
+using LMeter.ACT;
+using LMeter.Helpers;
 
 namespace LMeter.Config
 {
     public class BarConfig : IConfigPage
     {
+        [JsonIgnore]
+        private static string[] _anchorOptions = Enum.GetNames(typeof(DrawAnchor));
+        
         public string Name => "Bars";
 
         private static string[] _jobIconStyleOptions = new string[] { "Style 1", "Style 2" };
@@ -23,6 +29,16 @@ namespace LMeter.Config
 
         public bool UseJobColor = true;
         public ConfigColor BarColor = new ConfigColor(.3f, .3f, .3f, 1f);
+
+        public bool ShowRankText = false;
+        public string RankTextFormat = "[rank].";
+        public DrawAnchor RankTextAlign = DrawAnchor.Right;
+        public Vector2 RankTextOffset = new Vector2(0, 0);
+        public ConfigColor RankTextColor = new ConfigColor(1, 1, 1, 1);
+        public bool RankTextShowOutline = true;
+        public ConfigColor RankTextOutlineColor = new ConfigColor(0, 0, 0, 0.5f);
+        public string RankTextFontKey = FontsManager.DalamudFontKey;
+        public int RankTextFontId = 0;
 
         public string LeftTextFormat = "[name]";
         public Vector2 LeftTextOffset = new Vector2(0, 0);
@@ -46,8 +62,13 @@ namespace LMeter.Config
             BarConfig defaultConfig = new BarConfig();
             defaultConfig.BarNameFontKey = FontsManager.DefaultSmallFontKey;
             defaultConfig.BarNameFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey);
+
             defaultConfig.BarDataFontKey = FontsManager.DefaultSmallFontKey;
             defaultConfig.BarDataFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey);
+
+            defaultConfig.RankTextFontKey = FontsManager.DefaultSmallFontKey;
+            defaultConfig.RankTextFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey);
+            
             return defaultConfig;
         }
 
@@ -65,11 +86,34 @@ namespace LMeter.Config
             Vector2 barFillSize = new Vector2(size.X * (current / top), barHeight);
             drawList.AddRectFilled(localPos, localPos + barFillSize, barColor.Base);
 
+            float textOffset = 5f;
             if (this.ShowJobIcon && combatant.Job != Job.UKN)
             {
                 uint jobIconId = 62000u + (uint)combatant.Job + 100u * (uint)this.JobIconStyle;
                 Vector2 jobIconSize = Vector2.One * barHeight;
                 DrawHelpers.DrawIcon(jobIconId, localPos + this.JobIconOffset, jobIconSize, drawList);
+                textOffset = barHeight;
+            }
+
+            if (this.ShowRankText)
+            {
+                string rankText = combatant.GetFormattedString($"{this.RankTextFormat}", this.ThousandsSeparators ? "N" : "F");
+                bool rankFontPushed = FontsManager.PushFont(this.RankTextFontKey);
+                textOffset += ImGui.CalcTextSize("00.").X;
+                Vector2 rankTextSize = ImGui.CalcTextSize(rankText);
+                Vector2 rankTextPos = Utils.GetAnchoredPosition(localPos, -barSize, DrawAnchor.Left);
+                rankTextPos = Utils.GetAnchoredPosition(rankTextPos, rankTextSize, this.RankTextAlign) + this.RankTextOffset;
+                DrawHelpers.DrawText(drawList,
+                    rankText,
+                    rankTextPos.AddX(textOffset),
+                    this.RankTextColor.Base,
+                    this.RankTextShowOutline,
+                    this.RankTextOutlineColor.Base);
+
+                if (rankFontPushed)
+                {
+                    ImGui.PopFont();
+                }
             }
 
             bool fontPushed = FontsManager.PushFont(this.BarNameFontKey);
@@ -84,7 +128,7 @@ namespace LMeter.Config
             namePos = Utils.GetAnchoredPosition(namePos, nameTextSize, DrawAnchor.Left) + this.LeftTextOffset;
             DrawHelpers.DrawText(drawList,
                 leftText,
-                namePos.AddX(this.ShowJobIcon ? barHeight : 5),
+                namePos.AddX(textOffset),
                 this.BarNameColor.Base,
                 this.BarNameShowOutline,
                 this.BarNameOutlineColor.Base);
@@ -148,6 +192,50 @@ namespace LMeter.Config
                 }
                 
                 ImGui.Checkbox("Use Thousands Separators for Numbers", ref this.ThousandsSeparators);
+
+                ImGui.NewLine();
+                ImGui.Checkbox("Show Rank Text", ref this.ShowRankText);
+                if (this.ShowRankText)
+                {
+                    DrawHelpers.DrawNestIndicator(1);
+                    ImGui.InputText("Rank Text Format", ref this.RankTextFormat, 128);
+
+                    if (ImGui.IsItemHovered())
+                    {
+                        ImGui.SetTooltip(Utils.GetTagsTooltip(Combatant.TextTags));
+                    }
+                    
+                    DrawHelpers.DrawNestIndicator(1);
+                    ImGui.Combo("Rank Text Align", ref Unsafe.As<DrawAnchor, int>(ref this.RankTextAlign), _anchorOptions, _anchorOptions.Length);
+
+                    DrawHelpers.DrawNestIndicator(1);
+                    ImGui.DragFloat2("Rank Text Offset", ref this.RankTextOffset);
+
+                    if (!FontsManager.ValidateFont(fontOptions, this.RankTextFontId, this.RankTextFontKey))
+                    {
+                        this.RankTextFontId = 0;
+                        this.RankTextFontKey = FontsManager.DalamudFontKey;
+                    }
+                    
+                    DrawHelpers.DrawNestIndicator(1);
+                    ImGui.Combo("Font##Rank", ref this.RankTextFontId, fontOptions, fontOptions.Length);
+                    this.RankTextFontKey = fontOptions[this.RankTextFontId];
+                    
+                    DrawHelpers.DrawNestIndicator(1);
+                    vector = this.RankTextColor.Vector;
+                    ImGui.ColorEdit4("Text Color##Rank", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
+                    this.RankTextColor.Vector = vector;
+
+                    DrawHelpers.DrawNestIndicator(1);
+                    ImGui.Checkbox("Show Outline##Rank", ref this.RankTextShowOutline);
+                    if (this.RankTextShowOutline)
+                    {
+                        DrawHelpers.DrawNestIndicator(2);
+                        vector = this.RankTextOutlineColor.Vector;
+                        ImGui.ColorEdit4("Outline Color##Rank", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
+                        this.RankTextOutlineColor.Vector = vector;
+                    }
+                }
 
                 ImGui.NewLine();
                 ImGui.Checkbox("Use your name instead of 'YOU'", ref this.UseCharacterName);

@@ -16,10 +16,8 @@ namespace LMeter.Windows
         private bool _back = false;
         private bool _home = false;
         private string _name = string.Empty;
-
-        private Vector2 WindowSize { get; set; }
-
-        private Stack<IConfigurable> ConfigStack { get; init; }
+        private Vector2 _windowSize;
+        private Stack<IConfigurable> _configStack;
 
         public ConfigWindow(string id, Vector2 position, Vector2 size) : base(id)
         {
@@ -29,7 +27,6 @@ namespace LMeter.Windows
                 ImGuiWindowFlags.NoScrollWithMouse |
                 ImGuiWindowFlags.NoSavedSettings;
 
-            this.WindowSize = size;
             this.Position = position - size / 2;
             this.PositionCondition = ImGuiCond.Appearing;
             this.SizeConstraints = new WindowSizeConstraints()
@@ -38,44 +35,45 @@ namespace LMeter.Windows
                 MaximumSize = ImGui.GetMainViewport().Size
             };
 
-            this.ConfigStack = new Stack<IConfigurable>();
+            _windowSize = size;
+            _configStack = new Stack<IConfigurable>();
         }
 
         public void PushConfig(IConfigurable configItem)
         {
-            this.ConfigStack.Push(configItem);
-            this._name = configItem.Name;
+            _configStack.Push(configItem);
+            _name = configItem.Name;
             this.IsOpen = true;
         }
 
         public override void PreDraw()
         {
-            if (this.ConfigStack.Any())
+            if (_configStack.Any())
             {
                 this.WindowName = this.GetWindowTitle();
-                ImGui.SetNextWindowSize(this.WindowSize);
+                ImGui.SetNextWindowSize(_windowSize);
             }
         }        
 
         private string GetWindowTitle()
         {
             string title = string.Empty;
-            title = string.Join("  >  ", this.ConfigStack.Reverse().Select(c => c.Name));
+            title = string.Join("  >  ", _configStack.Reverse().Select(c => c.Name));
             return title;
         }
 
         public override void Draw()
         {
-            if (!this.ConfigStack.Any())
+            if (!_configStack.Any())
             {
                 this.IsOpen = false;
                 return;
             }
 
-            IConfigurable configItem = this.ConfigStack.Peek();
+            IConfigurable configItem = _configStack.Peek();
             Vector2 spacing = ImGui.GetStyle().ItemSpacing;
-            Vector2 size = this.WindowSize - spacing * 2;
-            bool drawNavBar = this.ConfigStack.Count > 1;
+            Vector2 size = _windowSize - spacing * 2;
+            bool drawNavBar = _configStack.Count > 1;
 
             if (drawNavBar)
             {
@@ -104,7 +102,7 @@ namespace LMeter.Windows
             }
 
             this.Position = ImGui.GetWindowPos();
-            this.WindowSize = ImGui.GetWindowSize();
+            _windowSize = ImGui.GetWindowSize();
         }
                 
         private void DrawNavBar(IConfigPage? openPage, Vector2 size, float padX)
@@ -117,7 +115,7 @@ namespace LMeter.Windows
                 DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.LongArrowAltLeft, () => _back = true, "Back", buttonsize);
                 ImGui.SameLine();
 
-                if (this.ConfigStack.Count > 2)
+                if (_configStack.Count > 2)
                 {
                     DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Home, () => _home = true, "Home", buttonsize);
                     ImGui.SameLine();
@@ -162,7 +160,7 @@ namespace LMeter.Windows
         {
             if (openPage is not null)
             {
-                this.ConfigStack.Peek().ImportPage(openPage.GetDefault());
+                _configStack.Peek().ImportPage(openPage.GetDefault());
             }
         }
 
@@ -181,45 +179,45 @@ namespace LMeter.Windows
 
             if (page is not null)
             {
-                this.ConfigStack.Peek().ImportPage(page);
+                _configStack.Peek().ImportPage(page);
             }
         }
 
         private void Rename(string name)
         {
-            if (this.ConfigStack.Any())
+            if (_configStack.Any())
             {
-                this.ConfigStack.Peek().Name = name;
+                _configStack.Peek().Name = name;
             }
         }
 
         public override void PostDraw()
         {
-            if (this._home)
+            if (_home)
             {
-                while (this.ConfigStack.Count > 1)
+                while (_configStack.Count > 1)
                 {
-                    this.ConfigStack.Pop();
+                    _configStack.Pop();
                 }
             }
-            else if (this._back)
+            else if (_back)
             {
-                this.ConfigStack.Pop();
+                _configStack.Pop();
             }
 
-            if ((this._home || this._back) && this.ConfigStack.Count > 1)
+            if ((_home || _back) && _configStack.Count > 1)
             {
-                this._name = this.ConfigStack.Peek().Name;
+                _name = _configStack.Peek().Name;
             }
 
-            this._home = false;
-            this._back = false;
+            _home = false;
+            _back = false;
         }
 
         public override void OnClose()
         {
             ConfigHelpers.SaveConfig();
-            this.ConfigStack.Clear();
+            _configStack.Clear();
 
             var config = Singletons.Get<LMeterConfig>();
             foreach (var meter in config.MeterList.Meters)

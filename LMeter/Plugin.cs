@@ -17,6 +17,7 @@ using ImGuiScene;
 using LMeter.ACT;
 using LMeter.Config;
 using LMeter.Helpers;
+using LMeter.Meter;
 using SigScanner = Dalamud.Game.SigScanner;
 
 namespace LMeter
@@ -91,9 +92,16 @@ namespace LMeter
             Singletons.Register(new FontsManager(pluginInterface.UiBuilder, config.FontConfig.Fonts.Values));
 
             // Connect to ACT
-            ACTClient actClient = new ACTClient();
-            actClient.Start(config.ACTConfig.ACTSocketAddress);
+            ACTClient actClient = new ACTClient(config.ACTConfig);
+            actClient.Start();
             Singletons.Register(actClient);
+
+            // Create profile on first load
+            if (config.FirstLoad && config.MeterList.Meters.Count == 0)
+            {
+                config.MeterList.Meters.Add(MeterWindow.GetDefaultMeter("Profile 1"));
+            }
+            config.FirstLoad = false;
 
             // Start the plugin
             Singletons.Register(new PluginManager(clientState, commandManager, pluginInterface, config));
