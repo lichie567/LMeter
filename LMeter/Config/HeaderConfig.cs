@@ -1,10 +1,10 @@
 using System;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using ImGuiNET;
+using LMeter.ACT;
 using LMeter.Helpers;
 using Newtonsoft.Json;
-using System.Runtime.CompilerServices;
-using LMeter.ACT;
 
 namespace LMeter.Config
 {

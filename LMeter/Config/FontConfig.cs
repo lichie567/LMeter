@@ -44,7 +44,7 @@ namespace LMeter.Config
 
         public void DrawConfig(Vector2 size, float padX, float padY)
         {
-            if (this._fonts.Length == 0)
+            if (_fonts.Length == 0)
             {
                 RefreshFontList();
             }
@@ -71,9 +71,9 @@ namespace LMeter.Config
                     ImGui.SetCursorPosX(ImGui.GetCursorPosX() + 3f);
                     DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Plus, () => AddFont(_selectedFont, _selectedSize), "Add Font", buttonSize);
 
-                    ImGui.Checkbox("Support Chinese/Japanese", ref this._chinese);
+                    ImGui.Checkbox("Support Chinese/Japanese", ref _chinese);
                     ImGui.SameLine();
-                    ImGui.Checkbox("Support Korean", ref this._korean);
+                    ImGui.Checkbox("Support Korean", ref _korean);
 
                     DrawHelpers.DrawSpacing(1);
                     ImGui.Text("Font List");
@@ -149,7 +149,7 @@ namespace LMeter.Config
 
         public void RefreshFontList()
         {
-            this._fonts = FontsManager.GetFontNamesFromPath(FontsManager.GetUserFontPath());
+            _fonts = FontsManager.GetFontNamesFromPath(FontsManager.GetUserFontPath());
         }
 
         private void AddFont(int fontIndex, int size)

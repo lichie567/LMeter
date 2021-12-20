@@ -23,7 +23,7 @@ namespace LMeter.ACT
         ConnectionFailed
     }
 
-    public class ACTClient : ILMeterDisposable
+    public class ACTClient : IPluginDisposable
     {
         private ACTConfig _config;
         private ClientWebSocket _socket;

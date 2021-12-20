@@ -25,12 +25,12 @@ namespace LMeter.Helpers
         }
     }
 
-    public class FontsManager : ILMeterDisposable
+    public class FontsManager : IPluginDisposable
     {
-        private IEnumerable<FontData> FontData { get; set; }
-        private Dictionary<string, ImFontPtr> ImGuiFonts { get; init; }
-        private string[] FontList { get; set; }
-        private UiBuilder UiBuilder { get; init; }
+        private IEnumerable<FontData> _fontData;
+        private Dictionary<string, ImFontPtr> _imGuiFonts;
+        private string[] _fontList;
+        private UiBuilder _uiBuilder;
 
         public const string DalamudFontKey = "Dalamud Font";
 
@@ -41,13 +41,13 @@ namespace LMeter.Helpers
 
         public FontsManager(UiBuilder uiBuilder, IEnumerable<FontData> fonts)
         {
-            this.FontData = fonts;
-            this.FontList = new string[] { DalamudFontKey };
-            this.ImGuiFonts = new Dictionary<string, ImFontPtr>();
+            _fontData = fonts;
+            _fontList = new string[] { DalamudFontKey };
+            _imGuiFonts = new Dictionary<string, ImFontPtr>();
 
-            this.UiBuilder = uiBuilder;
-            this.UiBuilder.BuildFonts += BuildFonts;
-            this.UiBuilder.RebuildFonts();
+            _uiBuilder = uiBuilder;
+            _uiBuilder.BuildFonts += BuildFonts;
+            _uiBuilder.RebuildFonts();
         }
 
         public void BuildFonts()
@@ -59,10 +59,10 @@ namespace LMeter.Helpers
                 return;
             }
 
-            this.ImGuiFonts.Clear();
+            _imGuiFonts.Clear();
             ImGuiIOPtr io = ImGui.GetIO();
 
-            foreach (FontData font in this.FontData)
+            foreach (FontData font in _fontData)
             {
                 string fontPath = $"{fontDir}{font.Name}.ttf";
                 if (!File.Exists(fontPath))
@@ -78,7 +78,7 @@ namespace LMeter.Helpers
                         ? io.Fonts.AddFontFromFileTTF(fontPath, font.Size)
                         : io.Fonts.AddFontFromFileTTF(fontPath, font.Size, null, ranges.Value.Data);
 
-                    this.ImGuiFonts.Add(GetFontKey(font), imFont);
+                    _imGuiFonts.Add(GetFontKey(font), imFont);
                 }
                 catch (Exception ex)
                 {
@@ -88,8 +88,8 @@ namespace LMeter.Helpers
             }
 
             List<string> fontList = new List<string>() { DalamudFontKey };
-            fontList.AddRange(this.ImGuiFonts.Keys);
-            this.FontList = fontList.ToArray();
+            fontList.AddRange(_imGuiFonts.Keys);
+            _fontList = fontList.ToArray();
         }
 
         public static bool ValidateFont(string[] fontOptions, int fontId, string fontKey)
@@ -102,31 +102,31 @@ namespace LMeter.Helpers
             FontsManager manager = Singletons.Get<FontsManager>();
             if (string.IsNullOrEmpty(fontKey) ||
                 fontKey.Equals(DalamudFontKey) ||
-                !manager.ImGuiFonts.Keys.Contains(fontKey))
+                !manager._imGuiFonts.Keys.Contains(fontKey))
             {
                 return false;
             }
 
-            ImGui.PushFont(manager.ImGuiFonts[fontKey]);
+            ImGui.PushFont(manager._imGuiFonts[fontKey]);
             return true;
         }
 
         public void UpdateFonts(IEnumerable<FontData> fonts)
         {
-            this.FontData = fonts;
+            _fontData = fonts;
             Singletons.Get<UiBuilder>().RebuildFonts();
         }
 
         public static string[] GetFontList()
         {
-            return Singletons.Get<FontsManager>().FontList;
+            return Singletons.Get<FontsManager>()._fontList;
         }
 
         public int GetFontIndex(string fontKey)
         {
-            for (int i = 0; i < this.FontList.Length; i++)
+            for (int i = 0; i < _fontList.Length; i++)
             {
-                if (this.FontList[i].Equals(fontKey))
+                if (_fontList[i].Equals(fontKey))
                 {
                     return i;
                 }
@@ -278,8 +278,8 @@ namespace LMeter.Helpers
         {
             if (disposing)
             {
-                this.UiBuilder.BuildFonts -= BuildFonts;
-                this.ImGuiFonts.Clear();
+                _uiBuilder.BuildFonts -= BuildFonts;
+                _imGuiFonts.Clear();
             }
         }
     }

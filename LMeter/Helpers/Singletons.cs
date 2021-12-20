@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace LMeter.Helpers
 {
-    public interface ILMeterDisposable : IDisposable { }
+    public interface IPluginDisposable : IDisposable { }
 
     public static class Singletons
     {
@@ -16,7 +16,7 @@ namespace LMeter.Helpers
 
         public static T Get<T>()
         {
-            return (T)Singletons.ActiveInstances.GetOrAdd(typeof(T), (objectType) =>
+            return (T)ActiveInstances.GetOrAdd(typeof(T), (objectType) =>
             {
                 object newInstance;
                 if (Singletons.TypeInitializers.TryGetValue(objectType, out Func<object>? initializer))
@@ -39,7 +39,7 @@ namespace LMeter.Helpers
 
         public static void Register(object newSingleton)
         {
-            if (!Singletons.ActiveInstances.TryAdd(newSingleton.GetType(), newSingleton))
+            if (!ActiveInstances.TryAdd(newSingleton.GetType(), newSingleton))
             {
                 throw new Exception($"Failed to register new singleton for type {newSingleton.GetType()}");
             }
@@ -50,7 +50,7 @@ namespace LMeter.Helpers
             foreach (object singleton in ActiveInstances.Values)
             {
                 // Only dispose the disposable objects that we own
-                if (singleton is ILMeterDisposable disposable)
+                if (singleton is IPluginDisposable disposable)
                 {
                     disposable.Dispose();
                 }

@@ -16,17 +16,17 @@ using static Lumina.Data.Files.TexFile;
 
 namespace LMeter.Helpers
 {
-    public class TexturesCache : ILMeterDisposable
+    public class TexturesCache : IPluginDisposable
     {
-        private Dictionary<string, Tuple<TextureWrap, float>> TextureCache { get; init; }
-        private ICallGateSubscriber<string, string> PenumbraPathResolver { get; init; }
-        private UiBuilder UiBuilder { get; init; }
+        private Dictionary<string, Tuple<TextureWrap, float>> _textureCache;
+        private ICallGateSubscriber<string, string> _penumbraPathResolver;
+        private UiBuilder _uiBuilder;
 
         public TexturesCache(DalamudPluginInterface pluginInterface)
         {
-            this.TextureCache = new Dictionary<string, Tuple<TextureWrap, float>>();
-            this.PenumbraPathResolver = pluginInterface.GetIpcSubscriber<string, string>("Penumbra.ResolveDefaultPath");
-            this.UiBuilder = pluginInterface.UiBuilder;
+            _textureCache = new Dictionary<string, Tuple<TextureWrap, float>>();
+            _penumbraPathResolver = pluginInterface.GetIpcSubscriber<string, string>("Penumbra.ResolveDefaultPath");
+            _uiBuilder = pluginInterface.UiBuilder;
         }
 
         public TextureWrap? GetTextureFromIconId(
@@ -37,7 +37,7 @@ namespace LMeter.Helpers
             float opacity = 1f)
         {
             string key = $"{iconId}{(greyScale ? "_g" : string.Empty)}{(opacity != 1f ? "_t" : string.Empty)}";
-            if (this.TextureCache.TryGetValue(key, out var tuple))
+            if (_textureCache.TryGetValue(key, out var tuple))
             {
                 TextureWrap texture = tuple.Item1;
                 float cachedOpacity = tuple.Item2;
@@ -46,7 +46,7 @@ namespace LMeter.Helpers
                     return texture;
                 }
 
-                this.TextureCache.Remove(key);
+                _textureCache.Remove(key);
             }
 
             TextureWrap? newTexture = this.LoadTexture(iconId + stackCount, hdIcon, greyScale, opacity);
@@ -55,23 +55,18 @@ namespace LMeter.Helpers
                 return null;
             }
 
-            this.TextureCache.Add(key, new Tuple<TextureWrap, float>(newTexture, opacity));
+            _textureCache.Add(key, new Tuple<TextureWrap, float>(newTexture, opacity));
             return newTexture;
         }
 
         private TextureWrap? LoadTexture(uint id, bool hdIcon, bool greyScale, float opacity = 1f)
         {
-            string hdString = hdIcon ? "_hr1" : "";
-            string path = $"ui/icon/{id / 1000 * 1000:000000}/{id:000000}{hdString}.tex";
-            return this.LoadTexture(path, greyScale, opacity);
-        }
-
-        private TextureWrap? LoadTexture(string path, bool greyScale, float opacity = 1f)
-        {
             TextureWrap? textureWrap = null;
+            string path = $"ui/icon/{id / 1000 * 1000:000000}/{id:000000}{(hdIcon ? "_hr1" : string.Empty)}.tex";
+
             try
             {
-                string resolvedPath = this.PenumbraPathResolver.InvokeFunc(path);
+                string resolvedPath = _penumbraPathResolver.InvokeFunc(path);
 
                 if (!string.IsNullOrEmpty(resolvedPath) && !resolvedPath.Equals(path))
                 {
@@ -122,7 +117,7 @@ namespace LMeter.Helpers
                     return null;
                 }
 
-                return this.UiBuilder.LoadImageRaw(GetRgbaImageData(imageData), Header.Width, Header.Height, 4);
+                return _uiBuilder.LoadImageRaw(GetRgbaImageData(imageData), Header.Width, Header.Height, 4);
             }
             catch (Exception ex)
             {
@@ -228,12 +223,12 @@ namespace LMeter.Helpers
         {
             if (disposing)
             {
-                foreach (var tuple in this.TextureCache.Values)
+                foreach (var tuple in _textureCache.Values)
                 {
                     tuple.Item1.Dispose();
                 }
 
-                this.TextureCache.Clear();
+                _textureCache.Clear();
             }
         }
     }

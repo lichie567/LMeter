@@ -14,7 +14,7 @@ using LMeter.Windows;
 
 namespace LMeter
 {
-    public class PluginManager : ILMeterDisposable
+    public class PluginManager : IPluginDisposable
     {
         private readonly Vector2 _origin = ImGui.GetMainViewport().Size / 2f;
         private readonly Vector2 _configSize = new Vector2(550, 550);

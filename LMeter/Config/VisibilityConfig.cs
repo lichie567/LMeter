@@ -100,14 +100,14 @@ namespace LMeter.Config
 
                 if (this.ShowForJobTypes == JobType.Custom)
                 {
-                    if (string.IsNullOrEmpty(this._customJobInput))
+                    if (string.IsNullOrEmpty(_customJobInput))
                     {
-                        this._customJobInput = this.CustomJobString.ToUpper();
+                        _customJobInput = this.CustomJobString.ToUpper();
                     }
 
                     if (ImGui.InputTextWithHint("Custom Job List", "Comma Separated List (ex: WAR, SAM, BLM)", ref _customJobInput, 100, ImGuiInputTextFlags.EnterReturnsTrue))
                     {
-                        IEnumerable<string> jobStrings = this._customJobInput.Split(',').Select(j => j.Trim());
+                        IEnumerable<string> jobStrings = _customJobInput.Split(',').Select(j => j.Trim());
                         List<Job> jobList = new List<Job>();
                         foreach (string j in jobStrings)
                         {
@@ -118,13 +118,13 @@ namespace LMeter.Config
                             else
                             {
                                 jobList.Clear();
-                                this._customJobInput = string.Empty;
+                                _customJobInput = string.Empty;
                                 break;
                             }
                         }
 
-                        this._customJobInput = this._customJobInput.ToUpper();
-                        this.CustomJobString = this._customJobInput;
+                        _customJobInput = _customJobInput.ToUpper();
+                        this.CustomJobString = _customJobInput;
                         this.CustomJobList = jobList;
                     }
                 }
