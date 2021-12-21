@@ -39,8 +39,7 @@ namespace LMeter.Helpers
             string key = $"{iconId}{(greyScale ? "_g" : string.Empty)}{(opacity != 1f ? "_t" : string.Empty)}";
             if (_textureCache.TryGetValue(key, out var tuple))
             {
-                TextureWrap texture = tuple.Item1;
-                float cachedOpacity = tuple.Item2;
+                var (texture, cachedOpacity) = tuple;
                 if (cachedOpacity == opacity)
                 {
                     return texture;

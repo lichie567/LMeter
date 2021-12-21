@@ -137,6 +137,7 @@ namespace LMeter.Meter
                 _eventIndex = index;
                 _lastSortedTimestamp = null;
                 _lastSortedCombatants = new List<Combatant>();
+                _scrollPosition = 0;
             }
 
             bool combat = CharacterState.IsInCombat();

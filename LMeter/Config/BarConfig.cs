@@ -19,7 +19,7 @@ namespace LMeter.Config
         private static string[] _jobIconStyleOptions = new string[] { "Style 1", "Style 2" };
 
         public int BarCount = 8;
-        public int BarGaps = 0;
+        public int BarGaps = 1;
 
         public bool ShowJobIcon = true;
         public int JobIconStyle = 0;
