@@ -6,7 +6,7 @@ using LMeter.Helpers;
 namespace LMeter.Config
 {
     [JsonObject]
-    public class LMeterConfig : IConfigurable, ILMeterDisposable
+    public class LMeterConfig : IConfigurable, IPluginDisposable
     {
         public string Name
         { 

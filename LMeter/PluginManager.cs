@@ -14,7 +14,7 @@ using LMeter.Windows;
 
 namespace LMeter
 {
-    public class PluginManager : ILMeterDisposable
+    public class PluginManager : IPluginDisposable
     {
         private readonly Vector2 _origin = ImGui.GetMainViewport().Size / 2f;
         private readonly Vector2 _configSize = new Vector2(550, 550);
@@ -58,7 +58,7 @@ namespace LMeter
                                 + "/lm end → Ends current ACT Encounter.\n"
                                 + "/lm clear → Clears all ACT encounter log data.\n"
                                 + "/lm ct <number> → Toggles clickthrough status for the given profile.\n"
-                                + "/lm toggle <number> → Toggles visibility for the given profile.",
+                                + "/lm toggle <number> [on|off] → Toggles visibility for the given profile.",
                     ShowInHelp = true
                 }
             );
@@ -142,7 +142,7 @@ namespace LMeter
                     this.Clear();
                     break;
                 case { } argument when argument.StartsWith("toggle"):
-                    _config.MeterList.ToggleMeter(GetIntArg(argument) - 1);
+                    _config.MeterList.ToggleMeter(GetIntArg(argument) - 1, GetBoolArg(argument, 2));
                     break;
                 case { } argument when argument.StartsWith("ct"):
                     _config.MeterList.ToggleClickThrough(GetIntArg(argument) - 1);
@@ -155,8 +155,20 @@ namespace LMeter
 
         private static int GetIntArg(string argument)
         {
-            string[] args1 = argument.Split(" ");
-            return args1.Length > 1 && int.TryParse(args1[1], out int num) ? num : 0;
+            string[] args = argument.Split(" ");
+            return args.Length > 1 && int.TryParse(args[1], out int num) ? num : 0;
+        }
+
+        private static bool? GetBoolArg(string argument, int index = 1)
+        {
+            string[] args = argument.Split(" ");
+            if (args.Length > index)
+            {
+                string arg = args[index].ToLower();
+                return arg.Equals("on") ? true : (arg.Equals("off") ? false : null);
+            }
+
+            return null;
         }
 
         private void ToggleWindow()

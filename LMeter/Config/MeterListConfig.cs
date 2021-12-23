@@ -4,9 +4,9 @@ using System.Numerics;
 using Dalamud.Interface;
 using Dalamud.Interface.Internal.Notifications;
 using ImGuiNET;
-using Newtonsoft.Json;
-using LMeter.Meter;
 using LMeter.Helpers;
+using LMeter.Meter;
+using Newtonsoft.Json;
 
 namespace LMeter.Config
 {
@@ -33,11 +33,13 @@ namespace LMeter.Config
             this.DrawMeterTable(size.AddY(-padY), padX);
         }
         
-        public void ToggleMeter(int meterIndex)
+        public void ToggleMeter(int meterIndex, bool? toggle = null)
         {
             if (meterIndex >= 0 && meterIndex < this.Meters.Count)
             {
-                this.Meters[meterIndex].VisibilityConfig.AlwaysHide ^= true;
+                this.Meters[meterIndex].VisibilityConfig.AlwaysHide = toggle.HasValue
+                    ? !toggle.Value
+                    : !this.Meters[meterIndex].VisibilityConfig.AlwaysHide;
             }
         }
         
@@ -97,8 +99,8 @@ namespace LMeter.Config
                 {
                     MeterWindow meter = this.Meters[i];
 
-                    if (!string.IsNullOrEmpty(this._input) &&
-                        !meter.Name.Contains(this._input, StringComparison.OrdinalIgnoreCase))
+                    if (!string.IsNullOrEmpty(_input) &&
+                        !meter.Name.Contains(_input, StringComparison.OrdinalIgnoreCase))
                     {
                         continue;
                     }
@@ -146,7 +148,7 @@ namespace LMeter.Config
                 this.Meters.Add(MeterWindow.GetDefaultMeter(name));
             }
 
-            this._input = string.Empty;
+            _input = string.Empty;
         }
 
         private void EditMeter(MeterWindow meter)
@@ -177,7 +179,7 @@ namespace LMeter.Config
                 DrawHelpers.DrawNotification("Failed to Import Meter!", NotificationType.Error);
             }
 
-            this._input = string.Empty;
+            _input = string.Empty;
         }
 
         private void ExportMeter(MeterWindow meter)

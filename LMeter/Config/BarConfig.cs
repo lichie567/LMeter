@@ -19,7 +19,7 @@ namespace LMeter.Config
         private static string[] _jobIconStyleOptions = new string[] { "Style 1", "Style 2" };
 
         public int BarCount = 8;
-        public int BarGaps = 0;
+        public int BarGaps = 1;
 
         public bool ShowJobIcon = true;
         public int JobIconStyle = 0;
@@ -103,7 +103,8 @@ namespace LMeter.Config
                 Vector2 rankTextSize = ImGui.CalcTextSize(rankText);
                 Vector2 rankTextPos = Utils.GetAnchoredPosition(localPos, -barSize, DrawAnchor.Left);
                 rankTextPos = Utils.GetAnchoredPosition(rankTextPos, rankTextSize, this.RankTextAlign) + this.RankTextOffset;
-                DrawHelpers.DrawText(drawList,
+                DrawHelpers.DrawText(
+                    drawList,
                     rankText,
                     rankTextPos.AddX(textOffset),
                     this.RankTextColor.Base,
@@ -117,16 +118,18 @@ namespace LMeter.Config
             }
 
             bool fontPushed = FontsManager.PushFont(this.BarNameFontKey);
+            string playerName = Singletons.Get<ClientState>().LocalPlayer?.Name.ToString() ?? "YOU";
             if (this.UseCharacterName && combatant.Name.Contains("YOU"))
             {
-                combatant.Name = Singletons.Get<ClientState>().LocalPlayer?.Name.ToString() ?? "YOU";
+                combatant.Name = playerName;
             }
 
             string leftText = combatant.GetFormattedString($" {this.LeftTextFormat} ", this.ThousandsSeparators ? "N" : "F");
             Vector2 nameTextSize = ImGui.CalcTextSize(leftText);
             Vector2 namePos = Utils.GetAnchoredPosition(localPos, -barSize, DrawAnchor.Left);
             namePos = Utils.GetAnchoredPosition(namePos, nameTextSize, DrawAnchor.Left) + this.LeftTextOffset;
-            DrawHelpers.DrawText(drawList,
+            DrawHelpers.DrawText(
+                drawList,
                 leftText,
                 namePos.AddX(textOffset),
                 this.BarNameColor.Base,
@@ -143,7 +146,8 @@ namespace LMeter.Config
             Vector2 dataTextSize = ImGui.CalcTextSize(rightText);
             Vector2 dataPos = Utils.GetAnchoredPosition(localPos, -barSize, DrawAnchor.Right);
             dataPos = Utils.GetAnchoredPosition(dataPos, dataTextSize, DrawAnchor.Right) + this.RightTextOffset;
-            DrawHelpers.DrawText(drawList,
+            DrawHelpers.DrawText(
+                drawList,
                 rightText,
                 dataPos,
                 this.BarDataColor.Base,

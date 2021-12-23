@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
@@ -23,7 +24,7 @@ namespace LMeter.ACT
         ConnectionFailed
     }
 
-    public class ACTClient : ILMeterDisposable
+    public class ACTClient : IPluginDisposable
     {
         private ACTConfig _config;
         private ClientWebSocket _socket;
@@ -45,7 +46,7 @@ namespace LMeter.ACT
             _pastEvents = new List<ACTEvent>();
         }
 
-        public static ACTEvent? GetEvent(int index)
+        public static ACTEvent? GetEvent(int index = -1)
         {
             ACTClient client = Singletons.Get<ACTClient>();
             if (index >= 0 && index < client._pastEvents.Count)
@@ -175,7 +176,7 @@ namespace LMeter.ACT
 
                                     if (newEvent?.Encounter is not null &&
                                         newEvent?.Combatants is not null &&
-                                        newEvent.Combatants.Count > 0 &&
+                                        newEvent.Combatants.Any() &&
                                         (CharacterState.IsInCombat() || !newEvent.IsEncounterActive()))
                                     {
                                         if (!newEvent.IsEncounterActive())

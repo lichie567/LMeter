@@ -102,8 +102,9 @@ namespace LMeter.Config
 
         public void TryReconnect()
         {
-            if (ACTClient.Status == ConnectionStatus.NotConnected ||
-                ACTClient.Status == ConnectionStatus.ConnectionFailed)
+            if (this.LastReconnectAttempt.HasValue &&
+                (ACTClient.Status == ConnectionStatus.NotConnected ||
+                ACTClient.Status == ConnectionStatus.ConnectionFailed))
             {
                 if (this.AutoReconnect &&
                     this.LastReconnectAttempt < DateTime.UtcNow - TimeSpan.FromSeconds(this.ReconnectDelay))

@@ -1,3 +1,10 @@
+# Version 0.1.5.1
+- Fixed issue with auto-reconnect not working
+- Fixed issue with name text tags
+- Fixed issue with borders when Header is disabled
+- Fixed issue with 'Return to Current Data' option
+- Added new toggle option (/lm toggle <number> [on|off])
+
 # Version 0.1.5.0
 - Added Encounter history right-click context menu
 - Added Rank text tag and Rank Text option under bar settings

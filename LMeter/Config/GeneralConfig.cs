@@ -67,7 +67,7 @@ namespace LMeter.Config
                     this.BorderColor.Vector = vector;
 
                     DrawHelpers.DrawNestIndicator(1);
-                    ImGui.Checkbox("Show border around bars", ref this.BorderAroundBars);
+                    ImGui.Checkbox("Hide border around Header", ref this.BorderAroundBars);
                 }
 
                 ImGui.NewLine();
