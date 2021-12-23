@@ -3,6 +3,7 @@
 - Fixed issue with name text tags
 - Fixed issue with borders when Header is disabled
 - Fixed issue with 'Return to Current Data' option
+- Added new toggle option (/lm toggle <number> [on|off])
 
 # Version 0.1.5.0
 - Added Encounter history right-click context menu

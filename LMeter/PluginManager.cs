@@ -155,14 +155,20 @@ namespace LMeter
 
         private static int GetIntArg(string argument)
         {
-            string[] args1 = argument.Split(" ");
-            return args1.Length > 1 && int.TryParse(args1[1], out int num) ? num : 0;
+            string[] args = argument.Split(" ");
+            return args.Length > 1 && int.TryParse(args[1], out int num) ? num : 0;
         }
 
         private static bool? GetBoolArg(string argument, int index = 1)
         {
-            string[] args1 = argument.Split(" ");
-            return args1.Length > index && args1[index].Equals("on") ? true : args1[index].Equals("off") ? false : null;
+            string[] args = argument.Split(" ");
+            if (args.Length > index)
+            {
+                string arg = args[index].ToLower();
+                return arg.Equals("on") ? true : (arg.Equals("off") ? false : null);
+            }
+
+            return null;
         }
 
         private void ToggleWindow()
