@@ -33,11 +33,18 @@ namespace LMeter.Config
             this.DrawMeterTable(size.AddY(-padY), padX);
         }
         
-        public void ToggleMeter(int meterIndex)
+        public void ToggleMeter(int meterIndex, bool? toggle = null)
         {
             if (meterIndex >= 0 && meterIndex < this.Meters.Count)
             {
-                this.Meters[meterIndex].VisibilityConfig.AlwaysHide ^= true;
+                if (toggle == null)
+                {
+                    this.Meters[meterIndex].VisibilityConfig.AlwaysHide ^= true;
+                }
+                else
+                {
+                    this.Meters[meterIndex].VisibilityConfig.AlwaysHide = !(bool) toggle;
+                }
             }
         }
         

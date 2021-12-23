@@ -58,7 +58,7 @@ namespace LMeter
                                 + "/lm end → Ends current ACT Encounter.\n"
                                 + "/lm clear → Clears all ACT encounter log data.\n"
                                 + "/lm ct <number> → Toggles clickthrough status for the given profile.\n"
-                                + "/lm toggle <number> → Toggles visibility for the given profile.",
+                                + "/lm toggle <number> [on|off] → Toggles visibility for the given profile.",
                     ShowInHelp = true
                 }
             );
@@ -142,7 +142,7 @@ namespace LMeter
                     this.Clear();
                     break;
                 case { } argument when argument.StartsWith("toggle"):
-                    _config.MeterList.ToggleMeter(GetIntArg(argument) - 1);
+                    _config.MeterList.ToggleMeter(GetIntArg(argument) - 1, GetBoolArg(argument, 2));
                     break;
                 case { } argument when argument.StartsWith("ct"):
                     _config.MeterList.ToggleClickThrough(GetIntArg(argument) - 1);
@@ -157,6 +157,12 @@ namespace LMeter
         {
             string[] args1 = argument.Split(" ");
             return args1.Length > 1 && int.TryParse(args1[1], out int num) ? num : 0;
+        }
+
+        private static bool? GetBoolArg(string argument, int index = 1)
+        {
+            string[] args1 = argument.Split(" ");
+            return args1.Length > index && args1[index].Equals("on") ? true : args1[index].Equals("off") ? false : null;
         }
 
         private void ToggleWindow()
