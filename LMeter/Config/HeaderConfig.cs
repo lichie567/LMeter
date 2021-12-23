@@ -60,11 +60,11 @@ namespace LMeter.Config
             return defaultConfig;
         }
 
-        public Vector2 DrawHeader(Vector2 pos, Vector2 size, Encounter? encounter, ImDrawListPtr drawList)
+        public (Vector2, Vector2) DrawHeader(Vector2 pos, Vector2 size, Encounter? encounter, ImDrawListPtr drawList)
         {
             if (!this.ShowHeader)
             {
-                return pos;
+                return (pos, size);
             }
             
             Vector2 headerSize = new Vector2(size.X, this.HeaderHeight);
@@ -132,7 +132,7 @@ namespace LMeter.Config
                 }
             }
             
-            return pos.AddY(this.HeaderHeight);
+            return (pos.AddY(this.HeaderHeight), size.AddY(-this.HeaderHeight));
         }
 
         public void DrawConfig(Vector2 size, float padX, float padY)

@@ -1,4 +1,3 @@
-
 using System;
 using LMeter.Helpers;
 
@@ -67,7 +66,7 @@ namespace LMeter.ACT
             string[] splits = input.Split(" ");
             if (splits.Length < 2)
             {
-                return input;
+                return string.Empty;
             }
 
             return splits[1];

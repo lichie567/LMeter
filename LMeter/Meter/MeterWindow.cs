@@ -141,7 +141,7 @@ namespace LMeter.Meter
             }
 
             bool combat = CharacterState.IsInCombat();
-            if (!_lastFrameWasCombat && combat)
+            if (this.GeneralConfig.ReturnToCurrent && !_lastFrameWasCombat && combat)
             {
                 _eventIndex = -1;
             }
@@ -166,7 +166,8 @@ namespace LMeter.Meter
                 {
                     Vector2 borderPos = localPos;
                     Vector2 borderSize = size;
-                    if (this.GeneralConfig.BorderAroundBars)
+                    if (this.GeneralConfig.BorderAroundBars &&
+                        this.HeaderConfig.ShowHeader)
                     {
                         borderPos = borderPos.AddY(this.HeaderConfig.HeaderHeight);
                         borderSize = borderSize.AddY(-this.HeaderConfig.HeaderHeight);
@@ -189,9 +190,7 @@ namespace LMeter.Meter
 
                 ACTEvent? actEvent = this.GeneralConfig.Preview ? _previewEvent : ACTClient.GetEvent(_eventIndex);
 
-                localPos = this.HeaderConfig.DrawHeader(localPos, size, actEvent?.Encounter, drawList);
-                size = size.AddY(-this.HeaderConfig.HeaderHeight);
-
+                (localPos, size) = this.HeaderConfig.DrawHeader(localPos, size, actEvent?.Encounter, drawList);
                 drawList.AddRectFilled(localPos, localPos + size, this.GeneralConfig.BackgroundColor.Base);
                 this.DrawBars(drawList, localPos, size, actEvent);
             });
