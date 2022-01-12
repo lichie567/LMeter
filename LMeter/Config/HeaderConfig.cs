@@ -74,15 +74,13 @@ namespace LMeter.Config
             Vector2 durationSize = Vector2.Zero;
             if (this.ShowEncounterDuration)
             {
-                bool fontPushed = FontsManager.PushFont(this.DurationFontKey);
-                string duration = encounter is null ? $" LMeter v{Plugin.Version}" : $" {encounter.Duration}";
-                durationSize = ImGui.CalcTextSize(duration);
-                durationPos = Utils.GetAnchoredPosition(durationPos, -headerSize, DrawAnchor.Left);
-                durationPos = Utils.GetAnchoredPosition(durationPos, durationSize, this.DurationAlign) + this.DurationOffset;
-                DrawHelpers.DrawText(drawList, duration, durationPos, this.DurationColor.Base, this.DurationShowOutline, this.DurationOutlineColor.Base);
-                if (fontPushed)
+                using (FontsManager.PushFont(this.DurationFontKey))
                 {
-                    ImGui.PopFont();
+                    string duration = encounter is null ? $" LMeter v{Plugin.Version}" : $" {encounter.Duration}";
+                    durationSize = ImGui.CalcTextSize(duration);
+                    durationPos = Utils.GetAnchoredPosition(durationPos, -headerSize, DrawAnchor.Left);
+                    durationPos = Utils.GetAnchoredPosition(durationPos, durationSize, this.DurationAlign) + this.DurationOffset;
+                    DrawHelpers.DrawText(drawList, duration, durationPos, this.DurationColor.Base, this.DurationShowOutline, this.DurationOutlineColor.Base);
                 }
             }
 
@@ -93,42 +91,38 @@ namespace LMeter.Config
 
                 if (!string.IsNullOrEmpty(text))
                 {
-                    bool fontPushed = FontsManager.PushFont(this.StatsFontKey);
-                    raidStatsSize = ImGui.CalcTextSize(text);
-                    Vector2 statsPos = Utils.GetAnchoredPosition(pos + this.StatsOffset, -headerSize, DrawAnchor.Right);
-                    statsPos = Utils.GetAnchoredPosition(statsPos, raidStatsSize, this.StatsAlign);
-                    DrawHelpers.DrawText(drawList, text, statsPos, this.RaidStatsColor.Base, this.StatsShowOutline, this.StatsOutlineColor.Base);
-                    if (fontPushed)
+                    using (FontsManager.PushFont(this.StatsFontKey))
                     {
-                        ImGui.PopFont();
+                        raidStatsSize = ImGui.CalcTextSize(text);
+                        Vector2 statsPos = Utils.GetAnchoredPosition(pos + this.StatsOffset, -headerSize, DrawAnchor.Right);
+                        statsPos = Utils.GetAnchoredPosition(statsPos, raidStatsSize, this.StatsAlign);
+                        DrawHelpers.DrawText(drawList, text, statsPos, this.RaidStatsColor.Base, this.StatsShowOutline, this.StatsOutlineColor.Base);
                     }
                 }
             }
 
             if (this.ShowEncounterName && encounter is not null && !string.IsNullOrEmpty(encounter.Title))
             {
-                bool fontPushed = FontsManager.PushFont(this.NameFontKey);
-                string name = $" {encounter.Title}";
-                Vector2 nameSize = ImGui.CalcTextSize(name);
-
-                if (durationSize.X + raidStatsSize.X + nameSize.X > size.X)
+                using (FontsManager.PushFont(this.NameFontKey))
                 {
-                    float elipsesWidth = ImGui.CalcTextSize("... ").X;
-                    do
+                    string name = $" {encounter.Title}";
+                    Vector2 nameSize = ImGui.CalcTextSize(name);
+
+                    if (durationSize.X + raidStatsSize.X + nameSize.X > size.X)
                     {
-                        name = name.AsSpan(0, name.Length - 1).ToString();
-                        nameSize = ImGui.CalcTextSize(name);
+                        float elipsesWidth = ImGui.CalcTextSize("... ").X;
+                        do
+                        {
+                            name = name.AsSpan(0, name.Length - 1).ToString();
+                            nameSize = ImGui.CalcTextSize(name);
+                        }
+                        while (durationSize.X + raidStatsSize.X + nameSize.X + elipsesWidth > size.X && name.Length > 1);
+                        name += "... ";
                     }
-                    while (durationSize.X + raidStatsSize.X + nameSize.X + elipsesWidth > size.X && name.Length > 1);
-                    name += "... ";
-                }
 
-                Vector2 namePos = Utils.GetAnchoredPosition(pos.AddX(durationSize.X), -headerSize, DrawAnchor.Left);
-                namePos = Utils.GetAnchoredPosition(namePos, nameSize, this.NameAlign) + this.NameOffset;
-                DrawHelpers.DrawText(drawList, name, namePos, this.NameColor.Base, this.NameShowOutline, this.NameOutlineColor.Base);
-                if (fontPushed)
-                {
-                    ImGui.PopFont();
+                    Vector2 namePos = Utils.GetAnchoredPosition(pos.AddX(durationSize.X), -headerSize, DrawAnchor.Left);
+                    namePos = Utils.GetAnchoredPosition(namePos, nameSize, this.NameAlign) + this.NameOffset;
+                    DrawHelpers.DrawText(drawList, name, namePos, this.NameColor.Base, this.NameShowOutline, this.NameOutlineColor.Base);
                 }
             }
             
@@ -167,7 +161,13 @@ namespace LMeter.Config
                         if (!FontsManager.ValidateFont(fontOptions, this.DurationFontId, this.DurationFontKey))
                         {
                             this.DurationFontId = 0;
-                            this.DurationFontKey = FontsManager.DalamudFontKey;
+                            for (int i = 0; i < fontOptions.Length; i++)
+                            {
+                                if (this.DurationFontKey.Equals(fontOptions[i]))
+                                {
+                                    this.DurationFontId = i;
+                                }
+                            }
                         }
                         
                         DrawHelpers.DrawNestIndicator(2);
@@ -204,7 +204,13 @@ namespace LMeter.Config
                         if (!FontsManager.ValidateFont(fontOptions, this.NameFontId, this.NameFontKey))
                         {
                             this.NameFontId = 0;
-                            this.NameFontKey = FontsManager.DalamudFontKey;
+                            for (int i = 0; i < fontOptions.Length; i++)
+                            {
+                                if (this.NameFontKey.Equals(fontOptions[i]))
+                                {
+                                    this.NameFontId = i;
+                                }
+                            }
                         }
                         
                         DrawHelpers.DrawNestIndicator(2);
@@ -251,7 +257,13 @@ namespace LMeter.Config
                         if (!FontsManager.ValidateFont(fontOptions, this.StatsFontId, this.StatsFontKey))
                         {
                             this.StatsFontId = 0;
-                            this.StatsFontKey = FontsManager.DalamudFontKey;
+                            for (int i = 0; i < fontOptions.Length; i++)
+                            {
+                                if (this.StatsFontKey.Equals(fontOptions[i]))
+                                {
+                                    this.StatsFontId = i;
+                                }
+                            }
                         }
                         
                         DrawHelpers.DrawNestIndicator(2);

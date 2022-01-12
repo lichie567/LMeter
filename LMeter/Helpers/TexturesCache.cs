@@ -84,8 +84,7 @@ namespace LMeter.Helpers
                     return null;
                 }
 
-                IconData newIcon = new IconData(iconFile);
-                return newIcon.GetTextureWrap(greyScale, opacity);
+                return GetTextureWrap(iconFile, greyScale, opacity);
             }
             catch (Exception ex)
             {
@@ -230,48 +229,26 @@ namespace LMeter.Helpers
                 _textureCache.Clear();
             }
         }
-    }
-
-    public class IconData
-    {
-        public byte[] Bytes { get; init; }
-        public ushort Width { get; init; }
-        public ushort Height { get; init; }
-
-        public IconData(byte[] bytes, ushort width, ushort height)
-        {
-            this.Bytes = bytes;
-            this.Width = width;
-            this.Height = height;
-        }
-
-        public IconData(TexFile tex)
-        {
-            this.Bytes = tex.GetRgbaImageData();
-            this.Width = tex.Header.Width;
-            this.Height = tex.Header.Height;
-        }
-
-        public TextureWrap GetTextureWrap(bool greyScale, float opacity)
+        
+        private static TextureWrap GetTextureWrap(TexFile tex, bool greyScale, float opacity)
         {
             UiBuilder uiBuilder = Singletons.Get<UiBuilder>();
-            byte[] bytes = this.Bytes;
+            byte[] bytes = tex.GetRgbaImageData();
             if (greyScale || opacity < 1f)
             {
-                bytes = this.ConvertBytes(bytes, greyScale, opacity);
+                ConvertBytes(ref bytes, greyScale, opacity);
             }
 
-            return uiBuilder.LoadImageRaw(bytes, this.Width, this.Height, 4);
+            return uiBuilder.LoadImageRaw(bytes, tex.Header.Width, tex.Header.Height, 4);
         }
 
-        public byte[] ConvertBytes(byte[] bytes, bool greyScale, float opacity)
+        private static void ConvertBytes(ref byte[] bytes, bool greyScale, float opacity)
         {
-            if (bytes.Length % 4 != 0 || opacity > 1f || opacity < 0)
+            if (bytes.Length % 4 != 0 || opacity > 1 || opacity < 0)
             {
-                return bytes;
+                return;
             }
             
-            byte[] newBytes = new byte[bytes.Length];
             for (int i = 0; i < bytes.Length; i += 4)
             {
                 if (greyScale)
@@ -279,23 +256,18 @@ namespace LMeter.Helpers
                     int r = bytes[i] >> 2;
                     int g = bytes[i + 1] >> 1;
                     int b = bytes[i + 2] >> 3;
-                    byte lum = (byte)(r + g + b / 3);
+                    byte lum = (byte)(r + g + b);
                     
-                    newBytes[i] = lum;
-                    newBytes[i + 1] = lum;
-                    newBytes[i + 2] = lum;
+                    bytes[i] = lum;
+                    bytes[i + 1] = lum;
+                    bytes[i + 2] = lum;
                 }
-                else
+
+                if (opacity != 1)
                 {
-                    newBytes[i] = bytes[i];
-                    newBytes[i + 1] = bytes[i + 1];
-                    newBytes[i + 2] = bytes[i + 2];
+                    bytes[i + 3] = (byte)(bytes[i + 3] * opacity);
                 }
-
-                newBytes[i + 3] = (byte)(bytes[i + 3] * opacity);
             }
-
-            return newBytes;
         }
     }
 }

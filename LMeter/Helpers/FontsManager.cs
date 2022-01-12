@@ -25,6 +25,24 @@ namespace LMeter.Helpers
         }
     }
 
+    public class FontScope : IDisposable
+    {
+        private bool _fontPushed;
+
+        public FontScope(bool fontPushed)
+        {
+            _fontPushed = fontPushed;
+        }
+
+        public void Dispose()
+        {
+            if (_fontPushed)
+            {
+                ImGui.PopFont();
+            }
+        }
+    }
+
     public class FontsManager : IPluginDisposable
     {
         private IEnumerable<FontData> _fontData;
@@ -97,18 +115,18 @@ namespace LMeter.Helpers
             return fontId < fontOptions.Length && fontOptions[fontId].Equals(fontKey);
         }
 
-        public static bool PushFont(string fontKey)
+        public static FontScope PushFont(string fontKey)
         {
             FontsManager manager = Singletons.Get<FontsManager>();
             if (string.IsNullOrEmpty(fontKey) ||
                 fontKey.Equals(DalamudFontKey) ||
                 !manager._imGuiFonts.Keys.Contains(fontKey))
             {
-                return false;
+                return new FontScope(false);
             }
 
             ImGui.PushFont(manager._imGuiFonts[fontKey]);
-            return true;
+            return new FontScope(true);
         }
 
         public void UpdateFonts(IEnumerable<FontData> fonts)

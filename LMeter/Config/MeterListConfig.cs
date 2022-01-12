@@ -18,7 +18,7 @@ namespace LMeter.Config
 
         public string Name => "Profiles";
 
-        public List<MeterWindow> Meters { get; init; }
+        public List<MeterWindow> Meters { get; set; }
 
         public MeterListConfig()
         {

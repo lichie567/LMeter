@@ -132,7 +132,6 @@ namespace LMeter
 
         private void PluginCommand(string command, string arguments)
         {
-
             switch (arguments)
             {
                 case "end":

@@ -192,12 +192,21 @@ namespace LMeter.ACT
         [JsonConverter(typeof(LazyFloatConverter))]
         public LazyFloat? Hps;
 
+        public LazyFloat? EffectiveHealing;
+
         [JsonProperty("healed")]
         [JsonConverter(typeof(LazyFloatConverter))]
         public LazyFloat? HealingTotal;
 
         [JsonProperty("healed%")]
         public string HealingPct = string.Empty;
+
+        [JsonProperty("overHeal")]
+        [JsonConverter(typeof(LazyFloatConverter))]
+        public LazyFloat? OverHeal;
+
+        [JsonProperty("OverHealPct")]
+        public string OverHealPct = string.Empty;
 
         [JsonProperty("damagetaken")]
         [JsonConverter(typeof(LazyFloatConverter))]
@@ -215,11 +224,18 @@ namespace LMeter.ACT
         [JsonProperty("MAXHIT")]
         private string _maxHit = string.Empty;
 
+        public LazyString<string?> MaxHitName;
+
+        public LazyFloat? MaxHitValue;
+
         public Combatant()
         {
             this.Name_First = new LazyString<string?>(() => this.Name, LazyStringConverters.FirstName);
             this.Name_Last = new LazyString<string?>(() => this.Name, LazyStringConverters.LastName);
             this.JobName = new LazyString<Job>(() => this.Job, LazyStringConverters.JobName);
+            this.EffectiveHealing = new LazyFloat(() => (this.HealingTotal?.Value ?? 0) - (this.OverHeal?.Value ?? 0));
+            this.MaxHitName = new LazyString<string?>(() => this.MaxHit, LazyStringConverters.MaxHitName);
+            this.MaxHitValue = new LazyFloat(() => LazyStringConverters.MaxHitValue(this.MaxHit));
         }
 
         public static Dictionary<string, Combatant> GetTestData()
@@ -253,6 +269,7 @@ namespace LMeter.ACT
                 Dps = new LazyFloat((damage / 30).ToString()),
                 EncDps = new LazyFloat((damage / 30).ToString()),
                 HealingTotal = new LazyFloat(healing.ToString()),
+                OverHeal = new LazyFloat(5000),
                 Hps = new LazyFloat((healing / 30).ToString()),
                 EncHps = new LazyFloat((healing / 30).ToString()),
                 DamagePct = "100%",
