@@ -1,3 +1,6 @@
+# Version 0.1.5.3
+- Fix bug that that caused removal of custom added fonts.
+
 # Version 0.1.5.2
 - Added new text tags: effectivehealing, overheal, overhealpct, maxhitname, maxhitvalue
 - Bars are now sorted by effective healing when the Healing sort mode is selected.
