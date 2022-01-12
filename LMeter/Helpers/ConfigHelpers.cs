@@ -18,6 +18,7 @@ namespace LMeter.Helpers
         {
             TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
             TypeNameHandling = TypeNameHandling.Objects,
+            ObjectCreationHandling = ObjectCreationHandling.Replace,
             SerializationBinder = new LMeterSerializationBinder()
         };
 

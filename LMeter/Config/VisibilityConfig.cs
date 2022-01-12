@@ -69,17 +69,7 @@ namespace LMeter.Config
                 return false;
             }
 
-            if (this.ShowForJobTypes == JobType.All)
-            {
-                return true;
-            }
-
-            if (this.ShowForJobTypes == JobType.Custom)
-            {
-                return CharacterState.IsJob(this.CustomJobList);
-            }
-
-            return CharacterState.IsJob(CharacterState.GetJobsForJobType(this.ShowForJobTypes));
+            return CharacterState.IsJobType(CharacterState.GetCharacterJob(), this.ShowForJobTypes, this.CustomJobList);
         }
 
         public void DrawConfig(Vector2 size, float padX, float padY)

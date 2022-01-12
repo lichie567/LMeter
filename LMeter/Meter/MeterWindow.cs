@@ -62,37 +62,31 @@ namespace LMeter.Meter
 
         public void ImportPage(IConfigPage page)
         {
-            if (page is GeneralConfig)
+            switch (page)
             {
-                this.GeneralConfig = (GeneralConfig)page;
-            }
-
-            if (page is HeaderConfig)
-            {
-                this.HeaderConfig = (HeaderConfig)page;
-            }
-            
-            if (page is BarConfig)
-            {
-                this.BarConfig = (BarConfig)page;
-            }
-            
-            if (page is BarColorsConfig)
-            {
-                this.BarColorsConfig = (BarColorsConfig)page;
-            }
-            
-            if (page is VisibilityConfig)
-            {
-                this.VisibilityConfig = (VisibilityConfig)page;
+                case GeneralConfig newPage:
+                    this.GeneralConfig = newPage;
+                    break;
+                case HeaderConfig newPage:
+                    this.HeaderConfig = newPage;
+                    break;
+                case BarConfig newPage:
+                    this.BarConfig = newPage;
+                    break;
+                case BarColorsConfig newPage:
+                    this.BarColorsConfig = newPage;
+                    break;
+                case VisibilityConfig newPage:
+                    this.VisibilityConfig = newPage;
+                    break;
             }
         }
 
         public static MeterWindow GetDefaultMeter(string name)
         {
             MeterWindow newMeter = new MeterWindow(name);
-            newMeter.HeaderConfig = (HeaderConfig)newMeter.HeaderConfig.GetDefault();
-            newMeter.BarConfig = (BarConfig)newMeter.BarConfig.GetDefault();
+            newMeter.ImportPage(newMeter.HeaderConfig.GetDefault());
+            newMeter.ImportPage(newMeter.BarConfig.GetDefault());
             return newMeter;
         }
 
@@ -209,7 +203,7 @@ namespace LMeter.Meter
                 float top = this.GeneralConfig.DataType switch
                 {
                     MeterDataType.Damage => sortedCombatants[0].DamageTotal?.Value ?? 0,
-                    MeterDataType.Healing => sortedCombatants[0].HealingTotal?.Value ?? 0,
+                    MeterDataType.Healing => sortedCombatants[0].EffectiveHealing?.Value ?? 0,
                     MeterDataType.DamageTaken => sortedCombatants[0].DamageTaken?.Value ?? 0,
                     _ => 0
                 };
@@ -230,22 +224,14 @@ namespace LMeter.Meter
                     float current = this.GeneralConfig.DataType switch
                     {
                         MeterDataType.Damage => combatant.DamageTotal?.Value ?? 0,
-                        MeterDataType.Healing => combatant.HealingTotal?.Value ?? 0,
+                        MeterDataType.Healing => combatant.EffectiveHealing?.Value ?? 0,
                         MeterDataType.DamageTaken => combatant.DamageTaken?.Value ?? 0,
                         _ => 0
                     };
 
-                    ConfigColor barColor;
-                    if (this.BarConfig.UseJobColor)
-                    {
-                        barColor = this.BarColorsConfig.GetColor(combatant.Job);
-                    }
-                    else
-                    {
-                        barColor = this.BarConfig.BarColor;
-                    }
-                    
-                    localPos = this.BarConfig.DrawBar(drawList, localPos, size, combatant, barColor, top, current);
+                    ConfigColor barColor = this.BarConfig.BarColor;
+                    ConfigColor jobColor = this.BarColorsConfig.GetColor(combatant.Job);
+                    localPos = this.BarConfig.DrawBar(drawList, localPos, size, combatant, jobColor, barColor, top, current);
                 }
             }
         }
@@ -318,7 +304,7 @@ namespace LMeter.Meter
                 float xFloat = dataType switch
                 {
                     MeterDataType.Damage => x.DamageTotal?.Value ?? 0,
-                    MeterDataType.Healing => x.HealingTotal?.Value ?? 0,
+                    MeterDataType.Healing => x.EffectiveHealing?.Value ?? 0,
                     MeterDataType.DamageTaken => x.DamageTaken?.Value ?? 0,
                     _ => 0
                 };
@@ -326,7 +312,7 @@ namespace LMeter.Meter
                 float yFloat = dataType switch
                 {
                     MeterDataType.Damage => y.DamageTotal?.Value ?? 0,
-                    MeterDataType.Healing => y.HealingTotal?.Value ?? 0,
+                    MeterDataType.Healing => y.EffectiveHealing?.Value ?? 0,
                     MeterDataType.DamageTaken => y.DamageTaken?.Value ?? 0,
                     _ => 0
                 };

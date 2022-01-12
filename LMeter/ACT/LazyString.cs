@@ -72,6 +72,38 @@ namespace LMeter.ACT
             return splits[1];
         }
 
+        public static string MaxHitName(string? input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return string.Empty;
+            }
+
+            string[] splits = input.Split('-');
+            if (splits.Length < 2)
+            {
+                return input;
+            }
+
+            return splits[0];
+        }
+
+        public static string MaxHitValue(string? input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return string.Empty;
+            }
+
+            string[] splits = input.Split('-');
+            if (splits.Length < 2)
+            {
+                return input;
+            }
+
+            return splits[1];
+        }
+
         public static string JobName(Job input) => input switch
         {
             Job.GLA => "Gladiator",

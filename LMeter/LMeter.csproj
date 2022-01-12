@@ -79,6 +79,9 @@
         <Reference Include="Lumina.Excel">
             <Private>false</Private>
         </Reference>
+        <Reference Include="FFXIVClientStructs">
+            <Private>false</Private>
+        </Reference>
     </ItemGroup>
 
     <!-- NuGet Packages -->

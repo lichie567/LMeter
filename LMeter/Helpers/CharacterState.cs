@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using Dalamud.Game.ClientState.Conditions;
 using System.Linq;
 using Dalamud.Game.ClientState;
+using Dalamud.Game.ClientState.Conditions;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 
 namespace LMeter.Helpers
 {
-
     public static class CharacterState
     {
         private static readonly uint[] _goldenSaucerIDs = { 144, 388, 389, 390, 391, 579, 792, 899, 941 };
@@ -46,126 +46,36 @@ namespace LMeter.Helpers
             return _goldenSaucerIDs.Any(id => id == Singletons.Get<ClientState>().TerritoryType);
         }
 
-        public static bool IsJob(IEnumerable<Job> jobs)
+        public static Job GetCharacterJob()
         {
             var player = Singletons.Get<ClientState>().LocalPlayer;
             if (player is null)
             {
-                return false;
+                return Job.UKN;
             }
 
-            return jobs.Contains((Job)player.ClassJob.Id);
-        }
-
-        public static List<Job> GetJobsForJobType(JobType type)
-        {
-            switch (type)
+            unsafe
             {
-                case JobType.All:
-                    return Enum.GetValues(typeof(Job)).Cast<Job>().ToList();
-                case JobType.Tanks:
-                    return new List<Job>() { Job.GLA, Job.MRD, Job.PLD, Job.WAR, Job.DRK, Job.GNB };
-                case JobType.Casters:
-                    return new List<Job>() { Job.THM, Job.ACN, Job.BLM, Job.SMN, Job.RDM, Job.BLU };
-                case JobType.Melee:
-                    return new List<Job>() { Job.PGL, Job.LNC, Job.ROG, Job.MNK, Job.DRG, Job.NIN, Job.SAM, Job.RPR };
-                case JobType.Ranged:
-                    return new List<Job>() { Job.ARC, Job.BRD, Job.MCH, Job.DNC };
-                case JobType.Healers:
-                    return new List<Job>() { Job.CNJ, Job.WHM, Job.SCH, Job.AST, Job.SGE };
-                case JobType.DoH:
-                    return new List<Job>() { Job.CRP, Job.BSM, Job.ARM, Job.GSM, Job.LTW, Job.WVR, Job.ALC, Job.CUL };
-                case JobType.DoL:
-                    return new List<Job>() { Job.MIN, Job.BOT, Job.FSH };
-                case JobType.Combat:
-                    List<Job> combatList = GetJobsForJobType(JobType.DoW);
-                    combatList.AddRange(GetJobsForJobType(JobType.DoM));
-                    return combatList;
-                case JobType.DoW:
-                    List<Job> dowList = GetJobsForJobType(JobType.Tanks);
-                    dowList.AddRange(GetJobsForJobType(JobType.Melee));
-                    dowList.AddRange(GetJobsForJobType(JobType.Ranged));
-                    return dowList;
-                case JobType.DoM:
-                    List<Job> domList = GetJobsForJobType(JobType.Casters);
-                    domList.AddRange(GetJobsForJobType(JobType.Healers));
-                    return domList;
-                case JobType.Crafters:
-                    List<Job> crafterList = GetJobsForJobType(JobType.DoH);
-                    crafterList.AddRange(GetJobsForJobType(JobType.DoL));
-                    return crafterList;
-                default:
-                    return new List<Job>();
+                return (Job)((Character*)player.Address)->ClassJob;
             }
         }
-    }
 
-    public enum Job
-    {
-        UKN = 0,
-
-        GLA = 1,
-        MRD = 3,
-        PLD = 19,
-        WAR = 21,
-        DRK = 32,
-        GNB = 37,
-
-        CNJ = 6,
-        WHM = 24,
-        SCH = 28,
-        AST = 33,
-        SGE = 40,
-
-        PGL = 2,
-        LNC = 4,
-        ROG = 29,
-        MNK = 20,
-        DRG = 22,
-        NIN = 30,
-        SAM = 34,
-        RPR = 39,
-
-        ARC = 5,
-        BRD = 23,
-        MCH = 31,
-        DNC = 38,
-
-        THM = 7,
-        ACN = 26,
-        BLM = 25,
-        SMN = 27,
-        RDM = 35,
-        BLU = 36,
-
-        CRP = 8,
-        BSM = 9,
-        ARM = 10,
-        GSM = 11,
-        LTW = 12,
-        WVR = 13,
-        ALC = 14,
-        CUL = 15,
-
-        MIN = 16,
-        BOT = 17,
-        FSH = 18
-    }
-
-    public enum JobType
-    {
-        All,
-        Custom,
-        Tanks,
-        Casters,
-        Melee,
-        Ranged,
-        Healers,
-        DoW,
-        DoM,
-        Combat,
-        Crafters,
-        DoH,
-        DoL
+        public static bool IsJobType(Job job, JobType type, IEnumerable<Job>? jobList = null) => type switch
+        {
+            JobType.All      => true,
+            JobType.Tanks    => job is Job.GLA or Job.MRD or Job.PLD or Job.WAR or Job.DRK or Job.GNB,
+            JobType.Casters  => job is Job.THM or Job.ACN or Job.BLM or Job.SMN or Job.RDM or Job.BLU,
+            JobType.Melee    => job is Job.PGL or Job.LNC or Job.ROG or Job.MNK or Job.DRG or Job.NIN or Job.SAM or Job.RPR,
+            JobType.Ranged   => job is Job.ARC or Job.BRD or Job.MCH or Job.DNC,
+            JobType.Healers  => job is Job.CNJ or Job.WHM or Job.SCH or Job.AST or Job.SGE,
+            JobType.DoH      => job is Job.CRP or Job.BSM or Job.ARM or Job.GSM or Job.LTW or Job.WVR or Job.ALC or Job.CUL,
+            JobType.DoL      => job is Job.MIN or Job.BOT or Job.FSH,
+            JobType.Combat   => IsJobType(job, JobType.DoW) || IsJobType(job, JobType.DoM),
+            JobType.DoW      => IsJobType(job, JobType.Tanks) || IsJobType(job, JobType.Melee) || IsJobType(job, JobType.Ranged),
+            JobType.DoM      => IsJobType(job, JobType.Casters) || IsJobType(job, JobType.Healers),
+            JobType.Crafters => IsJobType(job, JobType.DoH) || IsJobType(job, JobType.DoL),
+            JobType.Custom   => jobList is not null && jobList.Contains(job),
+            _                => false
+        };
     }
 }

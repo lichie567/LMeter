@@ -1,10 +1,13 @@
 
+using System;
 using System.Globalization;
 
 namespace LMeter.ACT
 {
     public class LazyFloat
     {
+        private Func<string>? _getStringInput;
+        private Func<float>? _getFloatInput;
         private float _value = 0;
 
         public string? Input { get; private set; }
@@ -17,21 +20,35 @@ namespace LMeter.ACT
             {
                 if (this.WasGenerated)
                 {
-                    return this._value;
+                    return _value;
+                }
+
+                if (this.Input is null)
+                {
+                    if (_getFloatInput is not null)
+                    {
+                        _value = _getFloatInput.Invoke();
+                        this.WasGenerated = true;
+                        return _value;
+                    }
+                    else if (_getStringInput is not null)
+                    {
+                        this.Input = _getStringInput.Invoke();
+                    }
                 }
 
                 if (float.TryParse(this.Input, NumberStyles.Float, CultureInfo.InvariantCulture, out float parsed) &&
                     !float.IsNaN(parsed))
                 {
-                    this._value = parsed;
+                    _value = parsed;
                 }
                 else
                 {
-                    this._value = 0;
+                    _value = 0;
                 }
 
                 this.WasGenerated = true;
-                return this._value;
+                return _value;
             }
         }
 
@@ -42,8 +59,18 @@ namespace LMeter.ACT
 
         public LazyFloat(float value)
         {
-            this._value = value;
+            _value = value;
             this.WasGenerated = true;
+        }
+
+        public LazyFloat(Func<float> input)
+        {
+            _getFloatInput = input;
+        }
+
+        public LazyFloat(Func<string> input)
+        {
+            _getStringInput = input;
         }
 
         public string? ToString(string format, bool kilo)

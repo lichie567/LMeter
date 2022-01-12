@@ -1,3 +1,9 @@
+# Version 0.1.5.2
+- Added new text tags: effectivehealing, overheal, overhealpct, maxhitname, maxhitvalue
+- Bars are now sorted by effective healing when the Healing sort mode is selected.
+- Added option to use Job color for bar text color
+- Fixed an issue with fonts on first time plugin load
+
 # Version 0.1.5.1
 - Fixed issue with auto-reconnect not working
 - Fixed issue with name text tags

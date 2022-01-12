@@ -84,11 +84,12 @@ namespace LMeter
             Plugin.Changelog = LoadChangelog();
 
             // Load config
+            FontsManager.CopyPluginFontsToUserPath();
             LMeterConfig config = ConfigHelpers.LoadConfig(Plugin.ConfigFilePath);
+            config.FontConfig.RefreshFontList();
             Singletons.Register(config);
 
             // Initialize Fonts
-            FontsManager.CopyPluginFontsToUserPath();
             Singletons.Register(new FontsManager(pluginInterface.UiBuilder, config.FontConfig.Fonts.Values));
 
             // Connect to ACT

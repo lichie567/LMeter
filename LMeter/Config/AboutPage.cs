@@ -6,7 +6,6 @@ namespace LMeter.Config
 {
     public class AboutPage : IConfigPage
     {
-
         public string Name => "Changelog";
 
         public IConfigPage GetDefault() => new AboutPage();
