@@ -18,28 +18,11 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Extract Dalamud version
-        id: dalamud-version
-        uses: mavrosxristoforos/get-xml-info@1.0
-        with:
-          xml-file: "./LMeter/LMeter.csproj"
-          xpath: "//DalamudVersion"
-
-      - name: CSProj Cache
-        id: cache-csproj
-        uses: actions/cache@v2
-        with:
-          path: |
-            ./dalamud
-            ~/.nuget/packages
-          key: ${{ runner.os }}-csproj-v3-${{ hashFiles('**/*.csproj') }}
-
       - name: Setup Dalamud
         shell: pwsh
         run: |
-          mkdir ./dalamud
-          Invoke-WebRequest -Uri https://goatcorp.github.io/dalamud-distrib/latest.zip -OutFile ./dalamud/latest.zip
-          Expand-Archive -Path ./dalamud/latest.zip ./dalamud
+          Invoke-WebRequest -Uri https://goatcorp.github.io/dalamud-distrib/latest.zip -OutFile ./latest.zip
+          Expand-Archive -Path ./latest.zip ./dalamud
 
       - name: Restore project dependencies
         run: dotnet restore --verbosity normal
