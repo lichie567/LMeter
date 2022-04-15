@@ -34,9 +34,8 @@ jobs:
       - name: Setup Dalamud
         shell: pwsh
         run: |
-          mkdir ./dalamud
-          Invoke-WebRequest -Uri https://goatcorp.github.io/dalamud-distrib/latest.zip -OutFile ./dalamud/latest.zip
-          Expand-Archive -Path ./dalamud/latest.zip ./dalamud
+          Invoke-WebRequest -Uri https://goatcorp.github.io/dalamud-distrib/latest.zip -OutFile ./latest.zip
+          Expand-Archive -Path ./latest.zip ./dalamud
 
       - name: Restore project dependencies
         run: dotnet restore --verbosity normal
