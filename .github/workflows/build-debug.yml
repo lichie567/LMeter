@@ -1,6 +1,6 @@
 name: Debug Build
 
-on: pull_request
+on: [push, pull_request]
 
 jobs:
   build-debug:
@@ -14,22 +14,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: recursive
-
-      - name: Extract Dalamud version
-        id: dalamud-version
-        uses: mavrosxristoforos/get-xml-info@1.0
-        with:
-          xml-file: "./LMeter/LMeter.csproj"
-          xpath: "//DalamudVersion"
-
-      - name: CSProj Cache
-        id: cache-csproj
-        uses: actions/cache@v2
-        with:
-          path: |
-            ./dalamud
-            ~/.nuget/packages
-          key: ${{ runner.os }}-csproj-v3-${{ hashFiles('**/*.csproj') }}
 
       - name: Setup Dalamud
         shell: pwsh
