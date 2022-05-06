@@ -23,6 +23,7 @@ namespace LMeter.Config
         public bool AlwaysHide = false;
         public bool HideInCombat = false;
         public bool HideOutsideCombat = false;
+        public bool ShowInDuty = false;
         public bool HideOutsideDuty = false;
         public bool HideWhilePerforming = false;
         public bool HideInGoldenSaucer = false;
@@ -46,6 +47,9 @@ namespace LMeter.Config
 
             if (this.HideOutsideCombat && !CharacterState.IsInCombat())
             {
+                if (this.ShowInDuty && CharacterState.IsInDuty()) {
+                    return true;
+                }
                 return false;
             }
 
@@ -79,6 +83,11 @@ namespace LMeter.Config
                 ImGui.Checkbox("Always Hide", ref this.AlwaysHide);
                 ImGui.Checkbox("Hide In Combat", ref this.HideInCombat);
                 ImGui.Checkbox("Hide Outside Combat", ref this.HideOutsideCombat);
+                if (this.HideOutsideCombat)
+                {
+                    DrawHelpers.DrawNestIndicator(1);
+                    ImGui.Checkbox("Show In Duty", ref this.ShowInDuty);
+                }
                 ImGui.Checkbox("Hide Outside Duty", ref this.HideOutsideDuty);
                 ImGui.Checkbox("Hide While Performing", ref this.HideWhilePerforming);
                 ImGui.Checkbox("Hide In Golden Saucer", ref this.HideInGoldenSaucer);
