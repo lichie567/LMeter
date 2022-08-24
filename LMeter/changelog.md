@@ -1,3 +1,7 @@
+# Version 0.1.7.0
+- Update for patch 6.2
+- Target net6.0
+
 # Version 0.1.5.3
 - Fix bug that that caused removal of custom added fonts.
 
