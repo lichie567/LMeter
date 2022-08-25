@@ -147,10 +147,10 @@ namespace LMeter.Helpers
                 case TextureFormat.DXT1: Decompress(SquishOptions.DXT1, src, dst, width, height); return true;
                 case TextureFormat.DXT3: Decompress(SquishOptions.DXT3, src, dst, width, height); return true;
                 case TextureFormat.DXT5: Decompress(SquishOptions.DXT5, src, dst, width, height); return true;
-                case TextureFormat.R5G5B5A1: ProcessA1R5G5B5(src, dst, width, height); return true;
-                case TextureFormat.R4G4B4A4: ProcessA4R4G4B4(src, dst, width, height); return true;
+                case TextureFormat.B5G5R5A1: ProcessB5G5R5A1(src, dst, width, height); return true;
+                case TextureFormat.B4G4R4A4: ProcessB4G4R4A4(src, dst, width, height); return true;
                 case TextureFormat.L8: ProcessR3G3B2(src, dst, width, height); return true;
-                case TextureFormat.A8R8G8B8: Array.Copy(src, dst, dst.Length); return true;
+                case TextureFormat.B8G8R8A8: Array.Copy(src, dst, dst.Length); return true;
             }
 
             return false;
@@ -162,7 +162,7 @@ namespace LMeter.Helpers
             Array.Copy(decompressed, dst, dst.Length);
         }
 
-        private static void ProcessA1R5G5B5(Span<byte> src, byte[] dst, int width, int height)
+        private static void ProcessB5G5R5A1(Span<byte> src, byte[] dst, int width, int height)
         {
             for (var i = 0; (i + 2) <= 2 * width * height; i += 2)
             {
@@ -183,7 +183,7 @@ namespace LMeter.Helpers
             }
         }
 
-        private static void ProcessA4R4G4B4(Span<byte> src, byte[] dst, int width, int height)
+        private static void ProcessB4G4R4A4(Span<byte> src, byte[] dst, int width, int height)
         {
             for (var i = 0; (i + 2) <= 2 * width * height; i += 2)
             {

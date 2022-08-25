@@ -166,8 +166,8 @@ namespace LMeter.ACT
                         using (StreamReader reader = new StreamReader(ms, Encoding.UTF8))
                         {
                             string data = await reader.ReadToEndAsync();
-                            
                             PluginLog.Verbose(data);
+                            
                             if (!string.IsNullOrEmpty(data))
                             {
                                 try
@@ -179,18 +179,24 @@ namespace LMeter.ACT
                                         newEvent.Combatants.Any() &&
                                         (CharacterState.IsInCombat() || !newEvent.IsEncounterActive()))
                                     {
-                                        if (!newEvent.IsEncounterActive())
+                                        if (!(_lastEvent is not null &&
+                                            _lastEvent.IsEncounterActive() == newEvent.IsEncounterActive() &&
+                                            _lastEvent.Encounter is not null &&
+                                            _lastEvent.Encounter.Duration.Equals(newEvent.Encounter.Duration)))
                                         {
-                                            _pastEvents.Add(newEvent);
-
-                                            while (_pastEvents.Count > _config.EncounterHistorySize)
+                                            if (!newEvent.IsEncounterActive())
                                             {
-                                                _pastEvents.RemoveAt(0);
-                                            }
-                                        }
+                                                _pastEvents.Add(newEvent);
 
-                                        newEvent.Timestamp = DateTime.UtcNow;
-                                        _lastEvent = newEvent;
+                                                while (_pastEvents.Count > _config.EncounterHistorySize)
+                                                {
+                                                    _pastEvents.RemoveAt(0);
+                                                }
+                                            }
+
+                                            newEvent.Timestamp = DateTime.UtcNow;
+                                            _lastEvent = newEvent;
+                                        }
                                     }
                                 }
                                 catch (Exception ex)

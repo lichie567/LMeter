@@ -33,13 +33,13 @@ namespace LMeter.ACT
 
         public bool IsEncounterActive()
         {
-            if (this._parsedActive)
+            if (_parsedActive)
             {
-                return this._active;
+                return _active;
             }
             
-            bool.TryParse(this.IsActive, out this._active);
-            this._parsedActive = true;
+            bool.TryParse(this.IsActive, out _active);
+            _parsedActive = true;
             return _active;
         }
 
