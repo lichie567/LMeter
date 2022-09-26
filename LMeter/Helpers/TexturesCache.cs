@@ -25,7 +25,7 @@ namespace LMeter.Helpers
         public TexturesCache(DalamudPluginInterface pluginInterface)
         {
             _textureCache = new Dictionary<string, Tuple<TextureWrap, float>>();
-            _penumbraPathResolver = pluginInterface.GetIpcSubscriber<string, string>("Penumbra.ResolveDefaultPath");
+            _penumbraPathResolver = pluginInterface.GetIpcSubscriber<string, string>("Penumbra.ResolveInterfacePath");
             _uiBuilder = pluginInterface.UiBuilder;
         }
 
