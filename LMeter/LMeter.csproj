@@ -39,7 +39,16 @@
     <PropertyGroup>
         <DalamudVersion>dev</DalamudVersion>
         <DalamudLocal>../dalamud/</DalamudLocal>
+    </PropertyGroup>
+    
+    <!-- Dalamud Configuration (Windows-specific) -->
+    <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
         <DalamudXIVLauncher>$(APPDATA)\XIVLauncher\addon\Hooks\$(DalamudVersion)</DalamudXIVLauncher>
+    </PropertyGroup>
+    
+    <!-- Dalamud Configuration (Linux-specific) -->
+    <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Linux'))">
+        <DalamudXIVLauncher>$(HOME)/.xlcore/dalamud/Hooks/$(DalamudVersion)</DalamudXIVLauncher>
     </PropertyGroup>
 
     <!-- Assembly Reference Locations -->
