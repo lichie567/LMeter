@@ -63,6 +63,7 @@ namespace LMeter
                 }
             );
 
+            _clientState.Login += OnLogin;
             _clientState.Logout += OnLogout;
             _pluginInterface.UiBuilder.OpenConfigUi += OpenConfigUi;
             _pluginInterface.UiBuilder.Draw += Draw;
@@ -123,6 +124,11 @@ namespace LMeter
             {
                 _configRoot.PushConfig(_config);
             }
+        }
+
+        private void OnLogin(object? sender, EventArgs? args)
+        {
+            Singletons.Get<ACTClient>().Start();
         }
 
         private void OnLogout(object? sender, EventArgs? args)
