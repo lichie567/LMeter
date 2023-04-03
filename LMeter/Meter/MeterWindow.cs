@@ -182,7 +182,7 @@ namespace LMeter.Meter
                     _previewEvent = ACTEvent.GetTestData();
                 }
 
-                ACTEvent? actEvent = this.GeneralConfig.Preview ? _previewEvent : ACTClient.GetEvent(_eventIndex);
+                ACTEvent? actEvent = this.GeneralConfig.Preview ? _previewEvent : IACTClient.Current.GetEvent(_eventIndex);
 
                 (localPos, size) = this.HeaderConfig.DrawHeader(localPos, size, actEvent?.Encounter, drawList);
                 drawList.AddRectFilled(localPos, localPos + size, this.GeneralConfig.BackgroundColor.Base);
@@ -253,7 +253,7 @@ namespace LMeter.Meter
                     selected = true;
                 }
 
-                List<ACTEvent> events = ACTClient.PastEvents;
+                List<ACTEvent> events = IACTClient.Current.PastEvents;
                 if (events.Count > 0)
                 {
                     ImGui.Separator();

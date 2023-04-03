@@ -93,9 +93,8 @@ namespace LMeter
             Singletons.Register(new FontsManager(pluginInterface.UiBuilder, config.FontConfig.Fonts.Values));
 
             // Connect to ACT
-            ACTClient actClient = new ACTClient(config.ACTConfig);
+            IACTClient actClient = IACTClient.GetNewClient(); // Singleton Registry is done internally here
             actClient.Start();
-            Singletons.Register(actClient);
 
             // Create profile on first load
             if (config.FirstLoad && config.MeterList.Meters.Count == 0)

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Numerics;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.Command;
@@ -96,7 +96,7 @@ namespace LMeter
 
         public void Clear()
         {
-            Singletons.Get<ACTClient>().Clear();
+            IACTClient.Current.Clear();
             foreach (var meter in _config.MeterList.Meters)
             {
                 meter.Clear();
@@ -135,7 +135,7 @@ namespace LMeter
             switch (arguments)
             {
                 case "end":
-                    ACTClient.EndEncounter();
+                    IACTClient.Current.EndEncounter();
                     break;
                 case "clear":
                     this.Clear();
