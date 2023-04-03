@@ -70,7 +70,7 @@ namespace LMeter
 
         private void Draw()
         {
-            if (_clientState.LocalPlayer == null || CharacterState.IsCharacterBusy())
+            if (_clientState.IsLoggedIn && (_clientState.LocalPlayer == null || CharacterState.IsCharacterBusy()))
             {
                 return;
             }
