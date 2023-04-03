@@ -23,7 +23,7 @@ namespace LMeter.Config
         
         public IConfigPage GetDefault() => new ACTConfig();
 
-        public bool IINACTMode = true;
+        public bool IINACTMode = false;
         public string ACTSocketAddress;
 
         public int EncounterHistorySize = 15;
