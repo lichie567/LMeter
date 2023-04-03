@@ -23,6 +23,7 @@ namespace LMeter.ACT
         private const string IINACTSubscribeIpcEndpoint = "IINACT.CreateSubscriber";
         private const string IINACTUnsubscribeIpcEndpoint = "IINACT.Unsubscribe";
         private const string IINACTProviderEditEndpoint = "IINACT.IpcProvider." + LMeterSubscriptionIpcEndpoint;
+        private readonly JObject SubscriptionMessageObject = JObject.Parse(ACTClient.SubscriptionMessage);
 
         public ConnectionStatus Status { get; private set; }
         public List<ACTEvent> PastEvents { get; private set; }
@@ -120,7 +121,7 @@ namespace LMeter.ACT
             {
                 _dpi
                     .GetIpcSubscriber<JObject, bool>(IINACTProviderEditEndpoint)
-                    .InvokeAction(JObject.Parse("""{"call":"subscribe","events":["CombatData"]}"""));
+                    .InvokeAction(SubscriptionMessageObject);
             }
             catch (Exception ex)
             {

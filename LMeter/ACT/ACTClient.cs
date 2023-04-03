@@ -24,6 +24,7 @@ namespace LMeter.ACT
         private Task? _receiveTask;
         private ACTEvent? _lastEvent;
 
+        public const string SubscriptionMessage = """{"call":"subscribe","events":["CombatData"]}""";
         public ConnectionStatus Status { get; private set; }
         public List<ACTEvent> PastEvents { get; private set; }
 
@@ -107,9 +108,8 @@ namespace LMeter.ACT
                 Status = ConnectionStatus.Connecting;
                 await _socket.ConnectAsync(new Uri(host), _cancellationTokenSource.Token);
 
-                string subscribe = "{\"call\":\"subscribe\",\"events\":[\"CombatData\"]}";
                 await _socket.SendAsync(
-                        Encoding.UTF8.GetBytes(subscribe),
+                        Encoding.UTF8.GetBytes(SubscriptionMessage),
                         WebSocketMessageType.Text,
                         endOfMessage: true,
                         _cancellationTokenSource.Token);
