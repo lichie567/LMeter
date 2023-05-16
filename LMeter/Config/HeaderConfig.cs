@@ -76,7 +76,7 @@ namespace LMeter.Config
             {
                 using (FontsManager.PushFont(this.DurationFontKey))
                 {
-                    string duration = encounter is null ? $" LMeter v{Plugin.Version}" : $" {encounter.Duration}";
+                    string duration = encounter is null ? $" LMeter Customized v{Plugin.Version}" : $" {encounter.Duration}";
                     durationSize = ImGui.CalcTextSize(duration);
                     durationPos = Utils.GetAnchoredPosition(durationPos, -headerSize, DrawAnchor.Left);
                     durationPos = Utils.GetAnchoredPosition(durationPos, durationSize, this.DurationAlign) + this.DurationOffset;

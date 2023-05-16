@@ -1,8 +1,8 @@
 {
-    "Name": "LMeter",
+    "Name": "LMeter Customized",
     "Author": "Lichie",
     "Punchline": "Plugin to display ACT combat log data.",
-    "Description": "Renders ACT combat log data as a plugin instead of using a web based overlay",
+    "Description": "Renders ACT combat log data as a plugin instead of using a web based overlay. Customized with INNACT Support.",
     "RepoUrl": "https://github.com/lichie567/LMeter",
     "Tags": ["UI"]
 }

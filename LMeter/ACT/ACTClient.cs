@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Net.WebSockets;
@@ -9,55 +10,45 @@ using System.Threading.Tasks;
 using Dalamud.Game.Gui;
 using Dalamud.Game.Text;
 using Dalamud.Logging;
+using Dalamud.Plugin;
 using LMeter.Config;
 using LMeter.Helpers;
 using Newtonsoft.Json;
 
 namespace LMeter.ACT
 {
-    public enum ConnectionStatus
-    {
-        NotConnected,
-        Connected,
-        ShuttingDown,
-        Connecting,
-        ConnectionFailed
-    }
-
-    public class ACTClient : IPluginDisposable
+    public class ACTClient : IACTClient
     {
         private ACTConfig _config;
         private ClientWebSocket _socket;
         private CancellationTokenSource _cancellationTokenSource;
         private Task? _receiveTask;
         private ACTEvent? _lastEvent;
-        private ConnectionStatus _status;
-        private List<ACTEvent> _pastEvents;
 
-        public static ConnectionStatus Status => Singletons.Get<ACTClient>()._status;
-        public static List<ACTEvent> PastEvents => Singletons.Get<ACTClient>()._pastEvents;
+        public const string SubscriptionMessage = """{"call":"subscribe","events":["CombatData"]}""";
+        public ConnectionStatus Status { get; private set; }
+        public List<ACTEvent> PastEvents { get; private set; }
 
-        public ACTClient(ACTConfig config)
+        public ACTClient(ACTConfig config, DalamudPluginInterface dpi)
         {
             _config = config;
             _socket = new ClientWebSocket();
             _cancellationTokenSource = new CancellationTokenSource();
-            _status = ConnectionStatus.NotConnected;
-            _pastEvents = new List<ACTEvent>();
+            Status = ConnectionStatus.NotConnected;
+            PastEvents = new List<ACTEvent>();
         }
 
-        public static ACTEvent? GetEvent(int index = -1)
+        public ACTEvent? GetEvent(int index = -1)
         {
-            ACTClient client = Singletons.Get<ACTClient>();
-            if (index >= 0 && index < client._pastEvents.Count)
+            if (index >= 0 && index < PastEvents.Count)
             {
-                return client._pastEvents[index];
+                return PastEvents[index];
             }
             
-            return client._lastEvent;
+            return _lastEvent;
         }
 
-        public static void EndEncounter()
+        public void EndEncounter()
         {
             ChatGui chat = Singletons.Get<ChatGui>();
             XivChatEntry message = new XivChatEntry()
@@ -72,7 +63,7 @@ namespace LMeter.ACT
         public void Clear()
         {
             _lastEvent = null;
-            _pastEvents = new List<ACTEvent>();
+            PastEvents = new List<ACTEvent>();
             if (_config.ClearACT)
             {
                 ChatGui chat = Singletons.Get<ChatGui>();
@@ -86,16 +77,15 @@ namespace LMeter.ACT
             }
         }
 
-        public static void RetryConnection(string address)
+        public void RetryConnection()
         {
-            ACTClient client = Singletons.Get<ACTClient>();
-            client.Reset();
-            client.Start();
+            Reset();
+            Start();
         }
 
         public void Start()
         {
-            if (_status != ConnectionStatus.NotConnected)
+            if (Status != ConnectionStatus.NotConnected)
             {
                 PluginLog.Error("Cannot start, ACTClient needs to be reset!");
                 return;
@@ -107,7 +97,7 @@ namespace LMeter.ACT
             }
             catch (Exception ex)
             {
-                _status = ConnectionStatus.ConnectionFailed;
+                Status = ConnectionStatus.ConnectionFailed;
                 this.LogConnectionFailure(ex.ToString());
             }
         }
@@ -116,19 +106,19 @@ namespace LMeter.ACT
         {
             try
             {
-                _status = ConnectionStatus.Connecting;
+                Status = ConnectionStatus.Connecting;
                 await _socket.ConnectAsync(new Uri(host), _cancellationTokenSource.Token);
 
                 string subscribe = "{\"call\":\"subscribe\",\"events\":[\"CombatData\"]}";
                 await _socket.SendAsync(
-                        Encoding.UTF8.GetBytes(subscribe),
+                        Encoding.UTF8.GetBytes(SubscriptionMessage),
                         WebSocketMessageType.Text,
                         endOfMessage: true,
                         _cancellationTokenSource.Token);
             }
             catch (Exception ex)
             {
-                _status = ConnectionStatus.ConnectionFailed;
+                Status = ConnectionStatus.ConnectionFailed;
                 this.LogConnectionFailure(ex.ToString());
                 return;
             }
@@ -136,12 +126,12 @@ namespace LMeter.ACT
             ArraySegment<byte> buffer = new ArraySegment<byte>(new byte[4096]);
             if (buffer.Array is null)
             {
-                _status = ConnectionStatus.ConnectionFailed;
+                Status = ConnectionStatus.ConnectionFailed;
                 this.LogConnectionFailure("Failed to allocate receive buffer!");
                 return;
             }
 
-            _status = ConnectionStatus.Connected;
+            Status = ConnectionStatus.Connected;
             PluginLog.Information("Successfully Established ACT Connection");
             try
             {
@@ -186,11 +176,11 @@ namespace LMeter.ACT
                                         {
                                             if (!newEvent.IsEncounterActive())
                                             {
-                                                _pastEvents.Add(newEvent);
+                                                PastEvents.Add(newEvent);
 
-                                                while (_pastEvents.Count > _config.EncounterHistorySize)
+                                                while (PastEvents.Count > _config.EncounterHistorySize)
                                                 {
-                                                    _pastEvents.RemoveAt(0);
+                                                    PastEvents.RemoveAt(0);
                                                 }
                                             }
 
@@ -207,7 +197,7 @@ namespace LMeter.ACT
                         }
                     }
                 }
-                while (_status == ConnectionStatus.Connected);
+                while (Status == ConnectionStatus.Connected);
             }
             catch
             {
@@ -215,7 +205,7 @@ namespace LMeter.ACT
             }
             finally
             {
-                if (_status != ConnectionStatus.ShuttingDown)
+                if (Status != ConnectionStatus.ShuttingDown)
                 {
                     this.Shutdown();
                 }
@@ -224,7 +214,7 @@ namespace LMeter.ACT
 
         public void Shutdown()
         {
-            _status = ConnectionStatus.ShuttingDown;
+            Status = ConnectionStatus.ShuttingDown;
             _lastEvent = null;
             if (_socket.State == WebSocketState.Open ||
                 _socket.State == WebSocketState.Connecting)
@@ -251,7 +241,7 @@ namespace LMeter.ACT
             }
 
             _socket.Dispose();
-            _status = ConnectionStatus.NotConnected;
+            Status = ConnectionStatus.NotConnected;
         }
 
         public void Reset()
@@ -259,7 +249,7 @@ namespace LMeter.ACT
             this.Shutdown();
             _socket = new ClientWebSocket();
             _cancellationTokenSource = new CancellationTokenSource();
-            _status = ConnectionStatus.NotConnected;
+            Status = ConnectionStatus.NotConnected;
         }
 
         private void LogConnectionFailure(string error)

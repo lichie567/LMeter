@@ -70,7 +70,7 @@ namespace LMeter
 
         private void Draw()
         {
-            if (_clientState.LocalPlayer == null || CharacterState.IsCharacterBusy())
+            if (_clientState.IsLoggedIn && (_clientState.LocalPlayer == null || CharacterState.IsCharacterBusy()))
             {
                 return;
             }
@@ -96,7 +96,7 @@ namespace LMeter
 
         public void Clear()
         {
-            Singletons.Get<ACTClient>().Clear();
+            IACTClient.Current.Clear();
             foreach (var meter in _config.MeterList.Meters)
             {
                 meter.Clear();
@@ -135,7 +135,7 @@ namespace LMeter
             switch (arguments)
             {
                 case "end":
-                    ACTClient.EndEncounter();
+                    IACTClient.Current.EndEncounter();
                     break;
                 case "clear":
                     this.Clear();

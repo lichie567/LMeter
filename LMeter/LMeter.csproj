@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup Label="Target">
         <PlatformTarget>x64</PlatformTarget>
         <TargetFramework>net7.0-windows</TargetFramework>
@@ -38,6 +38,7 @@
     <!-- Dalamud Configuration -->
     <PropertyGroup>
         <DalamudVersion>dev</DalamudVersion>
+		<DalamudHome>$(DALAMUD_HOME)</DalamudHome>
         <DalamudLocal>../dalamud/</DalamudLocal>
         <DalamudXIVLauncher>$(APPDATA)\XIVLauncher\addon\Hooks\$(DalamudVersion)</DalamudXIVLauncher>
     </PropertyGroup>
@@ -46,6 +47,7 @@
     <PropertyGroup>
         <AssemblySearchPaths>
             $(AssemblySearchPaths);
+			$(DalamudHome);
             $(DalamudLocal);
             $(DalamudXIVLauncher);
         </AssemblySearchPaths>

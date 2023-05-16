@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using LMeter.ACT;
 
 namespace LMeter.Helpers
 {
@@ -42,6 +43,21 @@ namespace LMeter.Helpers
             if (!ActiveInstances.TryAdd(newSingleton.GetType(), newSingleton))
             {
                 throw new Exception($"Failed to register new singleton for type {newSingleton.GetType()}");
+            }
+        }
+
+        public static void DeleteActClients()
+        {
+            ActiveInstances.TryRemove(typeof(ACTClient), out var client1);
+            if (client1 != null)
+            {
+                ((IACTClient) client1).Dispose();
+            }
+
+            ActiveInstances.TryRemove(typeof(IINACTClient), out var client2);
+            if (client2 != null)
+            {
+                ((IACTClient) client2).Dispose();
             }
         }
 

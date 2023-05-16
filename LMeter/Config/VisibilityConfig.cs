@@ -64,7 +64,7 @@ namespace LMeter.Config
                 return false;
             }
 
-            if (this.HideIfNotConnected && ACTClient.Status != ConnectionStatus.Connected)
+            if (this.HideIfNotConnected && IACTClient.Current.Status != ConnectionStatus.Connected)
             {
                 return false;
             }

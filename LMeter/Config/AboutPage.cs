@@ -18,7 +18,7 @@ namespace LMeter.Config
                 if (Plugin.IconTexture is not null)
                 {
                     Vector2 iconSize = new Vector2(Plugin.IconTexture.Width, Plugin.IconTexture.Height);
-                    string versionText = $"LMeter v{Plugin.Version}";
+                    string versionText = $"LMeter Customized v{Plugin.Version}";
                     Vector2 textSize = ImGui.CalcTextSize(versionText);
                     headerSize = new Vector2(size.X, iconSize.Y + textSize.Y);
 

@@ -39,7 +39,7 @@ namespace LMeter.Helpers
             string message,
             NotificationType type = NotificationType.Success,
             uint durationInMs = 3000,
-            string title = "LMeter")
+            string title = "LMeter Customized")
         {
             Singletons.Get<UiBuilder>().AddNotification(message, title, type, durationInMs);
         }
