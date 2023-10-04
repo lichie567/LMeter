@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Numerics;
 using Dalamud.Interface;
+using Dalamud.Interface.Internal;
 using Dalamud.Interface.Internal.Notifications;
 using ImGuiNET;
 using ImGuiScene;
@@ -71,7 +72,7 @@ namespace LMeter.Helpers
             Vector2 size,
             ImDrawListPtr drawList)
         {
-            TextureWrap? tex = Singletons.Get<TexturesCache>().GetTextureFromIconId(iconId, 0, true);
+            IDalamudTextureWrap? tex = Singletons.Get<TexturesCache>().GetTextureFromIconId(iconId, 0, true);
 
             if (tex is null)
             {
@@ -91,7 +92,7 @@ namespace LMeter.Helpers
             float opacity,
             ImDrawListPtr drawList)
         {
-            TextureWrap? tex = Singletons.Get<TexturesCache>().GetTextureFromIconId(iconId, (uint)stackCount, true, desaturate, opacity);
+            IDalamudTextureWrap? tex = Singletons.Get<TexturesCache>().GetTextureFromIconId(iconId, (uint)stackCount, true, desaturate);
 
             if (tex is null)
             {
@@ -100,10 +101,11 @@ namespace LMeter.Helpers
 
             (Vector2 uv0, Vector2 uv1) = GetTexCoordinates(tex, size, cropIcon);
 
-            drawList.AddImage(tex.ImGuiHandle, position, position + size, uv0, uv1);
+            uint alpha = (uint)(opacity * 255) << 24 | 0x00FFFFFF;
+            drawList.AddImage(tex.ImGuiHandle, position, position + size, uv0, uv1, alpha);
         }
 
-        public static (Vector2, Vector2) GetTexCoordinates(TextureWrap texture, Vector2 size, bool cropIcon = true)
+        public static (Vector2, Vector2) GetTexCoordinates(IDalamudTextureWrap texture, Vector2 size, bool cropIcon = true)
         {
             if (texture == null)
             {

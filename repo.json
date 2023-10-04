@@ -4,9 +4,9 @@
         "Name": "LMeter",
         "Description": "Plugin to display ACT combat log data.",
         "InternalName": "LMeter",
-        "AssemblyVersion": "0.1.8.0",
-        "TestingAssemblyVersion": "0.1.8.0",
-        "RepoUrl": "https://github.com/lichie567/LMeter",
+        "AssemblyVersion": "0.2.0.0",
+        "TestingAssemblyVersion": "0.2.0.0",
+        "RepoUrl": "https://github.com/Tischel/LMeter",
         "ApplicableVersion": "any",
         "DalamudApiLevel": 8,
         "IsHide": "False",
@@ -14,9 +14,9 @@
         "DownloadCount": 0,
         "LastUpdate": 0,
         "LoadPriority": 69420,
-        "DownloadLinkInstall": "https://github.com/lichie567/LMeter/releases/download/0.1.8.0/LMeter.zip",
-        "DownloadLinkTesting": "https://github.com/lichie567/LMeter/releases/download/0.1.8.0/LMeter.zip",
-        "DownloadLinkUpdate": "https://github.com/lichie567/LMeter/releases/download/0.1.8.0/LMeter.zip",
-        "IconUrl": "https://raw.githubusercontent.com/lichie567/LMeter/main/LMeter/Media/Images/icon.png"
+        "DownloadLinkInstall": "https://github.com/Tischel/LMeter/releases/download/0.2.0.0/LMeter.zip",
+        "DownloadLinkTesting": "https://github.com/Tischel/LMeter/releases/download/0.2.0.0/LMeter.zip",
+        "DownloadLinkUpdate": "https://github.com/Tischel/LMeter/releases/download/0.2.0.0/LMeter.zip",
+        "IconUrl": "https://raw.githubusercontent.com/Tischel/LMeter/main/LMeter/Media/Images/icon.png"
     }
 ]

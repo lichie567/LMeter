@@ -1,3 +1,8 @@
+using Dalamud.Game.Text;
+using Dalamud.Plugin.Services;
+using LMeter.Config;
+using LMeter.Helpers;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,12 +11,6 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Dalamud.Game.Gui;
-using Dalamud.Game.Text;
-using Dalamud.Logging;
-using LMeter.Config;
-using LMeter.Helpers;
-using Newtonsoft.Json;
 
 namespace LMeter.ACT
 {
@@ -53,20 +52,20 @@ namespace LMeter.ACT
             {
                 return client._pastEvents[index];
             }
-            
+
             return client._lastEvent;
         }
 
         public static void EndEncounter()
         {
-            ChatGui chat = Singletons.Get<ChatGui>();
+            IChatGui chat = Singletons.Get<IChatGui>();
             XivChatEntry message = new XivChatEntry()
             {
                 Message = "end",
                 Type = XivChatType.Echo
             };
 
-            chat.PrintChat(message);
+            chat.Print(message);
         }
 
         public void Clear()
@@ -75,14 +74,14 @@ namespace LMeter.ACT
             _pastEvents = new List<ACTEvent>();
             if (_config.ClearACT)
             {
-                ChatGui chat = Singletons.Get<ChatGui>();
+                IChatGui chat = Singletons.Get<IChatGui>();
                 XivChatEntry message = new XivChatEntry()
                 {
                     Message = "clear",
                     Type = XivChatType.Echo
                 };
 
-                chat.PrintChat(message);
+                chat.Print(message);
             }
         }
 
@@ -97,7 +96,7 @@ namespace LMeter.ACT
         {
             if (_status != ConnectionStatus.NotConnected)
             {
-                PluginLog.Error("Cannot start, ACTClient needs to be reset!");
+                Singletons.Get<IPluginLog>().Error("Cannot start, ACTClient needs to be reset!");
                 return;
             }
 
@@ -142,7 +141,7 @@ namespace LMeter.ACT
             }
 
             _status = ConnectionStatus.Connected;
-            PluginLog.Information("Successfully Established ACT Connection");
+            Singletons.Get<IPluginLog>().Information("Successfully Established ACT Connection");
             try
             {
                 do
@@ -166,8 +165,8 @@ namespace LMeter.ACT
                         using (StreamReader reader = new StreamReader(ms, Encoding.UTF8))
                         {
                             string data = await reader.ReadToEndAsync();
-                            PluginLog.Verbose(data);
-                            
+                            Singletons.Get<IPluginLog>().Verbose(data);
+
                             if (!string.IsNullOrEmpty(data))
                             {
                                 try
@@ -247,7 +246,7 @@ namespace LMeter.ACT
                     _receiveTask.Wait();
                 }
 
-                PluginLog.Information($"Closed ACT Connection");
+                Singletons.Get<IPluginLog>().Information($"Closed ACT Connection");
             }
 
             _socket.Dispose();
@@ -264,8 +263,8 @@ namespace LMeter.ACT
 
         private void LogConnectionFailure(string error)
         {
-            PluginLog.Debug($"Failed to connect to ACT!");
-            PluginLog.Verbose(error);
+            Singletons.Get<IPluginLog>().Debug($"Failed to connect to ACT!");
+            Singletons.Get<IPluginLog>().Verbose(error);
         }
 
         public void Dispose()
