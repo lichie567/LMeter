@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Numerics;
-using Dalamud.Game.ClientState;
 using Dalamud.Game.Command;
 using Dalamud.Interface;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using LMeter.ACT;
 using LMeter.Config;
@@ -19,9 +20,9 @@ namespace LMeter
         private readonly Vector2 _origin = ImGui.GetMainViewport().Size / 2f;
         private readonly Vector2 _configSize = new Vector2(550, 550);
 
-        private ClientState _clientState;
+        private IClientState _clientState;
         private DalamudPluginInterface _pluginInterface;
-        private CommandManager _commandManager;
+        private ICommandManager _commandManager;
         private WindowSystem _windowSystem;
         private ConfigWindow _configRoot;
         private LMeterConfig _config;
@@ -36,8 +37,8 @@ namespace LMeter
             ImGuiWindowFlags.NoSavedSettings;
 
         public PluginManager(
-            ClientState clientState,
-            CommandManager commandManager,
+            IClientState clientState,
+            ICommandManager commandManager,
             DalamudPluginInterface pluginInterface,
             LMeterConfig config)
         {
@@ -125,7 +126,7 @@ namespace LMeter
             }
         }
 
-        private void OnLogout(object? sender, EventArgs? args)
+        private void OnLogout()
         {
             ConfigHelpers.SaveConfig();
         }

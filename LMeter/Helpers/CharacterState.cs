@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Conditions;
+using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 
 namespace LMeter.Helpers
@@ -13,7 +13,7 @@ namespace LMeter.Helpers
 
         public static bool IsCharacterBusy()
         {
-            Condition condition = Singletons.Get<Condition>();
+            ICondition condition = Singletons.Get<ICondition>();
             return condition[ConditionFlag.WatchingCutscene] ||
                 condition[ConditionFlag.WatchingCutscene78] ||
                 condition[ConditionFlag.OccupiedInCutSceneEvent] ||
@@ -25,30 +25,30 @@ namespace LMeter.Helpers
 
         public static bool IsInCombat()
         {
-            Condition condition = Singletons.Get<Condition>();
+            ICondition condition = Singletons.Get<ICondition>();
             return condition[ConditionFlag.InCombat];
         }
 
         public static bool IsInDuty()
         {
-            Condition condition = Singletons.Get<Condition>();
+            ICondition condition = Singletons.Get<ICondition>();
             return condition[ConditionFlag.BoundByDuty];
         }
 
         public static bool IsPerforming()
         {
-            Condition condition = Singletons.Get<Condition>();
+            ICondition condition = Singletons.Get<ICondition>();
             return condition[ConditionFlag.Performing];
         }
 
         public static bool IsInGoldenSaucer()
         {
-            return _goldenSaucerIDs.Any(id => id == Singletons.Get<ClientState>().TerritoryType);
+            return _goldenSaucerIDs.Any(id => id == Singletons.Get<IClientState>().TerritoryType);
         }
 
         public static Job GetCharacterJob()
         {
-            var player = Singletons.Get<ClientState>().LocalPlayer;
+            var player = Singletons.Get<IClientState>().LocalPlayer;
             if (player is null)
             {
                 return Job.UKN;
@@ -56,7 +56,7 @@ namespace LMeter.Helpers
 
             unsafe
             {
-                return (Job)((Character*)player.Address)->ClassJob;
+                return (Job)((Character*)player.Address)->CharacterData.ClassJob;
             }
         }
 

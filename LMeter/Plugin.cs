@@ -3,22 +3,19 @@ using System.IO;
 using System.Reflection;
 using Dalamud.Data;
 using Dalamud.Game;
-using Dalamud.Game.ClientState;
-using Dalamud.Game.ClientState.Conditions;
-using Dalamud.Game.ClientState.JobGauge;
 using Dalamud.Game.ClientState.Objects;
-using Dalamud.Game.ClientState.Party;
 using Dalamud.Game.Command;
 using Dalamud.Game.Gui;
 using Dalamud.Interface;
+using Dalamud.Interface.Internal;
 using Dalamud.Logging;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using ImGuiScene;
 using LMeter.ACT;
 using LMeter.Config;
 using LMeter.Helpers;
 using LMeter.Meter;
-using SigScanner = Dalamud.Game.SigScanner;
 
 namespace LMeter
 {
@@ -32,26 +29,25 @@ namespace LMeter
 
         public static string ConfigFilePath { get; private set; } = "";
         
-        public static TextureWrap? IconTexture { get; private set; } = null;
+        public static IDalamudTextureWrap? IconTexture { get; private set; } = null;
 
         public static string Changelog { get; private set; } = string.Empty;
 
         public string Name => "LMeter";
 
         public Plugin(
-            ClientState clientState,
-            CommandManager commandManager,
-            Condition condition,
+            IClientState clientState,
+            ICommandManager commandManager,
+            ICondition condition,
             DalamudPluginInterface pluginInterface,
-            DataManager dataManager,
-            Framework framework,
-            GameGui gameGui,
-            JobGauges jobGauges,
-            ObjectTable objectTable,
-            PartyList partyList,
-            SigScanner sigScanner,
-            TargetManager targetManager,
-            ChatGui chatGui
+            IDataManager dataManager,
+            IFramework framework,
+            IGameGui gameGui,
+            IJobGauges jobGauges,
+            IObjectTable objectTable,
+            IPartyList partyList,
+            ITargetManager targetManager,
+            IChatGui chatGui
         )
         {
             Plugin.Version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? Plugin.Version;
@@ -69,7 +65,6 @@ namespace LMeter
             Singletons.Register(jobGauges);
             Singletons.Register(objectTable);
             Singletons.Register(partyList);
-            Singletons.Register(sigScanner);
             Singletons.Register(targetManager);
             Singletons.Register(chatGui);
             Singletons.Register(pluginInterface.UiBuilder);
@@ -108,7 +103,7 @@ namespace LMeter
             Singletons.Register(new PluginManager(clientState, commandManager, pluginInterface, config));
         }
         
-        private static TextureWrap? LoadIconTexture(UiBuilder uiBuilder)
+        private static IDalamudTextureWrap? LoadIconTexture(UiBuilder uiBuilder)
         {
             string? pluginPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             if (string.IsNullOrEmpty(pluginPath))
@@ -122,7 +117,7 @@ namespace LMeter
                 return null;
             }
 
-            TextureWrap? texture = null;
+            IDalamudTextureWrap? texture = null;
             try
             {
                 texture = uiBuilder.LoadImage(iconPath);

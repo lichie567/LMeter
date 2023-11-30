@@ -2,7 +2,7 @@ using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
-using Dalamud.Game.ClientState;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using LMeter.ACT;
 using LMeter.Helpers;
@@ -120,7 +120,7 @@ namespace LMeter.Config
 
             using (FontsManager.PushFont(this.BarNameFontKey))
             {
-                string playerName = Singletons.Get<ClientState>().LocalPlayer?.Name.ToString() ?? "YOU";
+                string playerName = Singletons.Get<IClientState>().LocalPlayer?.Name.ToString() ?? "YOU";
                 if (this.UseCharacterName && combatant.Name.Contains("YOU"))
                 {
                     combatant.Name = playerName;

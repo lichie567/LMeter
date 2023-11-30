@@ -37,9 +37,9 @@ namespace LMeter.Helpers
             });
         }
 
-        public static void Register(object newSingleton)
+        public static void Register<T>(T newSingleton) where T : notnull
         {
-            if (!ActiveInstances.TryAdd(newSingleton.GetType(), newSingleton))
+            if (!ActiveInstances.TryAdd(typeof(T), newSingleton))
             {
                 throw new Exception($"Failed to register new singleton for type {newSingleton.GetType()}");
             }

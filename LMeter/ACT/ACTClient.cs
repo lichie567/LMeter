@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Dalamud.Game.Gui;
 using Dalamud.Game.Text;
 using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 using LMeter.Config;
 using LMeter.Helpers;
 using Newtonsoft.Json;
@@ -59,14 +60,14 @@ namespace LMeter.ACT
 
         public static void EndEncounter()
         {
-            ChatGui chat = Singletons.Get<ChatGui>();
+            IChatGui chat = Singletons.Get<IChatGui>();
             XivChatEntry message = new XivChatEntry()
             {
                 Message = "end",
                 Type = XivChatType.Echo
             };
 
-            chat.PrintChat(message);
+            chat.Print(message);
         }
 
         public void Clear()
@@ -75,14 +76,14 @@ namespace LMeter.ACT
             _pastEvents = new List<ACTEvent>();
             if (_config.ClearACT)
             {
-                ChatGui chat = Singletons.Get<ChatGui>();
+                IChatGui chat = Singletons.Get<IChatGui>();
                 XivChatEntry message = new XivChatEntry()
                 {
                     Message = "clear",
                     Type = XivChatType.Echo
                 };
 
-                chat.PrintChat(message);
+                chat.Print(message);
             }
         }
 

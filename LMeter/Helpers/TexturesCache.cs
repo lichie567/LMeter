@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using Dalamud.Data;
 using Dalamud.Interface;
+using Dalamud.Interface.Internal;
 using Dalamud.Logging;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Ipc;
+using Dalamud.Plugin.Services;
 using Dalamud.Utility;
 using ImGuiScene;
 using Lumina.Data.Files;
@@ -18,18 +19,18 @@ namespace LMeter.Helpers
 {
     public class TexturesCache : IPluginDisposable
     {
-        private Dictionary<string, Tuple<TextureWrap, float>> _textureCache;
+        private Dictionary<string, Tuple<IDalamudTextureWrap, float>> _textureCache;
         private ICallGateSubscriber<string, string> _penumbraPathResolver;
         private UiBuilder _uiBuilder;
 
         public TexturesCache(DalamudPluginInterface pluginInterface)
         {
-            _textureCache = new Dictionary<string, Tuple<TextureWrap, float>>();
+            _textureCache = new Dictionary<string, Tuple<IDalamudTextureWrap, float>>();
             _penumbraPathResolver = pluginInterface.GetIpcSubscriber<string, string>("Penumbra.ResolveDefaultPath");
             _uiBuilder = pluginInterface.UiBuilder;
         }
 
-        public TextureWrap? GetTextureFromIconId(
+        public IDalamudTextureWrap? GetTextureFromIconId(
             uint iconId,
             uint stackCount = 0,
             bool hdIcon = true,
@@ -48,19 +49,19 @@ namespace LMeter.Helpers
                 _textureCache.Remove(key);
             }
 
-            TextureWrap? newTexture = this.LoadTexture(iconId + stackCount, hdIcon, greyScale, opacity);
+            IDalamudTextureWrap? newTexture = this.LoadTexture(iconId + stackCount, hdIcon, greyScale, opacity);
             if (newTexture == null)
             {
                 return null;
             }
 
-            _textureCache.Add(key, new Tuple<TextureWrap, float>(newTexture, opacity));
+            _textureCache.Add(key, new Tuple<IDalamudTextureWrap, float>(newTexture, opacity));
             return newTexture;
         }
 
-        private TextureWrap? LoadTexture(uint id, bool hdIcon, bool greyScale, float opacity = 1f)
+        private IDalamudTextureWrap? LoadTexture(uint id, bool hdIcon, bool greyScale, float opacity = 1f)
         {
-            TextureWrap? textureWrap = null;
+            IDalamudTextureWrap? textureWrap = null;
             string path = $"ui/icon/{id / 1000 * 1000:000000}/{id:000000}{(hdIcon ? "_hr1" : string.Empty)}.tex";
 
             try
@@ -78,7 +79,7 @@ namespace LMeter.Helpers
 
             try
             {
-                TexFile? iconFile = Singletons.Get<DataManager>().GetFile<TexFile>(path);
+                TexFile? iconFile = Singletons.Get<IDataManager>().GetFile<TexFile>(path);
                 if (iconFile is null)
                 {
                     return null;
@@ -94,7 +95,7 @@ namespace LMeter.Helpers
             return textureWrap;
         }
 
-        private TextureWrap? LoadPenumbraTexture(string path)
+        private IDalamudTextureWrap? LoadPenumbraTexture(string path)
         {            
             try
             {
@@ -230,7 +231,7 @@ namespace LMeter.Helpers
             }
         }
         
-        private static TextureWrap GetTextureWrap(TexFile tex, bool greyScale, float opacity)
+        private static IDalamudTextureWrap GetTextureWrap(TexFile tex, bool greyScale, float opacity)
         {
             UiBuilder uiBuilder = Singletons.Get<UiBuilder>();
             byte[] bytes = tex.GetRgbaImageData();
