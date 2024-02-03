@@ -62,11 +62,11 @@ namespace LMeter.ACT
         private static readonly Random _rand = new Random();
         
         [JsonIgnore]
-        private static readonly Dictionary<string, FieldInfo> _fields = typeof(Encounter).GetFields().ToDictionary((x) => x.Name.ToLower());
+        private static readonly Dictionary<string, MemberInfo> _members = typeof(Encounter).GetMembers().ToDictionary((x) => x.Name.ToLower());
 
         public string GetFormattedString(string format, string numberFormat)
         {
-            return TextTagFormatter.TextTagRegex.Replace(format, new TextTagFormatter(this, numberFormat, _fields).Evaluate);
+            return TextTagFormatter.TextTagRegex.Replace(format, new TextTagFormatter(this, numberFormat, _members).Evaluate);
         }
 
         [JsonProperty("title")]
@@ -131,15 +131,20 @@ namespace LMeter.ACT
         private static readonly Random _rand = new Random();
 
         [JsonIgnore]
-        private static readonly Dictionary<string, FieldInfo> _fields = typeof(Combatant).GetFields().ToDictionary((x) => x.Name.ToLower());
+        private static readonly Dictionary<string, MemberInfo> _members = typeof(Combatant).GetMembers().ToDictionary((x) => x.Name.ToLower());
 
         public string GetFormattedString(string format, string numberFormat)
         {
-            return TextTagFormatter.TextTagRegex.Replace(format, new TextTagFormatter(this, numberFormat, _fields).Evaluate);
+            return TextTagFormatter.TextTagRegex.Replace(format, new TextTagFormatter(this, numberFormat, _members).Evaluate);
         }
 
         [JsonProperty("name")]
-        public string Name = string.Empty;
+        public string OriginalName = string.Empty;
+
+        [JsonProperty("nameOverwrite")] 
+        public string? NameOverwrite = null;
+
+        public string Name => NameOverwrite ?? OriginalName;
 
         [JsonIgnore]
         public LazyString<string?>? Name_First;
@@ -262,7 +267,7 @@ namespace LMeter.ACT
 
             return new Combatant()
             {
-                Name = "Firstname Lastname",
+                OriginalName = "Firstname Lastname",
                 Duration = "00:30",
                 Job = Enum.Parse<Job>(jobs[_rand.Next(jobs.Length)]),
                 DamageTotal = new LazyFloat(damage.ToString()),

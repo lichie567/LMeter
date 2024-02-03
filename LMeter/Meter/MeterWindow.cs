@@ -2,6 +2,7 @@ using System.Linq;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using LMeter.Config;
 using LMeter.Helpers;
@@ -198,7 +199,9 @@ namespace LMeter.Meter
         {                
             if (actEvent?.Combatants is not null && actEvent.Combatants.Any())
             {
-                List<Combatant> sortedCombatants = this.GetSortedCombatants(actEvent, this.GeneralConfig.DataType);
+                // We don't want to corrupt the cache. The entire logic past this point mutates the sorted ACT combatants instead of using a rendering cache
+                // This has the issue that some settings can't behave properly and or don't update till the following combat update/fight
+                List<Combatant> sortedCombatants = this.GetSortedCombatants(actEvent, this.GeneralConfig.DataType).ToList();
                 
                 float top = this.GeneralConfig.DataType switch
                 {
@@ -208,18 +211,26 @@ namespace LMeter.Meter
                     _ => 0
                 };
 
-                int i = 0;
+                int currentIndex = 0;
+                var playerName = Singletons.Get<IClientState>().LocalPlayer?.Name.ToString() ?? "YOU";
+                
                 if (sortedCombatants.Count > this.BarConfig.BarCount)
                 {
-                    i = Math.Clamp(_scrollPosition, 0, sortedCombatants.Count - this.BarConfig.BarCount);
-                    _scrollPosition = i;
+                    currentIndex = Math.Clamp(_scrollPosition, 0, sortedCombatants.Count - this.BarConfig.BarCount);
+                    _scrollPosition = currentIndex;
+
+                    if (this.BarConfig.AlwaysShowSelf)
+                    {
+                        MovePlayerIntoViewableRange(sortedCombatants, _scrollPosition, playerName);
+                    }
                 }
 
-                int maxIndex = Math.Min(i + this.BarConfig.BarCount, sortedCombatants.Count);
-                for (; i < maxIndex; i++)
+                int maxIndex = Math.Min(currentIndex + this.BarConfig.BarCount, sortedCombatants.Count);
+                for (; currentIndex < maxIndex; currentIndex++)
                 {
-                    Combatant combatant = sortedCombatants[i];
-                    combatant.Rank = (i + 1).ToString();
+                    Combatant combatant = sortedCombatants[currentIndex];
+                    combatant.Rank = (currentIndex + 1).ToString();
+                    UpdatePlayerName(combatant, playerName);
 
                     float current = this.GeneralConfig.DataType switch
                     {
@@ -234,6 +245,33 @@ namespace LMeter.Meter
                     localPos = this.BarConfig.DrawBar(drawList, localPos, size, combatant, jobColor, barColor, top, current);
                 }
             }
+        }
+
+        private void MovePlayerIntoViewableRange(List<Combatant> sortedCombatants, int scrollPosition, string playerName)
+        {
+            var oldPlayerIndex = sortedCombatants.FindIndex(combatant => combatant.Name.Contains("YOU") || combatant.Name.Contains(playerName));
+            if (oldPlayerIndex == -1)
+            {
+                return;
+            }
+
+            var newPlayerIndex = Math.Clamp(oldPlayerIndex, scrollPosition, this.BarConfig.BarCount + scrollPosition - 1);
+
+            if (oldPlayerIndex == newPlayerIndex)
+            {
+                return;
+            }
+            sortedCombatants.MoveItem(oldPlayerIndex, newPlayerIndex);
+        }
+        
+        private void UpdatePlayerName(Combatant combatant, string localPlayerName)
+        {
+            combatant.NameOverwrite = this.BarConfig.UseCharacterName switch
+            {
+                true when combatant.Name.Contains("YOU") => localPlayerName,
+                false when combatant.NameOverwrite is not null => null,
+                _ => combatant.NameOverwrite
+            };
         }
         
         private bool DrawContextMenu(string popupId, out int selectedIndex)

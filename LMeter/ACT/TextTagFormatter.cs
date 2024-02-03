@@ -10,17 +10,17 @@ namespace LMeter.ACT
         public static Regex TextTagRegex { get; } = new Regex(@"\[(\w*)(:k)?\.?(\d+)?\]", RegexOptions.Compiled);
 
         private string _format;
-        private Dictionary<string, FieldInfo> _fields;
+        private Dictionary<string, MemberInfo> _members;
         private object _source;
 
         public TextTagFormatter(
             object source,
             string format,
-            Dictionary<string, FieldInfo> fields)
+            Dictionary<string, MemberInfo> members)
         {
             _source = source;
             _format = format;
-            _fields = fields;
+            _members = members;
         }
 
         public string Evaluate(Match m)
@@ -36,30 +36,38 @@ namespace LMeter.ACT
             
             string? value = null;
             string key = m.Groups[1].Value;
-            
-            if (_fields.ContainsKey(key))
+
+            if (!_members.TryGetValue(key, out var fieldInfo))
             {
-                object? propValue = _fields[m.Groups[1].Value].GetValue(_source);
+                return value ?? m.Value;
+            }
+            
+            var memberValue = fieldInfo?.MemberType switch
+            {
+                MemberTypes.Field => ((FieldInfo)fieldInfo).GetValue(_source),
+                MemberTypes.Property => ((PropertyInfo)fieldInfo).GetValue(_source),
+                // Default should null because we don't want people accidentally trying to access a method and then throw an exception
+                _ => null
+            };
 
-                if (propValue is null)
-                {
-                    return string.Empty;
-                }
+            if (memberValue is null)
+            {
+                return string.Empty;
+            }
 
-                if (propValue is LazyFloat lazyFloat)
+            if (memberValue is LazyFloat lazyFloat)
+            {
+                bool kilo = !string.IsNullOrEmpty(m.Groups[2].Value);
+                value = lazyFloat.ToString(format, kilo) ?? m.Value;
+            }
+            else
+            {
+                value = memberValue.ToString();
+                if (!string.IsNullOrEmpty(value) &&
+                    int.TryParse(m.Groups[3].Value, out int trim) &&
+                    trim < value.Length)
                 {
-                    bool kilo = !string.IsNullOrEmpty(m.Groups[2].Value);
-                    value = lazyFloat.ToString(format, kilo) ?? m.Value;
-                }
-                else
-                {
-                    value = propValue?.ToString();
-                    if (!string.IsNullOrEmpty(value) &&
-                        int.TryParse(m.Groups[3].Value, out int trim) &&
-                        trim < value.Length)
-                    {
-                        value = propValue?.ToString().AsSpan(0, trim).ToString();
-                    }
+                    value = memberValue?.ToString().AsSpan(0, trim).ToString();
                 }
             }
 

@@ -41,6 +41,7 @@ namespace LMeter.Config
         public ConfigColor RankTextOutlineColor = new ConfigColor(0, 0, 0, 0.5f);
         public string RankTextFontKey = FontsManager.DalamudFontKey;
         public int RankTextFontId = 0;
+        public bool AlwaysShowSelf = false;
 
         public string LeftTextFormat = "[name]";
         public Vector2 LeftTextOffset = new Vector2(0, 0);
@@ -121,13 +122,12 @@ namespace LMeter.Config
 
             using (FontsManager.PushFont(this.BarNameFontKey))
             {
-                string playerName = Singletons.Get<IClientState>().LocalPlayer?.Name.ToString() ?? "YOU";
-                if (this.UseCharacterName && combatant.Name.Contains("YOU"))
+                var leftText = combatant.Name;
+                if (!leftText.Contains("YOU"))
                 {
-                    combatant.Name = playerName;
+                    leftText = combatant.GetFormattedString($" {this.LeftTextFormat} ", this.ThousandsSeparators ? "N" : "F");
                 }
 
-                string leftText = combatant.GetFormattedString($" {this.LeftTextFormat} ", this.ThousandsSeparators ? "N" : "F");
                 Vector2 nameTextSize = ImGui.CalcTextSize(leftText);
                 Vector2 namePos = Utils.GetAnchoredPosition(localPos, -barSize, DrawAnchor.Left);
                 namePos = Utils.GetAnchoredPosition(namePos, nameTextSize, DrawAnchor.Left) + this.LeftTextOffset;
@@ -250,6 +250,7 @@ namespace LMeter.Config
 
                 ImGui.NewLine();
                 ImGui.Checkbox("Use your name instead of 'YOU'", ref this.UseCharacterName);
+                ImGui.Checkbox("Always show your own bar", ref this.AlwaysShowSelf);
                 ImGui.InputText("Left Text Format", ref this.LeftTextFormat, 128);
 
                 if (ImGui.IsItemHovered())
