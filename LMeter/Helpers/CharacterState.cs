@@ -9,7 +9,7 @@ namespace LMeter.Helpers
 {
     public static class CharacterState
     {
-        private static readonly uint[] _goldenSaucerIDs = { 144, 388, 389, 390, 391, 579, 792, 899, 941 };
+        private static readonly uint[] _goldenSaucerIDs = [144, 388, 389, 390, 391, 579, 792, 899, 941];
 
         public static bool IsCharacterBusy()
         {

@@ -8,6 +8,8 @@ using LMeter.Config;
 using LMeter.Helpers;
 using LMeter.ACT;
 using Newtonsoft.Json;
+using LMeter.Act.DataStructures;
+using LMeter.Act;
 
 namespace LMeter.Meter
 {
@@ -22,7 +24,7 @@ namespace LMeter.Meter
         [JsonIgnore] private bool _dragging = false;
         [JsonIgnore] private bool _locked = false;
         [JsonIgnore] private int _eventIndex = -1;
-        [JsonIgnore] private ACTEvent? _previewEvent = null;
+        [JsonIgnore] private ActEvent? _previewEvent = null;
         [JsonIgnore] private int _scrollPosition = 0;
         [JsonIgnore] private DateTime? _lastSortedTimestamp = null;
         [JsonIgnore] private List<Combatant> _lastSortedCombatants = new List<Combatant>();
@@ -180,10 +182,10 @@ namespace LMeter.Meter
 
                 if (this.GeneralConfig.Preview && !_lastFrameWasPreview)
                 {
-                    _previewEvent = ACTEvent.GetTestData();
+                    _previewEvent = ActEvent.GetTestData();
                 }
 
-                ACTEvent? actEvent = this.GeneralConfig.Preview ? _previewEvent : ACTClient.GetEvent(_eventIndex);
+                ActEvent? actEvent = this.GeneralConfig.Preview ? _previewEvent : ActClient.GetEvent(_eventIndex);
 
                 (localPos, size) = this.HeaderConfig.DrawHeader(localPos, size, actEvent?.Encounter, drawList);
                 drawList.AddRectFilled(localPos, localPos + size, this.GeneralConfig.BackgroundColor.Base);
@@ -195,11 +197,11 @@ namespace LMeter.Meter
             _lastFrameWasCombat = combat;
         }
 
-        private void DrawBars(ImDrawListPtr drawList, Vector2 localPos, Vector2 size, ACTEvent? actEvent)
+        private void DrawBars(ImDrawListPtr drawList, Vector2 localPos, Vector2 size, ActEvent? actEvent)
         {                
             if (actEvent?.Combatants is not null && actEvent.Combatants.Any())
             {
-                // We don't want to corrupt the cache. The entire logic past this point mutates the sorted ACT combatants instead of using a rendering cache
+                // We don't want to corrupt the cache. The entire logic past this point mutates the sorted Act combatants instead of using a rendering cache
                 // This has the issue that some settings can't behave properly and or don't update till the following combat update/fight
                 List<Combatant> sortedCombatants = this.GetSortedCombatants(actEvent, this.GeneralConfig.DataType).ToList();
                 
@@ -291,7 +293,7 @@ namespace LMeter.Meter
                     selected = true;
                 }
 
-                List<ACTEvent> events = ACTClient.PastEvents;
+                List<ActEvent> events = ActClient.PastEvents;
                 if (events.Count > 0)
                 {
                     ImGui.Separator();
@@ -325,7 +327,7 @@ namespace LMeter.Meter
             return selected;
         }
 
-        private List<Combatant> GetSortedCombatants(ACTEvent actEvent, MeterDataType dataType)
+        private List<Combatant> GetSortedCombatants(ActEvent actEvent, MeterDataType dataType)
         {
             if (actEvent.Combatants is null ||
                 _lastSortedTimestamp.HasValue &&

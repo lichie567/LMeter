@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System;
 
-namespace LMeter.ACT
+namespace LMeter.Act
 {
     public class TextTagFormatter
     {

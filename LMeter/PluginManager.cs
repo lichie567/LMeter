@@ -4,7 +4,7 @@ using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
-using LMeter.ACT;
+using LMeter.Act;
 using LMeter.Config;
 using LMeter.Helpers;
 using LMeter.Meter;
@@ -55,8 +55,8 @@ namespace LMeter
                 new CommandInfo(PluginCommand)
                 {
                     HelpMessage = "Opens the LMeter configuration window.\n"
-                                + "/lm end → Ends current ACT Encounter.\n"
-                                + "/lm clear → Clears all ACT encounter log data.\n"
+                                + "/lm end → Ends current Act Encounter.\n"
+                                + "/lm clear → Clears all Act encounter log data.\n"
                                 + "/lm ct <number> → Toggles clickthrough status for the given profile.\n"
                                 + "/lm toggle <number> [on|off] → Toggles visibility for the given profile.",
                     ShowInHelp = true
@@ -77,8 +77,8 @@ namespace LMeter
 
             _windowSystem.Draw();
 
-            _config.ACTConfig.TryReconnect();
-            _config.ACTConfig.TryEndEncounter();
+            _config.ActConfig.TryReconnect();
+            _config.ActConfig.TryEndEncounter();
 
             ImGuiHelpers.ForceNextWindowMainViewport();
             ImGui.SetNextWindowPos(Vector2.Zero);
@@ -96,7 +96,7 @@ namespace LMeter
 
         public void Clear()
         {
-            Singletons.Get<ACTClient>().Clear();
+            Singletons.Get<ActClient>().Clear();
             foreach (var meter in _config.MeterList.Meters)
             {
                 meter.Clear();
@@ -135,7 +135,7 @@ namespace LMeter
             switch (arguments)
             {
                 case "end":
-                    ACTClient.EndEncounter();
+                    ActClient.EndEncounter();
                     break;
                 case "clear":
                     this.Clear();

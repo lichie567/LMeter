@@ -4,7 +4,7 @@ using Dalamud.Interface;
 using Dalamud.Interface.Internal;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using LMeter.ACT;
+using LMeter.Act;
 using LMeter.Config;
 using LMeter.Helpers;
 using LMeter.Meter;
@@ -90,8 +90,8 @@ namespace LMeter
             // Initialize Fonts
             Singletons.Register(new FontsManager(pluginInterface.UiBuilder, config.FontConfig.Fonts.Values));
 
-            // Connect to ACT
-            ACTClient actClient = new ACTClient(config.ACTConfig);
+            // Connect to Act
+            ActClient actClient = new ActClient(config.ActConfig);
             actClient.Start();
             Singletons.Register(actClient);
 

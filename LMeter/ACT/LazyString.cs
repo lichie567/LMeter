@@ -1,7 +1,7 @@
 using System;
 using LMeter.Helpers;
 
-namespace LMeter.ACT
+namespace LMeter.Act
 {
     public class LazyString<T>
     {
@@ -40,6 +40,27 @@ namespace LMeter.ACT
 
     public static class LazyStringConverters
     {
+        public static string Duration(string? input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return string.Empty;
+            }
+
+            if (input.Contains(":"))
+            {
+                return input;
+            }
+            else if (int.TryParse(input, out int time))
+            {
+                int minutes = time / 60;
+                int seconds = time % 60;
+                return $"{(minutes < 10 ? "0" : "")}{minutes}:{(seconds < 10 ? "0" : "")}{seconds}";
+            }
+
+            return input ?? "";
+        }
+
         public static string FirstName(string? input)
         {
             if (string.IsNullOrWhiteSpace(input))

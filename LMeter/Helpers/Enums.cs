@@ -1,5 +1,14 @@
 namespace LMeter.Helpers
 {
+    public enum ConnectionStatus
+    {
+        NotConnected,
+        Connected,
+        ShuttingDown,
+        Connecting,
+        ConnectionFailed
+    }
+
     public enum Job
     {
         UKN = 0,

@@ -52,7 +52,6 @@ namespace LMeter.Helpers
             return null;
         }
 
-
         private static IDalamudTextureWrap? GetDesaturatedTextureWrap(string path)
         {
             TexFile? file = Singletons.Get<IDataManager>().GetFile<TexFile>(path);

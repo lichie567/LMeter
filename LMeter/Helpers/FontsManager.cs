@@ -60,7 +60,7 @@ namespace LMeter.Helpers
         public FontsManager(UiBuilder uiBuilder, IEnumerable<FontData> fonts)
         {
             _fontData = fonts;
-            _fontList = new string[] { DalamudFontKey };
+            _fontList = [DalamudFontKey];
             _imGuiFonts = new Dictionary<string, ImFontPtr>();
 
             _uiBuilder = uiBuilder;
@@ -105,8 +105,7 @@ namespace LMeter.Helpers
                 }
             }
 
-            List<string> fontList = new List<string>() { DalamudFontKey };
-            fontList.AddRange(_imGuiFonts.Keys);
+            List<string> fontList = [DalamudFontKey, .. _imGuiFonts.Keys];
             _fontList = fontList.ToArray();
         }
 
@@ -221,7 +220,7 @@ namespace LMeter.Helpers
             }
             catch
             {
-                pluginFonts = new string[0];
+                pluginFonts = [];
             }
 
             foreach (string font in pluginFonts)
@@ -266,7 +265,7 @@ namespace LMeter.Helpers
         {
             if (string.IsNullOrEmpty(path))
             {
-                return new string[0];
+                return [];
             }
 
             string[] fonts;
@@ -276,7 +275,7 @@ namespace LMeter.Helpers
             }
             catch
             {
-                fonts = new string[0];
+                fonts = [];
             }
 
             return fonts

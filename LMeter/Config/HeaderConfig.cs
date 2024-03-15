@@ -2,7 +2,7 @@ using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using ImGuiNET;
-using LMeter.ACT;
+using LMeter.Act.DataStructures;
 using LMeter.Helpers;
 using Newtonsoft.Json;
 
@@ -50,13 +50,15 @@ namespace LMeter.Config
         
         public IConfigPage GetDefault()
         {
-            HeaderConfig defaultConfig = new HeaderConfig();
-            defaultConfig.DurationFontKey = FontsManager.DefaultSmallFontKey;
-            defaultConfig.DurationFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey);
-            defaultConfig.NameFontKey = FontsManager.DefaultSmallFontKey;
-            defaultConfig.NameFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey);
-            defaultConfig.StatsFontKey = FontsManager.DefaultSmallFontKey;
-            defaultConfig.StatsFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey);
+            HeaderConfig defaultConfig = new HeaderConfig
+            {
+                DurationFontKey = FontsManager.DefaultSmallFontKey,
+                DurationFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey),
+                NameFontKey = FontsManager.DefaultSmallFontKey,
+                NameFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey),
+                StatsFontKey = FontsManager.DefaultSmallFontKey,
+                StatsFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey)
+            };
             return defaultConfig;
         }
 

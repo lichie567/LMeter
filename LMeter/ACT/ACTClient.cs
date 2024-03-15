@@ -11,43 +11,36 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using LMeter.Act.DataStructures;
 
-namespace LMeter.ACT
+namespace LMeter.Act
 {
-    public enum ConnectionStatus
-    {
-        NotConnected,
-        Connected,
-        ShuttingDown,
-        Connecting,
-        ConnectionFailed
-    }
 
-    public class ACTClient : IPluginDisposable
+    public class ActClient : IPluginDisposable
     {
-        private ACTConfig _config;
+        private ActConfig _config;
         private ClientWebSocket _socket;
         private CancellationTokenSource _cancellationTokenSource;
         private Task? _receiveTask;
-        private ACTEvent? _lastEvent;
+        private ActEvent? _lastEvent;
         private ConnectionStatus _status;
-        private List<ACTEvent> _pastEvents;
+        private List<ActEvent> _pastEvents;
 
-        public static ConnectionStatus Status => Singletons.Get<ACTClient>()._status;
-        public static List<ACTEvent> PastEvents => Singletons.Get<ACTClient>()._pastEvents;
+        public static ConnectionStatus Status => Singletons.Get<ActClient>()._status;
+        public static List<ActEvent> PastEvents => Singletons.Get<ActClient>()._pastEvents;
 
-        public ACTClient(ACTConfig config)
+        public ActClient(ActConfig config)
         {
             _config = config;
             _socket = new ClientWebSocket();
             _cancellationTokenSource = new CancellationTokenSource();
             _status = ConnectionStatus.NotConnected;
-            _pastEvents = new List<ACTEvent>();
+            _pastEvents = new List<ActEvent>();
         }
 
-        public static ACTEvent? GetEvent(int index = -1)
+        public static ActEvent? GetEvent(int index = -1)
         {
-            ACTClient client = Singletons.Get<ACTClient>();
+            ActClient client = Singletons.Get<ActClient>();
             if (index >= 0 && index < client._pastEvents.Count)
             {
                 return client._pastEvents[index];
@@ -71,8 +64,8 @@ namespace LMeter.ACT
         public void Clear()
         {
             _lastEvent = null;
-            _pastEvents = new List<ACTEvent>();
-            if (_config.ClearACT)
+            _pastEvents = new List<ActEvent>();
+            if (_config.ClearAct)
             {
                 IChatGui chat = Singletons.Get<IChatGui>();
                 XivChatEntry message = new XivChatEntry()
@@ -87,7 +80,7 @@ namespace LMeter.ACT
 
         public static void RetryConnection(string address)
         {
-            ACTClient client = Singletons.Get<ACTClient>();
+            ActClient client = Singletons.Get<ActClient>();
             client.Reset();
             client.Start();
         }
@@ -96,7 +89,7 @@ namespace LMeter.ACT
         {
             if (_status != ConnectionStatus.NotConnected)
             {
-                Singletons.Get<IPluginLog>().Error("Cannot start, ACTClient needs to be reset!");
+                Singletons.Get<IPluginLog>().Error("Cannot start, ActClient needs to be reset!");
                 return;
             }
 
@@ -141,7 +134,7 @@ namespace LMeter.ACT
             }
 
             _status = ConnectionStatus.Connected;
-            Singletons.Get<IPluginLog>().Information("Successfully Established ACT Connection");
+            Singletons.Get<IPluginLog>().Information("Successfully Established Act Connection");
             try
             {
                 do
@@ -171,7 +164,7 @@ namespace LMeter.ACT
                             {
                                 try
                                 {
-                                    ACTEvent? newEvent = JsonConvert.DeserializeObject<ACTEvent>(data);
+                                    ActEvent? newEvent = JsonConvert.DeserializeObject<ActEvent>(data);
 
                                     if (newEvent?.Encounter is not null &&
                                         newEvent?.Combatants is not null &&
@@ -181,7 +174,7 @@ namespace LMeter.ACT
                                         if (!(_lastEvent is not null &&
                                             _lastEvent.IsEncounterActive() == newEvent.IsEncounterActive() &&
                                             _lastEvent.Encounter is not null &&
-                                            _lastEvent.Encounter.Duration.Equals(newEvent.Encounter.Duration)))
+                                            _lastEvent.Encounter.DurationRaw.Equals(newEvent.Encounter.DurationRaw)))
                                         {
                                             if (!newEvent.IsEncounterActive())
                                             {
@@ -246,7 +239,7 @@ namespace LMeter.ACT
                     _receiveTask.Wait();
                 }
 
-                Singletons.Get<IPluginLog>().Information($"Closed ACT Connection");
+                Singletons.Get<IPluginLog>().Information($"Closed Act Connection");
             }
 
             _socket.Dispose();
@@ -263,7 +256,7 @@ namespace LMeter.ACT
 
         private void LogConnectionFailure(string error)
         {
-            Singletons.Get<IPluginLog>().Debug($"Failed to connect to ACT!");
+            Singletons.Get<IPluginLog>().Debug($"Failed to connect to Act!");
             Singletons.Get<IPluginLog>().Verbose(error);
         }
 

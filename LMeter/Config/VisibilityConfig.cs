@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 using LMeter.Helpers;
 using System.Linq;
 using System.Collections.Generic;
-using LMeter.ACT;
+using LMeter.Act;
 
 namespace LMeter.Config
 {
@@ -64,7 +64,7 @@ namespace LMeter.Config
                 return false;
             }
 
-            if (this.HideIfNotConnected && ACTClient.Status != ConnectionStatus.Connected)
+            if (this.HideIfNotConnected && ActClient.Status != ConnectionStatus.Connected)
             {
                 return false;
             }

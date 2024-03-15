@@ -1,12 +1,10 @@
 using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using System.Text.Json.Serialization;
-using Dalamud.Game.ClientState;
-using Dalamud.Plugin.Services;
 using ImGuiNET;
-using LMeter.ACT;
+using LMeter.Act.DataStructures;
 using LMeter.Helpers;
+using Newtonsoft.Json;
 
 namespace LMeter.Config
 {
@@ -17,7 +15,7 @@ namespace LMeter.Config
         
         public string Name => "Bars";
 
-        private static string[] _jobIconStyleOptions = new string[] { "Style 1", "Style 2" };
+        private static string[] _jobIconStyleOptions = ["Style 1", "Style 2"];
 
         public int BarCount = 8;
         public int BarGaps = 1;
@@ -64,16 +62,18 @@ namespace LMeter.Config
         
         public IConfigPage GetDefault()
         {
-            BarConfig defaultConfig = new BarConfig();
-            defaultConfig.BarNameFontKey = FontsManager.DefaultSmallFontKey;
-            defaultConfig.BarNameFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey);
+            BarConfig defaultConfig = new BarConfig
+            {
+                BarNameFontKey = FontsManager.DefaultSmallFontKey,
+                BarNameFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey),
 
-            defaultConfig.BarDataFontKey = FontsManager.DefaultSmallFontKey;
-            defaultConfig.BarDataFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey);
+                BarDataFontKey = FontsManager.DefaultSmallFontKey,
+                BarDataFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey),
 
-            defaultConfig.RankTextFontKey = FontsManager.DefaultSmallFontKey;
-            defaultConfig.RankTextFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey);
-            
+                RankTextFontKey = FontsManager.DefaultSmallFontKey,
+                RankTextFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey)
+            };
+
             return defaultConfig;
         }
 
