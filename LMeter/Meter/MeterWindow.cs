@@ -118,6 +118,11 @@ namespace LMeter.Meter
 
             Vector2 localPos = pos + this.GeneralConfig.Position;
             Vector2 size = this.GeneralConfig.Size;
+            
+            if (Singletons.Get<ClipRectsHelper>().GetClipRectForArea(localPos, size).HasValue)
+            {
+                return;
+            }
 
             if (ImGui.IsMouseHoveringRect(localPos, localPos + size))
             {

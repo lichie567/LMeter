@@ -71,6 +71,7 @@ namespace LMeter
             Singletons.Register(logger);
             Singletons.Register(textureProvider);
             Singletons.Register(textureSubstitutionProvider);
+            Singletons.Register(new ClipRectsHelper());
 
             // Init TexturesCache
             Singletons.Register(new TexturesCache());

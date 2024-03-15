@@ -85,6 +85,7 @@ namespace LMeter
             ImGui.SetNextWindowSize(ImGui.GetMainViewport().Size);
             if (ImGui.Begin("LMeter_Root", _mainWindowFlags))
             {
+                Singletons.Get<ClipRectsHelper>().Update();
                 foreach (var meter in _config.MeterList.Meters)
                 {
                     meter.Draw(_origin);
