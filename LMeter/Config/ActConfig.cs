@@ -83,7 +83,7 @@ namespace LMeter.Config
                 }
 
                 ImGui.NewLine();
-                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Stop, () => ActClient.EndEncounter(), null, buttonSize);
+                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Stop, () => LogClient.EndEncounter(), null, buttonSize);
                 ImGui.SameLine();
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() - 1f);
                 ImGui.Text("Force End Combat");
@@ -100,13 +100,13 @@ namespace LMeter.Config
         public void TryReconnect()
         {
             if (this.LastReconnectAttempt.HasValue &&
-                (ActClient.Status == ConnectionStatus.NotConnected ||
-                ActClient.Status == ConnectionStatus.ConnectionFailed))
+                (LogClient.GetStatus() == ConnectionStatus.NotConnected ||
+                LogClient.GetStatus() == ConnectionStatus.ConnectionFailed))
             {
                 if (this.AutoReconnect &&
                     this.LastReconnectAttempt < DateTime.UtcNow - TimeSpan.FromSeconds(this.ReconnectDelay))
                 {
-                    ActClient.RetryConnection(this.ActSocketAddress);
+                    LogClient.RetryConnection(this.ActSocketAddress);
                     this.LastReconnectAttempt = DateTime.UtcNow;
                 }
             }
@@ -118,7 +118,7 @@ namespace LMeter.Config
 
         public void TryEndEncounter()
         {
-            if (ActClient.Status == ConnectionStatus.Connected)
+            if (LogClient.GetStatus() == ConnectionStatus.Connected)
             {
                 if (this.AutoEnd &&
                     CharacterState.IsInCombat())
@@ -128,7 +128,7 @@ namespace LMeter.Config
                 else if (this.LastCombatTime is not null && 
                          this.LastCombatTime < DateTime.UtcNow - TimeSpan.FromSeconds(this.AutoEndDelay))
                 {
-                    ActClient.EndEncounter();
+                    LogClient.EndEncounter();
                     this.LastCombatTime = null;
                 }
             }

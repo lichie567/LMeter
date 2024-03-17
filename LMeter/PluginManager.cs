@@ -1,4 +1,6 @@
-﻿using Dalamud.Game.Command;
+﻿using System;
+using System.Numerics;
+using Dalamud.Game.Command;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
@@ -9,14 +11,11 @@ using LMeter.Config;
 using LMeter.Helpers;
 using LMeter.Meter;
 using LMeter.Windows;
-using System;
-using System.Numerics;
 
 namespace LMeter
 {
     public class PluginManager : IPluginDisposable
     {
-        private readonly Vector2 _origin = ImGui.GetMainViewport().Size / 2f;
         private readonly Vector2 _configSize = new Vector2(550, 550);
 
         private IClientState _clientState;
@@ -25,6 +24,7 @@ namespace LMeter
         private WindowSystem _windowSystem;
         private ConfigWindow _configRoot;
         private LMeterConfig _config;
+        private Vector2 _origin;
 
         private readonly ImGuiWindowFlags _mainWindowFlags =
             ImGuiWindowFlags.NoTitleBar |
@@ -74,9 +74,9 @@ namespace LMeter
             {
                 return;
             }
-
+            
+            _origin = ImGui.GetMainViewport().Size / 2f;
             _windowSystem.Draw();
-
             _config.ActConfig.TryReconnect();
             _config.ActConfig.TryEndEncounter();
 
@@ -97,7 +97,7 @@ namespace LMeter
 
         public void Clear()
         {
-            Singletons.Get<ActClient>().Clear();
+            Singletons.Get<LogClient>().Clear();
             foreach (var meter in _config.MeterList.Meters)
             {
                 meter.Clear();
@@ -136,7 +136,7 @@ namespace LMeter
             switch (arguments)
             {
                 case "end":
-                    ActClient.EndEncounter();
+                    LogClient.EndEncounter();
                     break;
                 case "clear":
                     this.Clear();
