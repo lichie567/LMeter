@@ -1,11 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using ImGuiNET;
 using Newtonsoft.Json;
 using LMeter.Helpers;
-using System.Linq;
-using System.Collections.Generic;
 using LMeter.Act;
 
 namespace LMeter.Config

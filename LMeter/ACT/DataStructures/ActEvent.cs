@@ -8,7 +8,9 @@ namespace LMeter.Act.DataStructures
     {
         private bool _parsedActive;
         private bool _active;
-        public DateTime Timestamp;
+
+        public DateTime Timestamp { get; set; }
+        public string Data { get; set; } = string.Empty;
 
         [JsonProperty("type")]
         public string EventType { get; set; } = string.Empty;
@@ -32,6 +34,32 @@ namespace LMeter.Act.DataStructures
             bool.TryParse(this.IsActive, out _active);
             _parsedActive = true;
             return _active;
+        }
+
+        public bool Equals(ActEvent? actEvent)
+        {
+            if (actEvent is null)
+            {
+                return false;
+            }
+
+            if (this.Encounter is null ^ actEvent.Encounter is null ||
+                this.Combatants is null ^ actEvent.Combatants is null)
+            {
+                return false;
+            }
+
+            if (this.Encounter is not null && actEvent.Encounter is not null &&
+                this.Combatants is not null && actEvent.Combatants is not null)
+            {
+                return this.Encounter.DurationRaw.Equals(actEvent.Encounter.DurationRaw) &&
+                       this.Encounter.Title.Equals(actEvent.Encounter.Title) &&
+                       (this.Encounter.DamageTotal?.Value ?? 0f) == (actEvent.Encounter.DamageTotal?.Value ?? 0f) &&
+                       this.IsEncounterActive() == actEvent.IsEncounterActive() &&
+                       this.Combatants.Count == actEvent.Combatants.Count;
+            }
+
+            return true;
         }
 
         public static ActEvent GetTestData()

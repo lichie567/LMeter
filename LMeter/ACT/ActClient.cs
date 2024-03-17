@@ -20,10 +20,11 @@ namespace LMeter.Act
     {
         private ActConfig _config;
         private ClientWebSocket _socket;
+        private ConnectionStatus _status;
         private CancellationTokenSource _cancellationTokenSource;
         private Task? _receiveTask;
         private ActEvent? _lastEvent;
-        private ConnectionStatus _status;
+        private ActEvent? _currentEvent;
         private List<ActEvent> _pastEvents;
 
         public static ConnectionStatus Status => Singletons.Get<ActClient>()._status;
@@ -46,7 +47,7 @@ namespace LMeter.Act
                 return client._pastEvents[index];
             }
 
-            return client._lastEvent;
+            return client._currentEvent;
         }
 
         public static void EndEncounter()
@@ -63,7 +64,7 @@ namespace LMeter.Act
 
         public void Clear()
         {
-            _lastEvent = null;
+            _currentEvent = null;
             _pastEvents = new List<ActEvent>();
             if (_config.ClearAct)
             {
@@ -89,13 +90,13 @@ namespace LMeter.Act
         {
             if (_status != ConnectionStatus.NotConnected)
             {
-                Singletons.Get<IPluginLog>().Error("Cannot start, ActClient needs to be reset!");
+                Singletons.Get<IPluginLog>().Error("Cannot start, ACT client needs to be reset!");
                 return;
             }
 
             try
             {
-                _receiveTask = Task.Run(() => this.Connect(_config.ACTSocketAddress));
+                _receiveTask = Task.Run(() => this.Connect(_config.ActSocketAddress));
             }
             catch (Exception ex)
             {
@@ -134,7 +135,7 @@ namespace LMeter.Act
             }
 
             _status = ConnectionStatus.Connected;
-            Singletons.Get<IPluginLog>().Information("Successfully Established Act Connection");
+            Singletons.Get<IPluginLog>().Information("Successfully Established ACT Connection");
             try
             {
                 do
@@ -165,29 +166,27 @@ namespace LMeter.Act
                                 try
                                 {
                                     ActEvent? newEvent = JsonConvert.DeserializeObject<ActEvent>(data);
-
-                                    if (newEvent?.Encounter is not null &&
-                                        newEvent?.Combatants is not null &&
-                                        newEvent.Combatants.Any() &&
-                                        (CharacterState.IsInCombat() || !newEvent.IsEncounterActive()))
+                                    if (newEvent is not null)
                                     {
-                                        if (!(_lastEvent is not null &&
-                                            _lastEvent.IsEncounterActive() == newEvent.IsEncounterActive() &&
-                                            _lastEvent.Encounter is not null &&
-                                            _lastEvent.Encounter.DurationRaw.Equals(newEvent.Encounter.DurationRaw)))
+                                        newEvent.Timestamp = DateTime.UtcNow;
+                                        newEvent.Data = data;
+
+                                        if (newEvent?.Encounter is not null &&
+                                            newEvent?.Combatants is not null &&
+                                            newEvent.Combatants.Any() &&
+                                            !newEvent.Equals(_lastEvent))
                                         {
                                             if (!newEvent.IsEncounterActive())
                                             {
                                                 _pastEvents.Add(newEvent);
-
                                                 while (_pastEvents.Count > _config.EncounterHistorySize)
                                                 {
                                                     _pastEvents.RemoveAt(0);
                                                 }
                                             }
 
-                                            newEvent.Timestamp = DateTime.UtcNow;
                                             _lastEvent = newEvent;
+                                            _currentEvent = newEvent;
                                         }
                                     }
                                 }
@@ -239,7 +238,7 @@ namespace LMeter.Act
                     _receiveTask.Wait();
                 }
 
-                Singletons.Get<IPluginLog>().Information($"Closed Act Connection");
+                Singletons.Get<IPluginLog>().Information($"Closed ACT Connection");
             }
 
             _socket.Dispose();
@@ -256,7 +255,7 @@ namespace LMeter.Act
 
         private void LogConnectionFailure(string error)
         {
-            Singletons.Get<IPluginLog>().Debug($"Failed to connect to Act!");
+            Singletons.Get<IPluginLog>().Debug($"Failed to connect to ACT!");
             Singletons.Get<IPluginLog>().Verbose(error);
         }
 

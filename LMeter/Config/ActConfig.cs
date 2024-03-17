@@ -23,20 +23,17 @@ namespace LMeter.Config
         
         public IConfigPage GetDefault() => new ActConfig();
 
-        public string ACTSocketAddress;
-
+        public string ActSocketAddress;
         public int EncounterHistorySize = 15;
-
         public bool AutoReconnect = false;
         public int ReconnectDelay = 30;
-
         public bool ClearAct = false;
         public bool AutoEnd = false;
         public int AutoEndDelay = 3;
 
         public ActConfig()
         {
-            this.ACTSocketAddress = _defaultSocketAddress;
+            this.ActSocketAddress = _defaultSocketAddress;
         }
 
         public void DrawConfig(Vector2 size, float padX, float padY)
@@ -45,8 +42,8 @@ namespace LMeter.Config
             {
                 Vector2 buttonSize = new Vector2(40, 0);
                 ImGui.Text($"ACT Status: {ActClient.Status}");
-                ImGui.InputTextWithHint("ACT Websocket Address", $"Default: '{_defaultSocketAddress}'", ref this.ACTSocketAddress, 64);
-                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Sync, () => ActClient.RetryConnection(this.ACTSocketAddress), "Reconnect", buttonSize);
+                ImGui.InputTextWithHint("ACT Websocket Address", $"Default: '{_defaultSocketAddress}'", ref this.ActSocketAddress, 64);
+                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Sync, () => ActClient.RetryConnection(this.ActSocketAddress), "Reconnect", buttonSize);
 
                 ImGui.SameLine();
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() - 1f);
@@ -109,7 +106,7 @@ namespace LMeter.Config
                 if (this.AutoReconnect &&
                     this.LastReconnectAttempt < DateTime.UtcNow - TimeSpan.FromSeconds(this.ReconnectDelay))
                 {
-                    ActClient.RetryConnection(this.ACTSocketAddress);
+                    ActClient.RetryConnection(this.ActSocketAddress);
                     this.LastReconnectAttempt = DateTime.UtcNow;
                 }
             }
