@@ -90,10 +90,14 @@ namespace LMeter
 
             // Initialize Fonts
             Singletons.Register(new FontsManager(pluginInterface.UiBuilder, config.FontConfig.Fonts.Values));
-
-            // Connect to Act
-            // LogClient actClient = new WebSocketClient(config.ActConfig);
-            LogClient actClient = new IpcClient(config.ActConfig);
+            
+            // Initialize ACT Client
+            LogClient actClient = config.ActConfig.ClientType switch
+            {
+                1 => new IpcClient(config.ActConfig),
+                _ => new WebSocketClient(config.ActConfig)
+            };
+            
             actClient.Start();
             Singletons.Register(actClient);
 

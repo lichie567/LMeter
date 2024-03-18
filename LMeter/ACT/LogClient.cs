@@ -11,6 +11,8 @@ namespace LMeter.Act
 {
     public abstract class LogClient : IPluginDisposable
     {
+        protected const string SubscriptionMessage = "{\"call\":\"subscribe\",\"events\":[\"CombatData\"]}";
+
         protected  ActConfig Config { get; set; }
         protected ConnectionStatus Status { get; set; }
         private ActEvent? _lastEvent;
@@ -100,11 +102,10 @@ namespace LMeter.Act
             }
         }
 
-        public static void RetryConnection(string address)
+        public static void RetryConnection()
         {
             LogClient client = Singletons.Get<LogClient>();
             client.Reset();
-            client.Start();
         }
 
         protected void LogConnectionFailure(string error, Exception? ex = null)

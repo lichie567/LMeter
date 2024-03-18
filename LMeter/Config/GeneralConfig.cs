@@ -48,7 +48,6 @@ namespace LMeter.Config
                 ImGui.Checkbox("Lock", ref this.Lock);
                 ImGui.Checkbox("Click Through", ref this.ClickThrough);
                 ImGui.Checkbox("Preview", ref this.Preview);
-
                 ImGui.NewLine();
 
                 Vector4 vector = this.BackgroundColor.Vector;

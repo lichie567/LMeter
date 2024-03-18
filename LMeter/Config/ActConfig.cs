@@ -30,6 +30,7 @@ namespace LMeter.Config
         public bool ClearAct = false;
         public bool AutoEnd = false;
         public int AutoEndDelay = 3;
+        public int ClientType = 0;
 
         public ActConfig()
         {
@@ -40,10 +41,26 @@ namespace LMeter.Config
         {
             if (ImGui.BeginChild($"##{this.Name}", new Vector2(size.X, size.Y), true))
             {
+                int currentClientType = this.ClientType;
+                ImGui.Text("ACT Client Type:");
+                // ImGui.SameLine();
+                ImGui.RadioButton("WebSocket", ref this.ClientType, 0);
+                ImGui.SameLine();
+                ImGui.RadioButton("IINACT IPC", ref this.ClientType, 1);
+
+                if (currentClientType != this.ClientType)
+                {
+                    Singletons.Get<PluginManager>().ChangeClientType(this.ClientType);
+                }
+
                 Vector2 buttonSize = new Vector2(40, 0);
                 ImGui.Text($"ACT Status: {LogClient.GetStatus()}");
-                ImGui.InputTextWithHint("ACT Websocket Address", $"Default: '{_defaultSocketAddress}'", ref this.ActSocketAddress, 64);
-                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Sync, () => LogClient.RetryConnection(this.ActSocketAddress), "Reconnect", buttonSize);
+                if (this.ClientType == 0)
+                {
+                    ImGui.InputTextWithHint("ACT Websocket Address", $"Default: '{_defaultSocketAddress}'", ref this.ActSocketAddress, 64);
+                }
+
+                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Sync, () => LogClient.RetryConnection(), "Reconnect", buttonSize);
 
                 ImGui.SameLine();
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() - 1f);
@@ -106,7 +123,7 @@ namespace LMeter.Config
                 if (this.AutoReconnect &&
                     this.LastReconnectAttempt < DateTime.UtcNow - TimeSpan.FromSeconds(this.ReconnectDelay))
                 {
-                    LogClient.RetryConnection(this.ActSocketAddress);
+                    LogClient.RetryConnection();
                     this.LastReconnectAttempt = DateTime.UtcNow;
                 }
             }

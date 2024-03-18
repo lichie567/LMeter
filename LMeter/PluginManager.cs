@@ -46,6 +46,7 @@ namespace LMeter
             _pluginInterface = pluginInterface;
             _config = config;
 
+            _origin = ImGui.GetMainViewport().Size / 2f;
             _configRoot = new ConfigWindow("ConfigRoot", _origin, _configSize);
             _windowSystem = new WindowSystem("LMeter");
             _windowSystem.AddWindow(_configRoot);
@@ -102,6 +103,21 @@ namespace LMeter
             {
                 meter.Clear();
             }
+        }
+
+        public void ChangeClientType(int clientType)
+        {
+            LogClient currentClient = Singletons.Get<LogClient>();
+            currentClient.Shutdown();
+            
+            LogClient newClient = clientType switch
+            {
+                1 => new IpcClient(_config.ActConfig),
+                _ => new WebSocketClient(_config.ActConfig)
+            };
+
+            newClient.Start();
+            Singletons.Update(newClient);
         }
 
         public void Edit(IConfigurable configItem)

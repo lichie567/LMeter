@@ -50,9 +50,8 @@ namespace LMeter.Act
                 Status = ConnectionStatus.Connecting;
                 await _socket.ConnectAsync(new Uri(host), _cancellationTokenSource.Token);
 
-                string subscribe = "{\"call\":\"subscribe\",\"events\":[\"CombatData\"]}";
                 await _socket.SendAsync(
-                        Encoding.UTF8.GetBytes(subscribe),
+                        Encoding.UTF8.GetBytes(SubscriptionMessage),
                         WebSocketMessageType.Text,
                         endOfMessage: true,
                         _cancellationTokenSource.Token);
@@ -160,7 +159,7 @@ namespace LMeter.Act
             this.Shutdown();
             _socket = new ClientWebSocket();
             _cancellationTokenSource = new CancellationTokenSource();
-            Status = ConnectionStatus.NotConnected;
+            this.Start();
         }
     }
 }

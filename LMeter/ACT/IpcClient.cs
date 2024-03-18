@@ -11,7 +11,6 @@ namespace LMeter.Act
 {
     public class IpcClient : LogClient
     {
-        private const string SubscriptionMessage = """{"call":"subscribe","events":["CombatData"]}""";
         private const string IinactListeningIpcEndpoint = "IINACT.Server.Listening";
         private const string IinactSubscribeIpcEndpoint = "IINACT.CreateSubscriber";
         private const string IinactUnsubscribeIpcEndpoint = "IINACT.Unsubscribe";
@@ -32,7 +31,7 @@ namespace LMeter.Act
         {
             if (this.Status != ConnectionStatus.NotConnected)
             {
-                Singletons.Get<IPluginLog>().Info("Cannot start, IINACTClient needs to be reset!");
+                Singletons.Get<IPluginLog>().Info("Cannot start, IpcClient needs to be reset!");
                 return;
             }
             else if (!Singletons.Get<IClientState>().IsLoggedIn)

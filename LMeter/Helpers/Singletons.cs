@@ -32,6 +32,16 @@ namespace LMeter.Helpers
             }
         }
 
+        public static void Update<T>(T newSingleton)
+        {
+            if (newSingleton == null) { return; }
+
+            if (ActiveInstances.ContainsKey(typeof(T)))
+            {
+                ActiveInstances[typeof(T)] = newSingleton;
+            }
+        }
+
         public static void Dispose()
         {
             foreach (object singleton in ActiveInstances.Values)
