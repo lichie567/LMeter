@@ -34,6 +34,7 @@ public class Combatant
     public string Rank = string.Empty;
 
     [JsonProperty("Job")]
+    [JsonConverter(typeof(JobConverter))]
     public Job Job { get; set; }
 
     [JsonIgnore]
