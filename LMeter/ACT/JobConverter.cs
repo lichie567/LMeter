@@ -1,9 +1,11 @@
 using System;
+using Dalamud.Utility;
+using LMeter.Helpers;
 using Newtonsoft.Json;
 
-namespace LMeter.ACT
+namespace LMeter.Act
 {
-    public class EnumConverter : JsonConverter
+    public class JobConverter : JsonConverter
     {
         public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
@@ -11,7 +13,7 @@ namespace LMeter.ACT
         }
 
         public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
-        {
+        {            
             if (!objectType.IsEnum)
             {
                 return serializer.Deserialize(reader, objectType);
@@ -19,26 +21,21 @@ namespace LMeter.ACT
 
             if (reader.TokenType != JsonToken.String)
             {
-                return 0;
+                return Job.UKN;
             }
 
             string? value = serializer.Deserialize(reader, typeof(string))?.ToString();
-            return Enum.TryParse(objectType, value, true, out object? result) ? result : 0;
-        }
+            if (value.IsNullOrEmpty() || value.Equals("Limit Break"))
+            {
+                return Job.UKN;
+            }
 
-        public override bool CanRead
-        {
-            get { return true; }
-        }
-
-        public override bool CanWrite
-        {
-            get { return false; }
+            return Enum.Parse<Job>(value.ToUpper());
         }
 
         public override bool CanConvert(Type objectType)
         {
-            return objectType.IsEnum;
+            return objectType == typeof(Job);
         }
     }
 }

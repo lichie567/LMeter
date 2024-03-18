@@ -4,11 +4,11 @@ using System.IO;
 using System.IO.Compression;
 using System.Text;
 using Dalamud.Interface.Internal.Notifications;
-using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
+using LMeter.Config;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using LMeter.Config;
 
 namespace LMeter.Helpers
 {
@@ -57,7 +57,7 @@ namespace LMeter.Helpers
             }
             catch (Exception ex)
             {
-                PluginLog.Error(ex.ToString());
+                Singletons.Get<IPluginLog>().Error(ex.ToString());
             }
 
             return null;
@@ -88,7 +88,7 @@ namespace LMeter.Helpers
             }
             catch (Exception ex)
             {
-                PluginLog.Error(ex.ToString());
+                Singletons.Get<IPluginLog>().Error(ex.ToString());
             }
 
             return default;
@@ -108,7 +108,7 @@ namespace LMeter.Helpers
             }
             catch (Exception ex)
             {
-                PluginLog.Error(ex.ToString());
+                Singletons.Get<IPluginLog>().Error(ex.ToString());
 
                 string backupPath = $"{path}.bak";
                 if (File.Exists(path))
@@ -116,11 +116,11 @@ namespace LMeter.Helpers
                     try
                     {
                         File.Copy(path, backupPath);
-                        PluginLog.Information($"Backed up LMeter config to '{backupPath}'.");
+                        Singletons.Get<IPluginLog>().Information($"Backed up LMeter config to '{backupPath}'.");
                     }
                     catch
                     {
-                        PluginLog.Warning($"Unable to back up LMeter config.");
+                        Singletons.Get<IPluginLog>().Warning($"Unable to back up LMeter config.");
                     }
                 }
             }
@@ -142,7 +142,7 @@ namespace LMeter.Helpers
             }
             catch (Exception ex)
             {
-                PluginLog.Error(ex.ToString());
+                Singletons.Get<IPluginLog>().Error(ex.ToString());
             }
         }
     }

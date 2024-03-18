@@ -2,9 +2,8 @@
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
-using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Types;
-using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 
 namespace LMeter.Helpers
 {
@@ -41,7 +40,7 @@ namespace LMeter.Helpers
 
             // only the first 200 elements in the array are relevant due to the order in which SE packs data into the array
             // we do a step of 2 because its always an actor followed by its companion
-            ObjectTable objectTable = Singletons.Get<ObjectTable>();
+            IObjectTable objectTable = Singletons.Get<IObjectTable>();
             for (int i = 0; i < 200; i += 2)
             {
                 GameObject? actor = objectTable[i];
@@ -53,7 +52,7 @@ namespace LMeter.Helpers
 
             return null;
         }
-        
+
         public static void OpenUrl(string url)
         {
             try
@@ -77,7 +76,7 @@ namespace LMeter.Helpers
                 }
                 catch (Exception e)
                 {
-                    PluginLog.Error("Error trying to open url: " + e.Message);
+                    Singletons.Get<IPluginLog>().Error("Error trying to open url: " + e.Message);
                 }
             }
         }

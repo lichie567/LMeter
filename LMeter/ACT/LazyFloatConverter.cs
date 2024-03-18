@@ -1,8 +1,7 @@
-
 using System;
 using Newtonsoft.Json;
 
-namespace LMeter.ACT
+namespace LMeter.Act
 {
     public class LazyFloatConverter : JsonConverter
     {

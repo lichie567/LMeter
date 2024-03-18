@@ -1,3 +1,9 @@
+# Version 0.3.0.0
+- Merged downstream changes from Tischel's repository
+- Added IINACT IPC support
+- Added Clipping functionality for meter to not draw over game UI elements
+- Various code cleanup and bug fixes
+
 # Version 0.1.5.3
 - Fix bug that that caused removal of custom added fonts.
 

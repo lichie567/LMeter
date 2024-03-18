@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
 using LMeter.Helpers;
+using Newtonsoft.Json;
 
 namespace LMeter.Config
 {
@@ -20,7 +20,7 @@ namespace LMeter.Config
 
         public MeterListConfig MeterList { get; init; }
 
-        public ACTConfig ACTConfig { get; init; }
+        public ActConfig ActConfig { get; init; }
 
         public FontConfig FontConfig { get; init; }
 
@@ -30,7 +30,7 @@ namespace LMeter.Config
         public LMeterConfig()
         {
             this.MeterList = new MeterListConfig();
-            this.ACTConfig = new ACTConfig();
+            this.ActConfig = new ActConfig();
             this.FontConfig = new FontConfig();
         }
 
@@ -51,7 +51,7 @@ namespace LMeter.Config
         public IEnumerable<IConfigPage> GetConfigPages()
         {
             yield return this.MeterList;
-            yield return this.ACTConfig;
+            yield return this.ActConfig;
             yield return this.FontConfig;
             yield return this.AboutPage;
         }

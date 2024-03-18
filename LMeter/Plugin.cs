@@ -1,24 +1,16 @@
-﻿using System;
-using System.IO;
-using System.Reflection;
-using Dalamud.Data;
-using Dalamud.Game;
-using Dalamud.Game.ClientState;
-using Dalamud.Game.ClientState.Conditions;
-using Dalamud.Game.ClientState.JobGauge;
+﻿using Dalamud.Game;
 using Dalamud.Game.ClientState.Objects;
-using Dalamud.Game.ClientState.Party;
-using Dalamud.Game.Command;
-using Dalamud.Game.Gui;
 using Dalamud.Interface;
-using Dalamud.Logging;
+using Dalamud.Interface.Internal;
 using Dalamud.Plugin;
-using ImGuiScene;
-using LMeter.ACT;
+using Dalamud.Plugin.Services;
+using LMeter.Act;
 using LMeter.Config;
 using LMeter.Helpers;
 using LMeter.Meter;
-using SigScanner = Dalamud.Game.SigScanner;
+using System;
+using System.IO;
+using System.Reflection;
 
 namespace LMeter
 {
@@ -26,32 +18,35 @@ namespace LMeter
     {
         public const string ConfigFileName = "LMeter.json";
 
-        public static string Version { get; private set; } = "0.1.8.0";
+        public static string Version { get; private set; } = "0.3.0.0";
 
         public static string ConfigFileDir { get; private set; } = "";
 
         public static string ConfigFilePath { get; private set; } = "";
-        
-        public static TextureWrap? IconTexture { get; private set; } = null;
+
+        public static IDalamudTextureWrap? IconTexture { get; private set; } = null;
 
         public static string Changelog { get; private set; } = string.Empty;
 
         public string Name => "LMeter";
 
         public Plugin(
-            ClientState clientState,
-            CommandManager commandManager,
-            Condition condition,
+            IClientState clientState,
+            ICommandManager commandManager,
+            ICondition condition,
             DalamudPluginInterface pluginInterface,
-            DataManager dataManager,
-            Framework framework,
-            GameGui gameGui,
-            JobGauges jobGauges,
-            ObjectTable objectTable,
-            PartyList partyList,
-            SigScanner sigScanner,
-            TargetManager targetManager,
-            ChatGui chatGui
+            IDataManager dataManager,
+            IFramework framework,
+            IGameGui gameGui,
+            IJobGauges jobGauges,
+            IObjectTable objectTable,
+            IPartyList partyList,
+            ISigScanner sigScanner,
+            ITargetManager targetManager,
+            IChatGui chatGui,
+            IPluginLog logger,
+            ITextureProvider textureProvider,
+            ITextureSubstitutionProvider textureSubstitutionProvider
         )
         {
             Plugin.Version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? Plugin.Version;
@@ -73,9 +68,15 @@ namespace LMeter
             Singletons.Register(targetManager);
             Singletons.Register(chatGui);
             Singletons.Register(pluginInterface.UiBuilder);
+            Singletons.Register(logger);
+            Singletons.Register(textureProvider);
+            Singletons.Register(textureSubstitutionProvider);
+
+            // Add ClipRect helper
+            Singletons.Register(new ClipRectsHelper());
 
             // Init TexturesCache
-            Singletons.Register(new TexturesCache(pluginInterface));
+            Singletons.Register(new TexturesCache());
 
             // Load Icon Texure
             Plugin.IconTexture = LoadIconTexture(pluginInterface.UiBuilder);
@@ -91,9 +92,14 @@ namespace LMeter
 
             // Initialize Fonts
             Singletons.Register(new FontsManager(pluginInterface.UiBuilder, config.FontConfig.Fonts.Values));
-
-            // Connect to ACT
-            ACTClient actClient = new ACTClient(config.ACTConfig);
+            
+            // Initialize ACT Client
+            LogClient actClient = config.ActConfig.ClientType switch
+            {
+                1 => new IpcClient(config.ActConfig),
+                _ => new WebSocketClient(config.ActConfig)
+            };
+            
             actClient.Start();
             Singletons.Register(actClient);
 
@@ -107,8 +113,8 @@ namespace LMeter
             // Start the plugin
             Singletons.Register(new PluginManager(clientState, commandManager, pluginInterface, config));
         }
-        
-        private static TextureWrap? LoadIconTexture(UiBuilder uiBuilder)
+
+        private static IDalamudTextureWrap? LoadIconTexture(UiBuilder uiBuilder)
         {
             string? pluginPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             if (string.IsNullOrEmpty(pluginPath))
@@ -122,14 +128,14 @@ namespace LMeter
                 return null;
             }
 
-            TextureWrap? texture = null;
+            IDalamudTextureWrap? texture = null;
             try
             {
                 texture = uiBuilder.LoadImage(iconPath);
             }
             catch (Exception ex)
             {
-                PluginLog.Warning($"Failed to load LMeter Icon {ex.ToString()}");
+                Singletons.Get<IPluginLog>().Warning($"Failed to load LMeter Icon {ex.ToString()}");
             }
 
             return texture;
@@ -155,7 +161,7 @@ namespace LMeter
                 }
                 catch (Exception ex)
                 {
-                    PluginLog.Warning($"Error loading changelog: {ex.ToString()}");
+                    Singletons.Get<IPluginLog>().Warning($"Error loading changelog: {ex.ToString()}");
                 }
             }
 

@@ -1,12 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using ImGuiNET;
-using Newtonsoft.Json;
+using LMeter.Act;
 using LMeter.Helpers;
-using System.Linq;
-using System.Collections.Generic;
-using LMeter.ACT;
+using Newtonsoft.Json;
 
 namespace LMeter.Config
 {
@@ -18,7 +18,6 @@ namespace LMeter.Config
         public IConfigPage GetDefault() => new VisibilityConfig();
 
         [JsonIgnore] private string _customJobInput = string.Empty;
-        [JsonIgnore] private string _hideIfValueInput = string.Empty;
 
         public bool AlwaysHide = false;
         public bool HideInCombat = false;
@@ -64,7 +63,7 @@ namespace LMeter.Config
                 return false;
             }
 
-            if (this.HideIfNotConnected && ACTClient.Status != ConnectionStatus.Connected)
+            if (this.HideIfNotConnected && LogClient.GetStatus() != ConnectionStatus.Connected)
             {
                 return false;
             }

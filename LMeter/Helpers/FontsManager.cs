@@ -1,11 +1,11 @@
-﻿using ImGuiNET;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using Dalamud.Logging;
 using System.Linq;
 using System.Reflection;
 using Dalamud.Interface;
+using Dalamud.Plugin.Services;
+using ImGuiNET;
 
 namespace LMeter.Helpers
 {
@@ -60,7 +60,7 @@ namespace LMeter.Helpers
         public FontsManager(UiBuilder uiBuilder, IEnumerable<FontData> fonts)
         {
             _fontData = fonts;
-            _fontList = new string[] { DalamudFontKey };
+            _fontList = [DalamudFontKey];
             _imGuiFonts = new Dictionary<string, ImFontPtr>();
 
             _uiBuilder = uiBuilder;
@@ -100,13 +100,12 @@ namespace LMeter.Helpers
                 }
                 catch (Exception ex)
                 {
-                    PluginLog.Error($"Failed to load font from path [{fontPath}]!");
-                    PluginLog.Error(ex.ToString());
+                    Singletons.Get<IPluginLog>().Error($"Failed to load font from path [{fontPath}]!");
+                    Singletons.Get<IPluginLog>().Error(ex.ToString());
                 }
             }
 
-            List<string> fontList = new List<string>() { DalamudFontKey };
-            fontList.AddRange(_imGuiFonts.Keys);
+            List<string> fontList = [DalamudFontKey, .. _imGuiFonts.Keys];
             _fontList = fontList.ToArray();
         }
 
@@ -205,7 +204,7 @@ namespace LMeter.Helpers
                 }
                 catch (Exception ex)
                 {
-                    PluginLog.Warning($"Failed to create User Font Directory {ex.ToString()}");
+                    Singletons.Get<IPluginLog>().Warning($"Failed to create User Font Directory {ex.ToString()}");
                 }
             }
 
@@ -213,7 +212,7 @@ namespace LMeter.Helpers
             {
                 return;
             }
-            
+
             string[] pluginFonts;
             try
             {
@@ -221,7 +220,7 @@ namespace LMeter.Helpers
             }
             catch
             {
-                pluginFonts = new string[0];
+                pluginFonts = [];
             }
 
             foreach (string font in pluginFonts)
@@ -240,7 +239,7 @@ namespace LMeter.Helpers
                 }
                 catch (Exception ex)
                 {
-                    PluginLog.Warning($"Failed to copy font {font} to User Font Directory: {ex.ToString()}");
+                    Singletons.Get<IPluginLog>().Warning($"Failed to copy font {font} to User Font Directory: {ex.ToString()}");
                 }
             }
         }
@@ -256,7 +255,7 @@ namespace LMeter.Helpers
 
             return string.Empty;
         }
-        
+
         public static string GetUserFontPath()
         {
             return $"{Plugin.ConfigFileDir}\\Fonts\\";
@@ -266,7 +265,7 @@ namespace LMeter.Helpers
         {
             if (string.IsNullOrEmpty(path))
             {
-                return new string[0];
+                return [];
             }
 
             string[] fonts;
@@ -276,7 +275,7 @@ namespace LMeter.Helpers
             }
             catch
             {
-                fonts = new string[0];
+                fonts = [];
             }
 
             return fonts

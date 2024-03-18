@@ -1,11 +1,10 @@
 using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using System.Text.Json.Serialization;
-using Dalamud.Game.ClientState;
 using ImGuiNET;
-using LMeter.ACT;
+using LMeter.Act.DataStructures;
 using LMeter.Helpers;
+using Newtonsoft.Json;
 
 namespace LMeter.Config
 {
@@ -16,7 +15,7 @@ namespace LMeter.Config
         
         public string Name => "Bars";
 
-        private static string[] _jobIconStyleOptions = new string[] { "Style 1", "Style 2" };
+        private static string[] _jobIconStyleOptions = ["Style 1", "Style 2"];
 
         public int BarCount = 8;
         public int BarGaps = 1;
@@ -40,6 +39,7 @@ namespace LMeter.Config
         public ConfigColor RankTextOutlineColor = new ConfigColor(0, 0, 0, 0.5f);
         public string RankTextFontKey = FontsManager.DalamudFontKey;
         public int RankTextFontId = 0;
+        public bool AlwaysShowSelf = false;
 
         public string LeftTextFormat = "[name]";
         public Vector2 LeftTextOffset = new Vector2(0, 0);
@@ -62,16 +62,18 @@ namespace LMeter.Config
         
         public IConfigPage GetDefault()
         {
-            BarConfig defaultConfig = new BarConfig();
-            defaultConfig.BarNameFontKey = FontsManager.DefaultSmallFontKey;
-            defaultConfig.BarNameFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey);
+            BarConfig defaultConfig = new BarConfig
+            {
+                BarNameFontKey = FontsManager.DefaultSmallFontKey,
+                BarNameFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey),
 
-            defaultConfig.BarDataFontKey = FontsManager.DefaultSmallFontKey;
-            defaultConfig.BarDataFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey);
+                BarDataFontKey = FontsManager.DefaultSmallFontKey,
+                BarDataFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey),
 
-            defaultConfig.RankTextFontKey = FontsManager.DefaultSmallFontKey;
-            defaultConfig.RankTextFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey);
-            
+                RankTextFontKey = FontsManager.DefaultSmallFontKey,
+                RankTextFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey)
+            };
+
             return defaultConfig;
         }
 
@@ -120,13 +122,12 @@ namespace LMeter.Config
 
             using (FontsManager.PushFont(this.BarNameFontKey))
             {
-                string playerName = Singletons.Get<ClientState>().LocalPlayer?.Name.ToString() ?? "YOU";
-                if (this.UseCharacterName && combatant.Name.Contains("YOU"))
+                var leftText = combatant.Name;
+                if (!leftText.Contains("YOU"))
                 {
-                    combatant.Name = playerName;
+                    leftText = combatant.GetFormattedString($" {this.LeftTextFormat} ", this.ThousandsSeparators ? "N" : "F");
                 }
 
-                string leftText = combatant.GetFormattedString($" {this.LeftTextFormat} ", this.ThousandsSeparators ? "N" : "F");
                 Vector2 nameTextSize = ImGui.CalcTextSize(leftText);
                 Vector2 namePos = Utils.GetAnchoredPosition(localPos, -barSize, DrawAnchor.Left);
                 namePos = Utils.GetAnchoredPosition(namePos, nameTextSize, DrawAnchor.Left) + this.LeftTextOffset;
@@ -249,6 +250,7 @@ namespace LMeter.Config
 
                 ImGui.NewLine();
                 ImGui.Checkbox("Use your name instead of 'YOU'", ref this.UseCharacterName);
+                ImGui.Checkbox("Always show your own bar", ref this.AlwaysShowSelf);
                 ImGui.InputText("Left Text Format", ref this.LeftTextFormat, 128);
 
                 if (ImGui.IsItemHovered())
