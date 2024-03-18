@@ -207,7 +207,7 @@ namespace LMeter.Meter
             {
                 // We don't want to corrupt the cache. The entire logic past this point mutates the sorted Act combatants instead of using a rendering cache
                 // This has the issue that some settings can't behave properly and or don't update till the following combat update/fight
-                List<Combatant> sortedCombatants = this.GetSortedCombatants(actEvent, this.GeneralConfig.DataType).ToList();
+                List<Combatant> sortedCombatants = this.GetSortedCombatants(actEvent, this.GeneralConfig.DataType);
                 
                 float top = this.GeneralConfig.DataType switch
                 {

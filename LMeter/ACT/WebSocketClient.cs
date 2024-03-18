@@ -26,7 +26,7 @@ namespace LMeter.Act
 
         public override void Start()
         {
-            if (Status != ConnectionStatus.NotConnected)
+            if (this.Status != ConnectionStatus.NotConnected)
             {
                 Singletons.Get<IPluginLog>().Error("Cannot start, ACT client needs to be reset!");
                 return;
@@ -38,7 +38,7 @@ namespace LMeter.Act
             }
             catch (Exception ex)
             {
-                Status = ConnectionStatus.ConnectionFailed;
+                this.Status = ConnectionStatus.ConnectionFailed;
                 this.LogConnectionFailure(ex.ToString());
             }
         }
@@ -47,7 +47,7 @@ namespace LMeter.Act
         {
             try
             {
-                Status = ConnectionStatus.Connecting;
+                this.Status = ConnectionStatus.Connecting;
                 await _socket.ConnectAsync(new Uri(host), _cancellationTokenSource.Token);
 
                 await _socket.SendAsync(
@@ -58,7 +58,7 @@ namespace LMeter.Act
             }
             catch (Exception ex)
             {
-                Status = ConnectionStatus.ConnectionFailed;
+                this.Status = ConnectionStatus.ConnectionFailed;
                 this.LogConnectionFailure(ex.ToString());
                 return;
             }
@@ -66,12 +66,12 @@ namespace LMeter.Act
             ArraySegment<byte> buffer = new ArraySegment<byte>(new byte[4096]);
             if (buffer.Array is null)
             {
-                Status = ConnectionStatus.ConnectionFailed;
+                this.Status = ConnectionStatus.ConnectionFailed;
                 this.LogConnectionFailure("Failed to allocate receive buffer!");
                 return;
             }
 
-            Status = ConnectionStatus.Connected;
+            this.Status = ConnectionStatus.Connected;
             Singletons.Get<IPluginLog>().Information("Successfully Established ACT Connection");
             try
             {
@@ -108,7 +108,7 @@ namespace LMeter.Act
                         }
                     }
                 }
-                while (Status == ConnectionStatus.Connected);
+                while (this.Status == ConnectionStatus.Connected);
             }
             catch
             {
@@ -116,7 +116,7 @@ namespace LMeter.Act
             }
             finally
             {
-                if (Status != ConnectionStatus.ShuttingDown)
+                if (this.Status != ConnectionStatus.ShuttingDown)
                 {
                     this.Shutdown();
                 }
@@ -125,7 +125,7 @@ namespace LMeter.Act
 
         public override void Shutdown()
         {
-            Status = ConnectionStatus.ShuttingDown;
+            this.Status = ConnectionStatus.ShuttingDown;
             if (_socket.State == WebSocketState.Open ||
                 _socket.State == WebSocketState.Connecting)
             {
@@ -151,7 +151,7 @@ namespace LMeter.Act
             }
 
             _socket.Dispose();
-            Status = ConnectionStatus.NotConnected;
+            this.Status = ConnectionStatus.NotConnected;
         }
 
         public override void Reset()

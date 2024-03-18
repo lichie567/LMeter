@@ -21,6 +21,17 @@ namespace LMeter.Act
 
         public static ConnectionStatus GetStatus() => Singletons.Get<LogClient>().Status;
         public static List<ActEvent> PastEvents => Singletons.Get<LogClient>()._pastEvents;
+
+        public LogClient(ActConfig config)
+        {
+            Config = config;
+            Status = ConnectionStatus.NotConnected;
+            _pastEvents = new List<ActEvent>();
+        }
+        
+        public abstract void Start();
+        public abstract void Shutdown();
+        public abstract void Reset();
         
         public static ActEvent? GetEvent(int index = -1)
         {
@@ -45,21 +56,8 @@ namespace LMeter.Act
             chat.Print(message);
         }
 
-        public LogClient(ActConfig config)
-        {
-            Config = config;
-            Status = ConnectionStatus.NotConnected;
-            _pastEvents = new List<ActEvent>();
-        }
-        
-        public abstract void Start();
-        public abstract void Shutdown();
-        public abstract void Reset();
-
         protected void ParseLogData(ActEvent? newEvent)
         {
-            // Singletons.Get<IPluginLog>().Verbose(data);
-
             if (newEvent is not null)
             {
                 newEvent.Timestamp = DateTime.UtcNow;
