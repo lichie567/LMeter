@@ -1,9 +1,9 @@
-﻿using Dalamud.Game.ClientState.Conditions;
-using Dalamud.Plugin.Services;
-using FFXIVClientStructs.FFXIV.Client.Game.Character;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Dalamud.Game.ClientState.Conditions;
+using Dalamud.Plugin.Services;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 
 namespace LMeter.Helpers
 {

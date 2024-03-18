@@ -50,7 +50,7 @@ namespace LMeter.Act
             {
                 this.Status = ConnectionStatus.Connecting;
                 var connectSuccess = Singletons.Get<DalamudPluginInterface>().GetIpcSubscriber<bool>(IinactListeningIpcEndpoint).InvokeFunc();
-                Singletons.Get<IPluginLog>().Verbose("Check if IINACT installed and running: " + connectSuccess);
+                Singletons.Get<IPluginLog>().Info("Check if IINACT installed and running: " + connectSuccess);
                 if (!connectSuccess)
                 {
                     this.Status = ConnectionStatus.ConnectionFailed;
@@ -60,21 +60,18 @@ namespace LMeter.Act
             catch (Exception ex)
             {
                 this.Status = ConnectionStatus.ConnectionFailed;
-                Singletons.Get<IPluginLog>().Info("IINACT server was not found or was not finished starting.");
-                Singletons.Get<IPluginLog>().Debug(ex.ToString());
+                this.LogConnectionFailure("IINACT server was not found or was not finished starting.", ex);
                 return;
             }
 
             Singletons.Get<IPluginLog>().Info("Successfully discovered IINACT IPC endpoint");
-
             try
             {
-                var subscribeSuccess = Singletons.Get<DalamudPluginInterface>()
+                var subscribeStatus = Singletons.Get<DalamudPluginInterface>()
                     .GetIpcSubscriber<string, bool>(IinactSubscribeIpcEndpoint)
                     .InvokeFunc(LMeterSubscriptionIpcEndpoint);
 
-                Singletons.Get<IPluginLog>().Verbose("Setup default empty IINACT subscription successfully: " + subscribeSuccess);
-                if (!subscribeSuccess)
+                if (!subscribeStatus)
                 {
                     this.Status = ConnectionStatus.ConnectionFailed;
                     return;
@@ -83,26 +80,23 @@ namespace LMeter.Act
             catch (Exception ex)
             {
                 this.Status = ConnectionStatus.ConnectionFailed;
-                Singletons.Get<IPluginLog>().Info("Failed to setup IINACT subscription!");
-                Singletons.Get<IPluginLog>().Debug(ex.ToString());
+                this.LogConnectionFailure("Failed to setup IINACT subscription!", ex);
                 return;
             }
 
             try
             {
-                Singletons.Get<IPluginLog>().Verbose($"""Updating subscription using endpoint: `{IinactProviderEditEndpoint}`""");
                 Singletons.Get<DalamudPluginInterface>()
                     .GetIpcSubscriber<JObject, bool>(IinactProviderEditEndpoint)
                     .InvokeAction(SubscriptionMessageObject);
-                Singletons.Get<IPluginLog>().Verbose($"""Subscription update message sent""");
+
                 this.Status = ConnectionStatus.Connected;
                 Singletons.Get<IPluginLog>().Info("Successfully subscribed to combat events from IINACT IPC");
             }
             catch (Exception ex)
             {
                 this.Status = ConnectionStatus.ConnectionFailed;
-                Singletons.Get<IPluginLog>().Info("Failed to finalize IINACT subscription!");
-                Singletons.Get<IPluginLog>().Debug(ex.ToString());
+                this.LogConnectionFailure("Failed to finalize IINACT subscription!", ex);
             }
         }
 
@@ -123,7 +117,8 @@ namespace LMeter.Act
 
         public override void Reset()
         {
-            throw new NotImplementedException();
+            this.Shutdown();
+            this.Start();
         }
 
         public override void Shutdown()

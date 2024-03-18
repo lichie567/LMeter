@@ -4,11 +4,11 @@ using System.IO;
 using System.IO.Compression;
 using System.Text;
 using Dalamud.Interface.Internal.Notifications;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
+using LMeter.Config;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using LMeter.Config;
-using Dalamud.Plugin.Services;
 
 namespace LMeter.Helpers
 {

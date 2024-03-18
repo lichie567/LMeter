@@ -1,9 +1,9 @@
-﻿using Dalamud.Game.ClientState.Objects.Types;
-using Dalamud.Plugin.Services;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.InteropServices;
+using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Plugin.Services;
 
 namespace LMeter.Helpers
 {

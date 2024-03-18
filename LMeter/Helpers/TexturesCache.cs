@@ -1,10 +1,10 @@
-﻿using Dalamud.Interface;
+﻿using System;
+using System.Collections.Generic;
+using Dalamud.Interface;
 using Dalamud.Interface.Internal;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility;
 using Lumina.Data.Files;
-using System;
-using System.Collections.Generic;
 using static Dalamud.Plugin.Services.ITextureProvider;
 
 namespace LMeter.Helpers

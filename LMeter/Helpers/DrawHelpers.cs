@@ -4,7 +4,6 @@ using Dalamud.Interface;
 using Dalamud.Interface.Internal;
 using Dalamud.Interface.Internal.Notifications;
 using ImGuiNET;
-using ImGuiScene;
 
 namespace LMeter.Helpers
 {

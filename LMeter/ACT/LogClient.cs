@@ -11,8 +11,6 @@ namespace LMeter.Act
 {
     public abstract class LogClient : IPluginDisposable
     {
-        protected const string SubscriptionMessage = """{"call":"subscribe","events":["CombatData"]}""";
-
         protected  ActConfig Config { get; set; }
         protected ConnectionStatus Status { get; set; }
         private ActEvent? _lastEvent;
@@ -109,10 +107,13 @@ namespace LMeter.Act
             client.Start();
         }
 
-        protected void LogConnectionFailure(string error)
+        protected void LogConnectionFailure(string error, Exception? ex = null)
         {
-            Singletons.Get<IPluginLog>().Information($"ACT connection failed!");
-            Singletons.Get<IPluginLog>().Debug(error);
+            Singletons.Get<IPluginLog>().Error(error);
+            if (ex is not null)
+            {
+                Singletons.Get<IPluginLog>().Error(ex.ToString());
+            }
         }
 
         public void Dispose()

@@ -1,15 +1,14 @@
-using System.Linq;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
+using LMeter.Act;
+using LMeter.Act.DataStructures;
 using LMeter.Config;
 using LMeter.Helpers;
-using LMeter.ACT;
 using Newtonsoft.Json;
-using LMeter.Act.DataStructures;
-using LMeter.Act;
 
 namespace LMeter.Meter
 {

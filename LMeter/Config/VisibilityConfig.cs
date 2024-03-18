@@ -4,9 +4,9 @@ using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using ImGuiNET;
-using Newtonsoft.Json;
-using LMeter.Helpers;
 using LMeter.Act;
+using LMeter.Helpers;
+using Newtonsoft.Json;
 
 namespace LMeter.Config
 {
@@ -18,7 +18,6 @@ namespace LMeter.Config
         public IConfigPage GetDefault() => new VisibilityConfig();
 
         [JsonIgnore] private string _customJobInput = string.Empty;
-        [JsonIgnore] private string _hideIfValueInput = string.Empty;
 
         public bool AlwaysHide = false;
         public bool HideInCombat = false;

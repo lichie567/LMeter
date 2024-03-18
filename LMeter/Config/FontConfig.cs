@@ -4,8 +4,8 @@ using System.Linq;
 using System.Numerics;
 using Dalamud.Interface;
 using ImGuiNET;
-using Newtonsoft.Json;
 using LMeter.Helpers;
+using Newtonsoft.Json;
 
 namespace LMeter.Config
 {
