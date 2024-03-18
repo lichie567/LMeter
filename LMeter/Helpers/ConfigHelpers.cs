@@ -4,7 +4,6 @@ using System.IO;
 using System.IO.Compression;
 using System.Text;
 using Dalamud.Interface.Internal.Notifications;
-using Dalamud.Logging;
 using ImGuiNET;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;

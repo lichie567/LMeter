@@ -41,9 +41,9 @@ namespace LMeter.Config
             if (ImGui.BeginChild($"##{this.Name}", new Vector2(size.X, size.Y), true))
             {
                 Vector2 buttonSize = new Vector2(40, 0);
-                ImGui.Text($"ACT Status: {ActClient.Status}");
+                ImGui.Text($"ACT Status: {LogClient.GetStatus()}");
                 ImGui.InputTextWithHint("ACT Websocket Address", $"Default: '{_defaultSocketAddress}'", ref this.ActSocketAddress, 64);
-                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Sync, () => ActClient.RetryConnection(this.ActSocketAddress), "Reconnect", buttonSize);
+                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Sync, () => LogClient.RetryConnection(this.ActSocketAddress), "Reconnect", buttonSize);
 
                 ImGui.SameLine();
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() - 1f);

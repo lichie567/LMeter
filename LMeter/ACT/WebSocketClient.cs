@@ -5,8 +5,10 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Dalamud.Plugin.Services;
+using LMeter.Act.DataStructures;
 using LMeter.Config;
 using LMeter.Helpers;
+using Newtonsoft.Json;
 
 namespace LMeter.Act
 {
@@ -94,8 +96,16 @@ namespace LMeter.Act
                         ms.Seek(0, SeekOrigin.Begin);
                         using (StreamReader reader = new StreamReader(ms, Encoding.UTF8))
                         {
-                            string data = await reader.ReadToEndAsync();
-                            this.ParseLogData(data);
+                            try
+                            {
+                                string data = await reader.ReadToEndAsync();
+                                ActEvent? newEvent = JsonConvert.DeserializeObject<ActEvent>(data);
+                                this.ParseLogData(newEvent);
+                            }
+                            catch (Exception ex)
+                            {
+                                this.LogConnectionFailure(ex.ToString());
+                            }
                         }
                     }
                 }

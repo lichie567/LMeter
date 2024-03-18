@@ -10,7 +10,6 @@ namespace LMeter.Act.DataStructures
         private bool _active;
 
         public DateTime Timestamp { get; set; }
-        public string Data { get; set; } = string.Empty;
 
         [JsonProperty("type")]
         public string EventType { get; set; } = string.Empty;

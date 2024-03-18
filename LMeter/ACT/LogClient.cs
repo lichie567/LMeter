@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Dalamud.Game.Text;
 using Dalamud.Plugin.Services;
 using LMeter.Act.DataStructures;
@@ -13,19 +11,13 @@ namespace LMeter.Act
 {
     public abstract class LogClient : IPluginDisposable
     {
+        protected const string SubscriptionMessage = """{"call":"subscribe","events":["CombatData"]}""";
+
         protected  ActConfig Config { get; set; }
         protected ConnectionStatus Status { get; set; }
         private ActEvent? _lastEvent;
         private ActEvent? _currentEvent;
         private List<ActEvent> _pastEvents;
-
-        private static readonly JsonSerializerOptions JsonSerializerOptions = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true,
-            Converters = {
-                new JsonStringEnumConverter()
-            }
-        };
 
         public static ConnectionStatus GetStatus() => Singletons.Get<LogClient>().Status;
         public static List<ActEvent> PastEvents => Singletons.Get<LogClient>()._pastEvents;
@@ -64,43 +56,31 @@ namespace LMeter.Act
         public abstract void Shutdown();
         public abstract void Reset();
 
-        protected void ParseLogData(string data)
+        protected void ParseLogData(ActEvent? newEvent)
         {
-            Singletons.Get<IPluginLog>().Verbose(data);
+            // Singletons.Get<IPluginLog>().Verbose(data);
 
-            if (!string.IsNullOrEmpty(data))
+            if (newEvent is not null)
             {
-                try
+                newEvent.Timestamp = DateTime.UtcNow;
+
+                if (newEvent?.Encounter is not null &&
+                    newEvent?.Combatants is not null &&
+                    newEvent.Combatants.Any() &&
+                    !newEvent.Equals(_lastEvent))
                 {
-                    ActEvent? newEvent = JsonSerializer.Deserialize<ActEvent>(data, JsonSerializerOptions);
-                    if (newEvent is not null)
+                    if (!newEvent.IsEncounterActive() &&
+                        !newEvent.Equals(_pastEvents.LastOrDefault()))
                     {
-                        newEvent.Timestamp = DateTime.UtcNow;
-                        newEvent.Data = data;
-
-                        if (newEvent?.Encounter is not null &&
-                            newEvent?.Combatants is not null &&
-                            newEvent.Combatants.Any() &&
-                            !newEvent.Equals(_lastEvent))
+                        _pastEvents.Add(newEvent);
+                        while (_pastEvents.Count > Config.EncounterHistorySize)
                         {
-                            if (!newEvent.IsEncounterActive() &&
-                                !newEvent.Equals(_pastEvents.LastOrDefault()))
-                            {
-                                _pastEvents.Add(newEvent);
-                                while (_pastEvents.Count > Config.EncounterHistorySize)
-                                {
-                                    _pastEvents.RemoveAt(0);
-                                }
-                            }
-
-                            _lastEvent = newEvent;
-                            _currentEvent = newEvent;
+                            _pastEvents.RemoveAt(0);
                         }
                     }
-                }
-                catch (Exception ex)
-                {
-                    this.LogConnectionFailure(ex.ToString());
+
+                    _lastEvent = newEvent;
+                    _currentEvent = newEvent;
                 }
             }
         }

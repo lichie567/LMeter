@@ -1,30 +1,30 @@
 using System;
-using System.Text.Json.Nodes;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Ipc;
 using Dalamud.Plugin.Services;
+using LMeter.Act.DataStructures;
 using LMeter.Config;
 using LMeter.Helpers;
+using Newtonsoft.Json.Linq;
 
 namespace LMeter.Act
 {
     public class IpcClient : LogClient
     {
+        private const string SubscriptionMessage = """{"call":"subscribe","events":["CombatData"]}""";
         private const string IinactListeningIpcEndpoint = "IINACT.Server.Listening";
         private const string IinactSubscribeIpcEndpoint = "IINACT.CreateSubscriber";
         private const string IinactUnsubscribeIpcEndpoint = "IINACT.Unsubscribe";
-
         private const string LMeterSubscriptionIpcEndpoint = "LMeter.SubscriptionReceiver";
         private const string IinactProviderEditEndpoint = "IINACT.IpcProvider." + LMeterSubscriptionIpcEndpoint;
-        public const string SubscriptionMessage = """{"call":"subscribe","events":["CombatData"]}""";
-        private static readonly JsonObject? SubscriptionMessageObject = JsonNode.Parse(SubscriptionMessage)?.AsObject();
+        private static readonly JObject SubscriptionMessageObject = JObject.Parse(SubscriptionMessage);
 
-        private readonly ICallGateProvider<JsonObject, bool> subscriptionReceiver;
+        private readonly ICallGateProvider<JObject, bool> _subscriptionReceiver;
 
         public IpcClient(ActConfig config) : base(config)
         {
-            subscriptionReceiver = Singletons.Get<DalamudPluginInterface>().GetIpcProvider<JsonObject, bool>(LMeterSubscriptionIpcEndpoint);
-            subscriptionReceiver.RegisterFunc(ReceiveIpcMessage);
+            _subscriptionReceiver = Singletons.Get<DalamudPluginInterface>().GetIpcProvider<JObject, bool>(LMeterSubscriptionIpcEndpoint);
+            _subscriptionReceiver.RegisterFunc(ReceiveIpcMessage);
 
         }
 
@@ -90,10 +90,9 @@ namespace LMeter.Act
 
             try
             {
-                // no way to check this, hoping blindly that it always works ¯\_(ツ)_/¯
                 Singletons.Get<IPluginLog>().Verbose($"""Updating subscription using endpoint: `{IinactProviderEditEndpoint}`""");
                 Singletons.Get<DalamudPluginInterface>()
-                    .GetIpcSubscriber<JsonObject, bool>(IinactProviderEditEndpoint)
+                    .GetIpcSubscriber<JObject, bool>(IinactProviderEditEndpoint)
                     .InvokeAction(SubscriptionMessageObject);
                 Singletons.Get<IPluginLog>().Verbose($"""Subscription update message sent""");
                 this.Status = ConnectionStatus.Connected;
@@ -107,17 +106,17 @@ namespace LMeter.Act
             }
         }
 
-        private bool ReceiveIpcMessage(JsonObject json)
+        private bool ReceiveIpcMessage(JObject data)
         {
             try
             {
-                string data = json.ToJsonString();
-                this.ParseLogData(data);
+                ActEvent? newEvent = data.ToObject<ActEvent?>();
+                this.ParseLogData(newEvent);
                 return true;
             }
             catch (Exception ex)
             {
-                Singletons.Get<IPluginLog>().Debug(ex.ToString());
+                this.LogConnectionFailure(ex.ToString());
                 return false;
             }
         }
