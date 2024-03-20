@@ -26,7 +26,7 @@ namespace LMeter.Meter
         [JsonIgnore] private ActEvent? _previewEvent = null;
         [JsonIgnore] private int _scrollPosition = 0;
         [JsonIgnore] private DateTime? _lastSortedTimestamp = null;
-        [JsonIgnore] private List<Combatant> _lastSortedCombatants = new List<Combatant>();
+        [JsonIgnore] private List<Combatant> _lastSortedCombatants = [];
 
         [JsonIgnore] public string ID { get; init; }
 
@@ -86,7 +86,7 @@ namespace LMeter.Meter
 
         public static MeterWindow GetDefaultMeter(string name)
         {
-            MeterWindow newMeter = new MeterWindow(name);
+            MeterWindow newMeter = new(name);
             newMeter.ImportPage(newMeter.HeaderConfig.GetDefault());
             newMeter.ImportPage(newMeter.BarConfig.GetDefault());
             return newMeter;
@@ -94,7 +94,7 @@ namespace LMeter.Meter
 
         public void Clear()
         {
-            _lastSortedCombatants = new List<Combatant>();
+            _lastSortedCombatants = [];
             _lastSortedTimestamp = null;
         }
         
@@ -137,7 +137,7 @@ namespace LMeter.Meter
             {
                 _eventIndex = index;
                 _lastSortedTimestamp = null;
-                _lastSortedCombatants = new List<Combatant>();
+                _lastSortedCombatants = [];
                 _scrollPosition = 0;
             }
 
@@ -176,7 +176,7 @@ namespace LMeter.Meter
 
                     for (int i = 0; i < this.GeneralConfig.BorderThickness; i++)
                     {
-                        Vector2 offset = new Vector2(i, i);
+                        Vector2 offset = new(i, i);
                         drawList.AddRect(borderPos + offset, borderPos + borderSize - offset, this.GeneralConfig.BorderColor.Base);
                     }
 
@@ -207,7 +207,7 @@ namespace LMeter.Meter
             {
                 // We don't want to corrupt the cache. The entire logic past this point mutates the sorted Act combatants instead of using a rendering cache
                 // This has the issue that some settings can't behave properly and or don't update till the following combat update/fight
-                List<Combatant> sortedCombatants = this.GetSortedCombatants(actEvent, this.GeneralConfig.DataType);
+                List<Combatant> sortedCombatants = [.. this.GetSortedCombatants(actEvent, this.GeneralConfig.DataType)];
                 
                 float top = this.GeneralConfig.DataType switch
                 {
@@ -255,18 +255,19 @@ namespace LMeter.Meter
 
         private void MovePlayerIntoViewableRange(List<Combatant> sortedCombatants, int scrollPosition, string playerName)
         {
-            var oldPlayerIndex = sortedCombatants.FindIndex(combatant => combatant.Name.Contains("YOU") || combatant.Name.Contains(playerName));
+            int oldPlayerIndex = sortedCombatants.FindIndex(combatant => combatant.Name.Contains("YOU") || combatant.Name.Contains(playerName));
             if (oldPlayerIndex == -1)
             {
                 return;
             }
 
-            var newPlayerIndex = Math.Clamp(oldPlayerIndex, scrollPosition, this.BarConfig.BarCount + scrollPosition - 1);
+            int newPlayerIndex = Math.Clamp(oldPlayerIndex, scrollPosition, this.BarConfig.BarCount + scrollPosition - 1);
 
             if (oldPlayerIndex == newPlayerIndex)
             {
                 return;
             }
+
             sortedCombatants.MoveItem(oldPlayerIndex, newPlayerIndex);
         }
         
@@ -341,7 +342,7 @@ namespace LMeter.Meter
                 return _lastSortedCombatants;
             }
 
-            List<Combatant> sortedCombatants = actEvent.Combatants.Values.ToList();
+            List<Combatant> sortedCombatants = [.. actEvent.Combatants.Values];
 
             sortedCombatants.Sort((x, y) =>
             {

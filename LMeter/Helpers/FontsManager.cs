@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using Dalamud.Interface;
+using Dalamud.Interface.ManagedFontAtlas;
+using Dalamud.Interface.Utility;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 
@@ -27,62 +28,54 @@ namespace LMeter.Helpers
 
     public class FontScope : IDisposable
     {
-        private bool _fontPushed;
+        private readonly IFontHandle? _handle;
 
-        public FontScope(bool fontPushed)
+        public FontScope(IFontHandle? handle)
         {
-            _fontPushed = fontPushed;
+            _handle = handle;
+            _handle?.Push();
         }
 
         public void Dispose()
         {
-            if (_fontPushed)
-            {
-                ImGui.PopFont();
-            }
+            _handle?.Pop();
+            GC.SuppressFinalize(this);
         }
     }
 
-    public class FontsManager : IPluginDisposable
+    public class FontsManager : IDisposable
     {
-        private IEnumerable<FontData> _fontData;
-        private Dictionary<string, ImFontPtr> _imGuiFonts;
+        private readonly Dictionary<string, IFontHandle> _imGuiFonts = [];
         private string[] _fontList;
-        private UiBuilder _uiBuilder;
-
+        private readonly UiBuilder _uiBuilder;
+        
         public const string DalamudFontKey = "Dalamud Font";
-
-        public static readonly List<string> DefaultFontKeys = new List<string>() { "Expressway_24", "Expressway_20", "Expressway_16" };
+        public static readonly List<string> DefaultFontKeys = ["Expressway_24", "Expressway_20", "Expressway_16"];
         public static string DefaultBigFontKey => DefaultFontKeys[0];
         public static string DefaultMediumFontKey => DefaultFontKeys[1];
         public static string DefaultSmallFontKey => DefaultFontKeys[2];
 
         public FontsManager(UiBuilder uiBuilder, IEnumerable<FontData> fonts)
         {
-            _fontData = fonts;
-            _fontList = [DalamudFontKey];
-            _imGuiFonts = new Dictionary<string, ImFontPtr>();
-
             _uiBuilder = uiBuilder;
-            _uiBuilder.BuildFonts += BuildFonts;
-            _uiBuilder.RebuildFonts();
+            _fontList = [DalamudFontKey];
+            this.BuildFonts(fonts);
         }
 
-        public void BuildFonts()
+        private void BuildFonts(IEnumerable<FontData> fontData)
         {
-            string fontDir = GetUserFontPath();
-
+            var fontDir = GetUserFontPath();
             if (string.IsNullOrEmpty(fontDir))
             {
                 return;
             }
 
-            _imGuiFonts.Clear();
-            ImGuiIOPtr io = ImGui.GetIO();
+            this.DisposeFontHandles();
+            var io = ImGui.GetIO();
 
-            foreach (FontData font in _fontData)
+            foreach (var font in fontData)
             {
-                string fontPath = $"{fontDir}{font.Name}.ttf";
+                var fontPath = $"{fontDir}{font.Name}.ttf";
                 if (!File.Exists(fontPath))
                 {
                     continue;
@@ -90,11 +83,21 @@ namespace LMeter.Helpers
 
                 try
                 {
-                    ImVector? ranges = this.GetCharacterRanges(font, io);
-
-                    ImFontPtr imFont = !ranges.HasValue
-                        ? io.Fonts.AddFontFromFileTTF(fontPath, font.Size)
-                        : io.Fonts.AddFontFromFileTTF(fontPath, font.Size, null, ranges.Value.Data);
+                    var imFont = this._uiBuilder.FontAtlas.NewDelegateFontHandle
+                    (
+                        e => e.OnPreBuild
+                        (
+                            tk => tk.AddFontFromFile
+                            (
+                                fontPath,
+                                new SafeFontConfig
+                                {
+                                    SizePx = font.Size,
+                                    GlyphRanges = this.GetCharacterRanges(io, font.Chinese, font.Korean),
+                                }
+                            )
+                        )
+                    );
 
                     _imGuiFonts.Add(GetFontKey(font), imFont);
                 }
@@ -105,8 +108,61 @@ namespace LMeter.Helpers
                 }
             }
 
-            List<string> fontList = [DalamudFontKey, .. _imGuiFonts.Keys];
-            _fontList = fontList.ToArray();
+            _fontList = [DalamudFontKey, .. _imGuiFonts.Keys];
+        }
+
+        public void UpdateFonts(IEnumerable<FontData> fonts)
+        {
+            this.BuildFonts(fonts);
+        }
+
+        private void DisposeFontHandles()
+        {
+            foreach ((string _, IFontHandle value) in _imGuiFonts)
+            {
+                value.Dispose();
+            }
+            
+            _imGuiFonts.Clear();
+        }
+
+        private unsafe ushort[]? GetCharacterRanges(ImGuiIOPtr io, bool chinese, bool korean)
+        {
+            if (!chinese && !korean)
+            {
+                return null;
+            }
+
+            using (ImGuiHelpers.NewFontGlyphRangeBuilderPtrScoped(out var builder))
+            {
+                if (chinese)
+                {
+                    // GetGlyphRangesChineseFull() includes Default + Hiragana, Katakana, Half-Width, Selection of 1946 Ideographs
+                    // https://skia.googlesource.com/external/github.com/ocornut/imgui/+/v1.53/extra_fonts/README.txt
+                    builder.AddRanges(io.Fonts.GetGlyphRangesChineseFull());
+                }
+
+                if (korean)
+                {
+                    builder.AddRanges(io.Fonts.GetGlyphRangesKorean());
+                }
+
+                return builder.BuildRangesToArray();
+            }
+        }
+
+        public static int GetFontIndex(string fontKey)
+        {
+            var manager = Singletons.Get<FontsManager>();
+            for (var i = 0; i < manager._fontList.Length; i++)
+            {
+                if (manager._fontList[i].Equals(fontKey))
+                {
+                    return i;
+                }
+            }
+
+            return 0;
         }
 
         public static bool ValidateFont(string[] fontOptions, int fontId, string fontKey)
@@ -116,22 +172,15 @@ namespace LMeter.Helpers
 
         public static FontScope PushFont(string fontKey)
         {
-            FontsManager manager = Singletons.Get<FontsManager>();
-            if (string.IsNullOrEmpty(fontKey) ||
-                fontKey.Equals(DalamudFontKey) ||
-                !manager._imGuiFonts.Keys.Contains(fontKey))
+            if (!string.IsNullOrEmpty(fontKey))
             {
-                return new FontScope(false);
+                if (Singletons.Get<FontsManager>()._imGuiFonts.TryGetValue(fontKey, out var fontHandle))
+                {
+                    return new FontScope(fontHandle);
+                }
             }
 
-            ImGui.PushFont(manager._imGuiFonts[fontKey]);
-            return new FontScope(true);
-        }
-
-        public void UpdateFonts(IEnumerable<FontData> fonts)
-        {
-            _fontData = fonts;
-            Singletons.Get<UiBuilder>().RebuildFonts();
+            return new FontScope(null);
         }
 
         public static string[] GetFontList()
@@ -139,79 +188,34 @@ namespace LMeter.Helpers
             return Singletons.Get<FontsManager>()._fontList;
         }
 
-        public int GetFontIndex(string fontKey)
-        {
-            for (int i = 0; i < _fontList.Length; i++)
-            {
-                if (_fontList[i].Equals(fontKey))
-                {
-                    return i;
-                }
-            }
-
-            return 0;
-        }
-
-        private unsafe ImVector? GetCharacterRanges(FontData font, ImGuiIOPtr io)
-        {
-            if (!font.Chinese && !font.Korean)
-            {
-                return null;
-            }
-
-            var builder = new ImFontGlyphRangesBuilderPtr(ImGuiNative.ImFontGlyphRangesBuilder_ImFontGlyphRangesBuilder());
-
-            if (font.Chinese)
-            {
-                // GetGlyphRangesChineseFull() includes Default + Hiragana, Katakana, Half-Width, Selection of 1946 Ideographs
-                // https://skia.googlesource.com/external/github.com/ocornut/imgui/+/v1.53/extra_fonts/README.txt
-                builder.AddRanges(io.Fonts.GetGlyphRangesChineseFull());
-            }
-
-            if (font.Korean)
-            {
-                builder.AddRanges(io.Fonts.GetGlyphRangesKorean());
-            }
-
-            builder.BuildRanges(out ImVector ranges);
-
-            return ranges;
-        }
-
         public static string GetFontKey(FontData font)
         {
             string key = $"{font.Name}_{font.Size}";
-            key += (font.Chinese ? "_cnjp" : string.Empty);
-            key += (font.Korean ? "_kr" : string.Empty);
+            key += font.Chinese ? "_cnjp" : string.Empty;
+            key += font.Korean ? "_kr" : string.Empty;
             return key;
         }
 
         public static void CopyPluginFontsToUserPath()
         {
-            string? pluginFontPath = GetPluginFontPath();
-            string? userFontPath = GetUserFontPath();
+            var pluginFontPath = GetPluginFontPath();
+            var userFontPath = GetUserFontPath();
 
             if (string.IsNullOrEmpty(pluginFontPath) || string.IsNullOrEmpty(userFontPath))
             {
                 return;
             }
 
-            if (!Directory.Exists(userFontPath))
+            try
             {
-                try
-                {
-                    Directory.CreateDirectory(userFontPath);
-                }
-                catch (Exception ex)
-                {
-                    Singletons.Get<IPluginLog>().Warning($"Failed to create User Font Directory {ex.ToString()}");
-                }
+                Directory.CreateDirectory(userFontPath);
+            }
+            catch (Exception ex)
+            {
+                Singletons.Get<IPluginLog>().Warning($"Failed to create User Font Directory {ex}");
             }
 
-            if (!Directory.Exists(userFontPath))
-            {
-                return;
-            }
+            if (!Directory.Exists(userFontPath)) return;
 
             string[] pluginFonts;
             try
@@ -223,14 +227,14 @@ namespace LMeter.Helpers
                 pluginFonts = [];
             }
 
-            foreach (string font in pluginFonts)
+            foreach (var font in pluginFonts)
             {
                 try
                 {
                     if (!string.IsNullOrEmpty(font))
                     {
-                        string fileName = font.Replace(pluginFontPath, string.Empty);
-                        string copyPath = Path.Combine(userFontPath, fileName);
+                        var fileName = font.Replace(pluginFontPath, string.Empty);
+                        var copyPath = Path.Combine(userFontPath, fileName);
                         if (!File.Exists(copyPath))
                         {
                             File.Copy(font, copyPath, false);
@@ -239,7 +243,7 @@ namespace LMeter.Helpers
                 }
                 catch (Exception ex)
                 {
-                    Singletons.Get<IPluginLog>().Warning($"Failed to copy font {font} to User Font Directory: {ex.ToString()}");
+                    Singletons.Get<IPluginLog>().Warning($"Failed to copy font {font} to User Font Directory: {ex}");
                 }
             }
         }
@@ -263,10 +267,7 @@ namespace LMeter.Helpers
 
         public static string[] GetFontNamesFromPath(string? path)
         {
-            if (string.IsNullOrEmpty(path))
-            {
-                return [];
-            }
+            if (string.IsNullOrEmpty(path)) return [];
 
             string[] fonts;
             try
@@ -278,11 +279,14 @@ namespace LMeter.Helpers
                 fonts = [];
             }
 
-            return fonts
-                .Select(f => f
+            for (var i = 0; i < fonts.Length; i++)
+            {
+                fonts[i] = fonts[i]
                     .Replace(path, string.Empty)
-                    .Replace(".ttf", string.Empty, StringComparison.OrdinalIgnoreCase))
-                .ToArray();
+                    .Replace(".ttf", string.Empty, StringComparison.OrdinalIgnoreCase);
+            }
+
+            return fonts;
         }
 
         public void Dispose()
@@ -295,8 +299,7 @@ namespace LMeter.Helpers
         {
             if (disposing)
             {
-                _uiBuilder.BuildFonts -= BuildFonts;
-                _imGuiFonts.Clear();
+                this.DisposeFontHandles();
             }
         }
     }

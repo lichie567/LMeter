@@ -14,7 +14,7 @@ namespace LMeter.Helpers
 {
     public static class ConfigHelpers
     {
-        private static readonly JsonSerializerSettings _serializerSettings = new JsonSerializerSettings
+        private static readonly JsonSerializerSettings _serializerSettings = new()
         {
             TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
             TypeNameHandling = TypeNameHandling.Objects,
@@ -42,11 +42,11 @@ namespace LMeter.Helpers
             try
             {
                 string jsonString = JsonConvert.SerializeObject(toExport, Formatting.None, _serializerSettings);
-                using (MemoryStream outputStream = new MemoryStream())
+                using (MemoryStream outputStream = new())
                 {
-                    using (DeflateStream compressionStream = new DeflateStream(outputStream, CompressionLevel.Optimal))
+                    using (DeflateStream compressionStream = new(outputStream, CompressionLevel.Optimal))
                     {
-                        using (StreamWriter writer = new StreamWriter(compressionStream, Encoding.UTF8))
+                        using (StreamWriter writer = new(compressionStream, Encoding.UTF8))
                         {
                             writer.Write(jsonString);
                         }
@@ -72,11 +72,11 @@ namespace LMeter.Helpers
                 byte[] bytes = Convert.FromBase64String(importString);
 
                 string decodedJsonString;
-                using (MemoryStream inputStream = new MemoryStream(bytes))
+                using (MemoryStream inputStream = new(bytes))
                 {
-                    using (DeflateStream compressionStream = new DeflateStream(inputStream, CompressionMode.Decompress))
+                    using (DeflateStream compressionStream = new(inputStream, CompressionMode.Decompress))
                     {
-                        using (StreamReader reader = new StreamReader(compressionStream, Encoding.UTF8))
+                        using (StreamReader reader = new(compressionStream, Encoding.UTF8))
                         {
                             decodedJsonString = reader.ReadToEnd();
                         }
@@ -154,12 +154,10 @@ namespace LMeter.Helpers
     public class LMeterSerializationBinder : ISerializationBinder
     {
         // TODO: Make this automatic somehow?
-        private static List<Type> _configTypes = new List<Type>()
-        {
-        };
+        private static List<Type> _configTypes = [];
 
-        private readonly Dictionary<Type, string> typeToName = new Dictionary<Type, string>();
-        private readonly Dictionary<string, Type> nameToType = new Dictionary<string, Type>();
+        private readonly Dictionary<Type, string> typeToName = [];
+        private readonly Dictionary<string, Type> nameToType = [];
 
         public LMeterSerializationBinder()
         {

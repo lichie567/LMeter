@@ -11,7 +11,7 @@ public class Encounter
     [JsonIgnore]
     public static string[] TextTags { get; } = typeof(Encounter).GetFields().Select(x => $"[{x.Name.ToLower()}]").ToArray();
 
-    private static readonly Random _rand = new Random();
+    private static readonly Random _rand = new();
     private static readonly Dictionary<string, MemberInfo> _members = typeof(Encounter).GetMembers().ToDictionary((x) => x.Name.ToLower());
 
     public string GetFormattedString(string format, string numberFormat)

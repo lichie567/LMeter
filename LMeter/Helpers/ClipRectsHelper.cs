@@ -13,8 +13,8 @@ namespace LMeter.Helpers
     {
         // these are ordered by priority, if 2 game windows are on top of a DelvUI element
         // the one that comes first in this list is the one that will be clipped around
-        internal static List<string> AddonNames = new List<string>()
-        {
+        internal static List<string> AddonNames =
+        [
             "ContextMenu",
             "ItemDetail", // tooltip
             "ActionDetail", // tooltip
@@ -136,9 +136,9 @@ namespace LMeter.Helpers
             "ColorPicker",
             "PlayGuide",
             "SelectYesno"
-        };
+        ];
 
-        private List<ClipRect> _clipRects = new List<ClipRect>();
+        private List<ClipRect> _clipRects = [];
 
         public unsafe void Update()
         {

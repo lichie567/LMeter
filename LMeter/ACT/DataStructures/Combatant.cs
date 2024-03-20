@@ -13,7 +13,7 @@ public class Combatant
     public static string[] TextTags { get; } = typeof(Combatant).GetFields().Select(x => $"[{x.Name.ToLower()}]").ToArray();
 
     // TODO: move this to a global place so it can be shared between encounter and combatant
-    private static readonly Random _rand = new Random();
+    private static readonly Random _rand = new();
     private static readonly Dictionary<string, MemberInfo> _members = typeof(Combatant).GetMembers().ToDictionary((x) => x.Name.ToLower());
 
     [JsonProperty("name")]
@@ -133,7 +133,7 @@ public class Combatant
 
     public static Dictionary<string, Combatant> GetTestData()
     {
-        Dictionary<string, Combatant> mockCombatants = new Dictionary<string, Combatant>
+        Dictionary<string, Combatant> mockCombatants = new()
         {
             { "1", GetCombatant("GNB", "DRK", "WAR", "PLD") },
             { "2", GetCombatant("GNB", "DRK", "WAR", "PLD") },
@@ -142,9 +142,13 @@ public class Combatant
             { "5", GetCombatant("SAM", "DRG", "MNK", "NIN", "RPR") },
             { "6", GetCombatant("SAM", "DRG", "MNK", "NIN", "RPR") },
             { "7", GetCombatant("BLM", "SMN", "RDM") },
-            { "8", GetCombatant("DNC", "MCH", "BRD") }
+            { "8", GetCombatant("DNC", "MCH", "BRD") },
+            { "9", GetCombatant("SAM", "DRG", "MNK", "NIN", "RPR") },
+            { "10", GetCombatant("SAM", "DRG", "MNK", "NIN", "RPR") },
+            { "11", GetCombatant("BLM", "SMN", "RDM") },
+            { "12", GetCombatant("DNC", "MCH", "BRD") }
         };
-
+        
         return mockCombatants;
     }
 

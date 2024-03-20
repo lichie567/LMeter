@@ -6,6 +6,8 @@ using Dalamud.Plugin.Services;
 using LMeter.Act.DataStructures;
 using LMeter.Config;
 using LMeter.Helpers;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace LMeter.Act
 {
@@ -26,7 +28,7 @@ namespace LMeter.Act
         {
             Config = config;
             Status = ConnectionStatus.NotConnected;
-            _pastEvents = new List<ActEvent>();
+            _pastEvents = [];
         }
         
         public abstract void Start();
@@ -47,7 +49,7 @@ namespace LMeter.Act
         public static void EndEncounter()
         {
             IChatGui chat = Singletons.Get<IChatGui>();
-            XivChatEntry message = new XivChatEntry()
+            XivChatEntry message = new()
             {
                 Message = "end",
                 Type = XivChatType.Echo
@@ -56,7 +58,23 @@ namespace LMeter.Act
             chat.Print(message);
         }
 
-        protected void ParseLogData(ActEvent? newEvent)
+        public static void RetryConnection()
+        {
+            LogClient client = Singletons.Get<LogClient>();
+            client.Reset();
+        }
+
+        protected void ParseLogData(string data)
+        {
+            this.HandleNewEvent(JsonConvert.DeserializeObject<ActEvent>(data));
+        }
+
+        protected void ParseLogData(JObject data)
+        {
+            this.HandleNewEvent(data.ToObject<ActEvent>());
+        }
+
+        private void HandleNewEvent(ActEvent? newEvent)
         {
             if (newEvent is not null)
             {
@@ -86,11 +104,11 @@ namespace LMeter.Act
         public void Clear()
         {
             _currentEvent = null;
-            _pastEvents = new List<ActEvent>();
+            _pastEvents = [];
             if (Config.ClearAct)
             {
                 IChatGui chat = Singletons.Get<IChatGui>();
-                XivChatEntry message = new XivChatEntry()
+                XivChatEntry message = new()
                 {
                     Message = "clear",
                     Type = XivChatType.Echo
@@ -98,12 +116,6 @@ namespace LMeter.Act
 
                 chat.Print(message);
             }
-        }
-
-        public static void RetryConnection()
-        {
-            LogClient client = Singletons.Get<LogClient>();
-            client.Reset();
         }
 
         protected void LogConnectionFailure(string error, Exception? ex = null)

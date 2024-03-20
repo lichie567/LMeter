@@ -5,7 +5,7 @@ namespace LMeter.Helpers
 {
     public static class Singletons
     {
-        private static readonly ConcurrentDictionary<Type, object> ActiveInstances = new ConcurrentDictionary<Type, object>();
+        private static readonly ConcurrentDictionary<Type, object> ActiveInstances = new();
 
         public static T Get<T>()
         {

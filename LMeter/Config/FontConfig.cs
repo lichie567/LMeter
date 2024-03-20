@@ -28,14 +28,14 @@ namespace LMeter.Config
         public FontConfig()
         {
             RefreshFontList();
-            this.Fonts = new Dictionary<string, FontData>();
+            this.Fonts = [];
 
             foreach (string fontKey in FontsManager.DefaultFontKeys)
             {
                 string[] splits = fontKey.Split("_", StringSplitOptions.RemoveEmptyEntries);
                 if (splits.Length == 2 && int.TryParse(splits[1], out int size))
                 {
-                    FontData newFont = new FontData(splits[0], size, false, false);
+                    FontData newFont = new(splits[0], size, false, false);
                     string key = FontsManager.GetFontKey(newFont);
                     this.Fonts.Add(key, newFont);
                 }
@@ -58,7 +58,7 @@ namespace LMeter.Config
                     ImGui.Text("Copy Font Folder Path to Clipboard: ");
                     ImGui.SameLine();
 
-                    Vector2 buttonSize = new Vector2(40, 0);
+                    Vector2 buttonSize = new(40, 0);
                     ImGui.SetCursorPosY(cursorY);
                     DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Copy, () => ImGui.SetClipboardText(_fontPath), null, buttonSize);
 
@@ -154,7 +154,7 @@ namespace LMeter.Config
 
         private void AddFont(int fontIndex, int size)
         {
-            FontData newFont = new FontData(_fonts[fontIndex], size + 1, _chinese, _korean);
+            FontData newFont = new(_fonts[fontIndex], size + 1, _chinese, _korean);
             string key = FontsManager.GetFontKey(newFont);
 
             if (!this.Fonts.ContainsKey(key))

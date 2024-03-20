@@ -29,7 +29,7 @@ namespace LMeter.Config
 
         public JobType ShowForJobTypes = JobType.All;
         public string CustomJobString = string.Empty;
-        public List<Job> CustomJobList = new List<Job>();
+        public List<Job> CustomJobList = [];
 
         public bool IsVisible()
         {
@@ -97,7 +97,7 @@ namespace LMeter.Config
                     if (ImGui.InputTextWithHint("Custom Job List", "Comma Separated List (ex: WAR, SAM, BLM)", ref _customJobInput, 100, ImGuiInputTextFlags.EnterReturnsTrue))
                     {
                         IEnumerable<string> jobStrings = _customJobInput.Split(',').Select(j => j.Trim());
-                        List<Job> jobList = new List<Job>();
+                        List<Job> jobList = [];
                         foreach (string j in jobStrings)
                         {
                             if (Enum.TryParse(j, true, out Job parsed))

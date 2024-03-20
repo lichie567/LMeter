@@ -5,10 +5,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Dalamud.Plugin.Services;
-using LMeter.Act.DataStructures;
 using LMeter.Config;
 using LMeter.Helpers;
-using Newtonsoft.Json;
 
 namespace LMeter.Act
 {
@@ -63,7 +61,7 @@ namespace LMeter.Act
                 return;
             }
 
-            ArraySegment<byte> buffer = new ArraySegment<byte>(new byte[4096]);
+            ArraySegment<byte> buffer = new(new byte[4096]);
             if (buffer.Array is null)
             {
                 this.Status = ConnectionStatus.ConnectionFailed;
@@ -78,7 +76,7 @@ namespace LMeter.Act
                 do
                 {
                     WebSocketReceiveResult result;
-                    using (MemoryStream ms = new MemoryStream())
+                    using (MemoryStream ms = new())
                     {
                         do
                         {
@@ -93,13 +91,12 @@ namespace LMeter.Act
                         }
 
                         ms.Seek(0, SeekOrigin.Begin);
-                        using (StreamReader reader = new StreamReader(ms, Encoding.UTF8))
+                        using (StreamReader reader = new(ms, Encoding.UTF8))
                         {
                             try
                             {
                                 string data = await reader.ReadToEndAsync();
-                                ActEvent? newEvent = JsonConvert.DeserializeObject<ActEvent>(data);
-                                this.ParseLogData(newEvent);
+                                this.ParseLogData(data);
                             }
                             catch (Exception ex)
                             {
