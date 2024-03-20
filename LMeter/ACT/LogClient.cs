@@ -28,7 +28,7 @@ namespace LMeter.Act
         {
             Config = config;
             Status = ConnectionStatus.NotConnected;
-            _pastEvents = new List<ActEvent>();
+            _pastEvents = [];
         }
         
         public abstract void Start();
@@ -49,7 +49,7 @@ namespace LMeter.Act
         public static void EndEncounter()
         {
             IChatGui chat = Singletons.Get<IChatGui>();
-            XivChatEntry message = new XivChatEntry()
+            XivChatEntry message = new()
             {
                 Message = "end",
                 Type = XivChatType.Echo
@@ -104,11 +104,11 @@ namespace LMeter.Act
         public void Clear()
         {
             _currentEvent = null;
-            _pastEvents = new List<ActEvent>();
+            _pastEvents = [];
             if (Config.ClearAct)
             {
                 IChatGui chat = Singletons.Get<IChatGui>();
-                XivChatEntry message = new XivChatEntry()
+                XivChatEntry message = new()
                 {
                     Message = "clear",
                     Type = XivChatType.Echo

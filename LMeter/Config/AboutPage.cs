@@ -17,7 +17,7 @@ namespace LMeter.Config
                 Vector2 headerSize = Vector2.Zero;
                 if (Plugin.IconTexture is not null)
                 {
-                    Vector2 iconSize = new Vector2(Plugin.IconTexture.Width, Plugin.IconTexture.Height);
+                    Vector2 iconSize = new(Plugin.IconTexture.Width, Plugin.IconTexture.Height);
                     string versionText = $"LMeter v{Plugin.Version}";
                     Vector2 textSize = ImGui.CalcTextSize(versionText);
                     headerSize = new Vector2(size.X, iconSize.Y + textSize.Y);
@@ -36,7 +36,7 @@ namespace LMeter.Config
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() + headerSize.Y);
                 DrawHelpers.DrawSpacing(1);
                 ImGui.Text("Changelog");
-                Vector2 changeLogSize = new Vector2(size.X - padX * 2, size.Y - ImGui.GetCursorPosY() - padY - 30);
+                Vector2 changeLogSize = new(size.X - padX * 2, size.Y - ImGui.GetCursorPosY() - padY - 30);
 
                 if (ImGui.BeginChild("##Changelog", changeLogSize, true))
                 {
@@ -45,7 +45,7 @@ namespace LMeter.Config
                 }
                 
                 ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 0);
-                Vector2 buttonSize = new Vector2((size.X - padX * 2 - padX * 2) / 3, 30 - padY * 2);
+                Vector2 buttonSize = new((size.X - padX * 2 - padX * 2) / 3, 30 - padY * 2);
                 if (ImGui.Button("Github", buttonSize))
                 {
                     Utils.OpenUrl("https://github.com/lichie567/LMeter");

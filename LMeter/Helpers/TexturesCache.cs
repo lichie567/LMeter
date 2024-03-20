@@ -15,7 +15,7 @@ namespace LMeter.Helpers
 
         public TexturesCache()
         {
-            _desaturatedCache = new Dictionary<uint, IDalamudTextureWrap>();
+            _desaturatedCache = [];
         }
 
         public IDalamudTextureWrap? GetTextureFromIconId(

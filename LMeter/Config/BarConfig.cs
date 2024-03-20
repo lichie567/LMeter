@@ -22,56 +22,56 @@ namespace LMeter.Config
 
         public bool ShowJobIcon = true;
         public int JobIconStyle = 0;
-        public Vector2 JobIconOffset = new Vector2(0, 0);
+        public Vector2 JobIconOffset = new(0, 0);
         
         public bool ThousandsSeparators = true;
 
         public bool UseJobColor = true;
-        public ConfigColor BarColor = new ConfigColor(.3f, .3f, .3f, 1f);
+        public ConfigColor BarColor = new(.3f, .3f, .3f, 1f);
 
         public bool ShowRankText = false;
         public string RankTextFormat = "[rank].";
         public DrawAnchor RankTextAlign = DrawAnchor.Right;
-        public Vector2 RankTextOffset = new Vector2(0, 0);
+        public Vector2 RankTextOffset = new(0, 0);
         public bool RankTextJobColor = false;
-        public ConfigColor RankTextColor = new ConfigColor(1, 1, 1, 1);
+        public ConfigColor RankTextColor = new(1, 1, 1, 1);
         public bool RankTextShowOutline = true;
-        public ConfigColor RankTextOutlineColor = new ConfigColor(0, 0, 0, 0.5f);
+        public ConfigColor RankTextOutlineColor = new(0, 0, 0, 0.5f);
         public string RankTextFontKey = FontsManager.DalamudFontKey;
         public int RankTextFontId = 0;
         public bool AlwaysShowSelf = false;
 
         public string LeftTextFormat = "[name]";
-        public Vector2 LeftTextOffset = new Vector2(0, 0);
+        public Vector2 LeftTextOffset = new(0, 0);
         public bool LeftTextJobColor = false;
-        public ConfigColor BarNameColor = new ConfigColor(1, 1, 1, 1);
+        public ConfigColor BarNameColor = new(1, 1, 1, 1);
         public bool BarNameShowOutline = true;
-        public ConfigColor BarNameOutlineColor = new ConfigColor(0, 0, 0, 0.5f);
+        public ConfigColor BarNameOutlineColor = new(0, 0, 0, 0.5f);
         public string BarNameFontKey = FontsManager.DalamudFontKey;
         public int BarNameFontId = 0;
         public bool UseCharacterName = false;
 
         public string RightTextFormat = "[damagetotal:k.1]  ([encdps:k.1], [damagepct])";
-        public Vector2 RightTextOffset = new Vector2(0, 0);
+        public Vector2 RightTextOffset = new(0, 0);
         public bool RightTextJobColor = false;
-        public ConfigColor BarDataColor = new ConfigColor(1, 1, 1, 1);
+        public ConfigColor BarDataColor = new(1, 1, 1, 1);
         public bool BarDataShowOutline = true;
-        public ConfigColor BarDataOutlineColor = new ConfigColor(0, 0, 0, 0.5f);
+        public ConfigColor BarDataOutlineColor = new(0, 0, 0, 0.5f);
         public string BarDataFontKey = FontsManager.DalamudFontKey;
         public int BarDataFontId = 0;
         
         public IConfigPage GetDefault()
         {
-            BarConfig defaultConfig = new BarConfig
+            BarConfig defaultConfig = new()
             {
                 BarNameFontKey = FontsManager.DefaultSmallFontKey,
-                BarNameFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey),
+                BarNameFontId = FontsManager.GetFontIndex(FontsManager.DefaultSmallFontKey),
 
                 BarDataFontKey = FontsManager.DefaultSmallFontKey,
-                BarDataFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey),
+                BarDataFontId = FontsManager.GetFontIndex(FontsManager.DefaultSmallFontKey),
 
                 RankTextFontKey = FontsManager.DefaultSmallFontKey,
-                RankTextFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey)
+                RankTextFontId = FontsManager.GetFontIndex(FontsManager.DefaultSmallFontKey)
             };
 
             return defaultConfig;
@@ -88,8 +88,8 @@ namespace LMeter.Config
             float current)
         {
             float barHeight = (size.Y - (this.BarCount - 1) * this.BarGaps) / this.BarCount;
-            Vector2 barSize = new Vector2(size.X, barHeight);
-            Vector2 barFillSize = new Vector2(size.X * (current / top), barHeight);
+            Vector2 barSize = new(size.X, barHeight);
+            Vector2 barFillSize = new(size.X * (current / top), barHeight);
             drawList.AddRectFilled(localPos, localPos + barFillSize, this.UseJobColor ? jobColor.Base : barColor.Base);
 
             float textOffset = 5f;

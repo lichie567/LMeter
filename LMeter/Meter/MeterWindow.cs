@@ -26,7 +26,7 @@ namespace LMeter.Meter
         [JsonIgnore] private ActEvent? _previewEvent = null;
         [JsonIgnore] private int _scrollPosition = 0;
         [JsonIgnore] private DateTime? _lastSortedTimestamp = null;
-        [JsonIgnore] private List<Combatant> _lastSortedCombatants = new List<Combatant>();
+        [JsonIgnore] private List<Combatant> _lastSortedCombatants = [];
 
         [JsonIgnore] public string ID { get; init; }
 
@@ -86,7 +86,7 @@ namespace LMeter.Meter
 
         public static MeterWindow GetDefaultMeter(string name)
         {
-            MeterWindow newMeter = new MeterWindow(name);
+            MeterWindow newMeter = new(name);
             newMeter.ImportPage(newMeter.HeaderConfig.GetDefault());
             newMeter.ImportPage(newMeter.BarConfig.GetDefault());
             return newMeter;
@@ -94,7 +94,7 @@ namespace LMeter.Meter
 
         public void Clear()
         {
-            _lastSortedCombatants = new List<Combatant>();
+            _lastSortedCombatants = [];
             _lastSortedTimestamp = null;
         }
         
@@ -137,7 +137,7 @@ namespace LMeter.Meter
             {
                 _eventIndex = index;
                 _lastSortedTimestamp = null;
-                _lastSortedCombatants = new List<Combatant>();
+                _lastSortedCombatants = [];
                 _scrollPosition = 0;
             }
 
@@ -176,7 +176,7 @@ namespace LMeter.Meter
 
                     for (int i = 0; i < this.GeneralConfig.BorderThickness; i++)
                     {
-                        Vector2 offset = new Vector2(i, i);
+                        Vector2 offset = new(i, i);
                         drawList.AddRect(borderPos + offset, borderPos + borderSize - offset, this.GeneralConfig.BorderColor.Base);
                     }
 

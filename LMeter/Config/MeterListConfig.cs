@@ -22,7 +22,7 @@ namespace LMeter.Config
 
         public MeterListConfig()
         {
-            this.Meters = new List<MeterWindow>();
+            this.Meters = [];
         }
         
         public IConfigPage GetDefault() => new MeterListConfig();
@@ -53,7 +53,7 @@ namespace LMeter.Config
 
         private void DrawCreateMenu(Vector2 size, float padX)
         {
-            Vector2 buttonSize = new Vector2(40, 0);
+            Vector2 buttonSize = new(40, 0);
             float textInputWidth = size.X - buttonSize.X * 2 - padX * 4;
 
             if (ImGui.BeginChild("##Buttons", new Vector2(size.X, MenuBarHeight), true))
@@ -85,7 +85,7 @@ namespace LMeter.Config
 
             if (ImGui.BeginTable("##Meter_Table", 3, flags, new Vector2(size.X, size.Y - MenuBarHeight)))
             {
-                Vector2 buttonsize = new Vector2(30, 0);
+                Vector2 buttonsize = new(30, 0);
                 float actionsWidth = buttonsize.X * 3 + padX * 2;
 
                 ImGui.TableSetupColumn("   #", ImGuiTableColumnFlags.WidthFixed, 18, 0);

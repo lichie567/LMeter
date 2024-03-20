@@ -60,7 +60,7 @@ namespace LMeter.Helpers
             // Shift cursor to the right to pad for children with depth more than 1.
             // 26 is an arbitrary value I found to be around half the width of a checkbox
             Vector2 oldCursor = ImGui.GetCursorPos();
-            Vector2 offset = new Vector2(26 * Math.Max((depth - 1), 0), 2);
+            Vector2 offset = new(26 * Math.Max((depth - 1), 0), 2);
             ImGui.SetCursorPos(oldCursor + offset);
             ImGui.TextColored(new Vector4(229f / 255f, 57f / 255f, 57f / 255f, 1f), "\u2002\u2514");
             ImGui.SameLine();

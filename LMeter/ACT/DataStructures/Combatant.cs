@@ -13,7 +13,7 @@ public class Combatant
     public static string[] TextTags { get; } = typeof(Combatant).GetFields().Select(x => $"[{x.Name.ToLower()}]").ToArray();
 
     // TODO: move this to a global place so it can be shared between encounter and combatant
-    private static readonly Random _rand = new Random();
+    private static readonly Random _rand = new();
     private static readonly Dictionary<string, MemberInfo> _members = typeof(Combatant).GetMembers().ToDictionary((x) => x.Name.ToLower());
 
     [JsonProperty("name")]
@@ -133,7 +133,7 @@ public class Combatant
 
     public static Dictionary<string, Combatant> GetTestData()
     {
-        Dictionary<string, Combatant> mockCombatants = new Dictionary<string, Combatant>
+        Dictionary<string, Combatant> mockCombatants = new()
         {
             { "1", GetCombatant("GNB", "DRK", "WAR", "PLD") },
             { "2", GetCombatant("GNB", "DRK", "WAR", "PLD") },
