@@ -207,7 +207,7 @@ namespace LMeter.Meter
             {
                 // We don't want to corrupt the cache. The entire logic past this point mutates the sorted Act combatants instead of using a rendering cache
                 // This has the issue that some settings can't behave properly and or don't update till the following combat update/fight
-                List<Combatant> sortedCombatants = this.GetSortedCombatants(actEvent, this.GeneralConfig.DataType);
+                List<Combatant> sortedCombatants = [.. this.GetSortedCombatants(actEvent, this.GeneralConfig.DataType)];
                 
                 float top = this.GeneralConfig.DataType switch
                 {
@@ -255,18 +255,19 @@ namespace LMeter.Meter
 
         private void MovePlayerIntoViewableRange(List<Combatant> sortedCombatants, int scrollPosition, string playerName)
         {
-            var oldPlayerIndex = sortedCombatants.FindIndex(combatant => combatant.Name.Contains("YOU") || combatant.Name.Contains(playerName));
+            int oldPlayerIndex = sortedCombatants.FindIndex(combatant => combatant.Name.Contains("YOU") || combatant.Name.Contains(playerName));
             if (oldPlayerIndex == -1)
             {
                 return;
             }
 
-            var newPlayerIndex = Math.Clamp(oldPlayerIndex, scrollPosition, this.BarConfig.BarCount + scrollPosition - 1);
+            int newPlayerIndex = Math.Clamp(oldPlayerIndex, scrollPosition, this.BarConfig.BarCount + scrollPosition - 1);
 
             if (oldPlayerIndex == newPlayerIndex)
             {
                 return;
             }
+
             sortedCombatants.MoveItem(oldPlayerIndex, newPlayerIndex);
         }
         
@@ -341,7 +342,7 @@ namespace LMeter.Meter
                 return _lastSortedCombatants;
             }
 
-            List<Combatant> sortedCombatants = actEvent.Combatants.Values.ToList();
+            List<Combatant> sortedCombatants = [.. actEvent.Combatants.Values];
 
             sortedCombatants.Sort((x, y) =>
             {

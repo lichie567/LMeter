@@ -142,9 +142,13 @@ public class Combatant
             { "5", GetCombatant("SAM", "DRG", "MNK", "NIN", "RPR") },
             { "6", GetCombatant("SAM", "DRG", "MNK", "NIN", "RPR") },
             { "7", GetCombatant("BLM", "SMN", "RDM") },
-            { "8", GetCombatant("DNC", "MCH", "BRD") }
+            { "8", GetCombatant("DNC", "MCH", "BRD") },
+            { "9", GetCombatant("SAM", "DRG", "MNK", "NIN", "RPR") },
+            { "10", GetCombatant("SAM", "DRG", "MNK", "NIN", "RPR") },
+            { "11", GetCombatant("BLM", "SMN", "RDM") },
+            { "12", GetCombatant("DNC", "MCH", "BRD") }
         };
-
+        
         return mockCombatants;
     }
 

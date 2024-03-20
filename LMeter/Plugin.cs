@@ -46,7 +46,8 @@ namespace LMeter
             IChatGui chatGui,
             IPluginLog logger,
             ITextureProvider textureProvider,
-            ITextureSubstitutionProvider textureSubstitutionProvider
+            ITextureSubstitutionProvider textureSubstitutionProvider,
+            INotificationManager notificationManager
         )
         {
             Plugin.Version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? Plugin.Version;
@@ -71,6 +72,7 @@ namespace LMeter
             Singletons.Register(logger);
             Singletons.Register(textureProvider);
             Singletons.Register(textureSubstitutionProvider);
+            Singletons.Register(notificationManager);
 
             // Add ClipRect helper
             Singletons.Register(new ClipRectsHelper());

@@ -43,10 +43,17 @@ namespace LMeter.Config
             {
                 int currentClientType = this.ClientType;
                 ImGui.Text("ACT Client Type:");
-                // ImGui.SameLine();
                 ImGui.RadioButton("WebSocket", ref this.ClientType, 0);
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.SetTooltip("Use this option if you are using the standard standalone Advanced Combat Tracker program.");
+                }
                 ImGui.SameLine();
                 ImGui.RadioButton("IINACT IPC", ref this.ClientType, 1);
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.SetTooltip("Use this option if you are using the IINACT dalamud plugin.");
+                }
 
                 if (currentClientType != this.ClientType)
                 {

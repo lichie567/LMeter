@@ -104,7 +104,7 @@ namespace LMeter.Config
             if (this.ShowRankText)
             {
                 string rankText = combatant.GetFormattedString($"{this.RankTextFormat}", this.ThousandsSeparators ? "N" : "F");
-                using(FontsManager.PushFont(this.RankTextFontKey))
+                using (FontsManager.PushFont(this.RankTextFontKey))
                 {
                     textOffset += ImGui.CalcTextSize("00.").X;
                     Vector2 rankTextSize = ImGui.CalcTextSize(rankText);
@@ -274,7 +274,6 @@ namespace LMeter.Config
                 
                 ImGui.Combo("Font##Name", ref this.BarNameFontId, fontOptions, fontOptions.Length);
                 this.BarNameFontKey = fontOptions[this.BarNameFontId];
-                
                 
                 ImGui.Checkbox("Use Job Color##LeftTextJobColor", ref this.LeftTextJobColor);
                 if (!this.LeftTextJobColor)

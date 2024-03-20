@@ -106,7 +106,7 @@ namespace LMeter.Helpers
             }
 
             List<string> fontList = [DalamudFontKey, .. _imGuiFonts.Keys];
-            _fontList = fontList.ToArray();
+            _fontList = [.. fontList];
         }
 
         public static bool ValidateFont(string[] fontOptions, int fontId, string fontKey)

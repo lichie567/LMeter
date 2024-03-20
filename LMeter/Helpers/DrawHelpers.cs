@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Numerics;
 using Dalamud.Interface;
+using Dalamud.Interface.ImGuiNotification;
 using Dalamud.Interface.Internal;
 using Dalamud.Interface.Internal.Notifications;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 
 namespace LMeter.Helpers
@@ -37,11 +39,19 @@ namespace LMeter.Helpers
 
         public static void DrawNotification(
             string message,
-            NotificationType type = NotificationType.Success,
+            NotificationType type = NotificationType.Info,
             uint durationInMs = 3000,
             string title = "LMeter")
         {
-            Singletons.Get<UiBuilder>().AddNotification(message, title, type, durationInMs);
+            var notification = new Notification()
+            {
+                Title = title,
+                Content = message,
+                Type = type,
+                InitialDuration = TimeSpan.FromMilliseconds(durationInMs)
+            };
+
+            Singletons.Get<INotificationManager>().AddNotification(notification);
         }
 
         public static void DrawNestIndicator(int depth)

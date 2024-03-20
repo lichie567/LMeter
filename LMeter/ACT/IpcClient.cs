@@ -2,7 +2,6 @@ using System;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Ipc;
 using Dalamud.Plugin.Services;
-using LMeter.Act.DataStructures;
 using LMeter.Config;
 using LMeter.Helpers;
 using Newtonsoft.Json.Linq;
@@ -103,15 +102,15 @@ namespace LMeter.Act
         {
             try
             {
-                ActEvent? newEvent = data.ToObject<ActEvent?>();
-                this.ParseLogData(newEvent);
+                this.ParseLogData(data);
                 return true;
             }
             catch (Exception ex)
             {
                 this.LogConnectionFailure(ex.ToString());
-                return false;
             }
+            
+            return false;
         }
 
         public override void Reset()
