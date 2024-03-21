@@ -121,13 +121,12 @@ namespace LMeter
 
         private static IDalamudTextureWrap? LoadIconTexture(UiBuilder uiBuilder)
         {
-            string? pluginPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            if (string.IsNullOrEmpty(pluginPath))
+            if (string.IsNullOrEmpty(AssemblyFileDir))
             {
                 return null;
             }
 
-            string iconPath = Path.Combine(pluginPath, "Media", "Images", "icon_small.png");
+            string iconPath = Path.Combine(AssemblyFileDir, "Media", "Images", "icon_small.png");
             if (!File.Exists(iconPath))
             {
                 return null;
@@ -148,14 +147,12 @@ namespace LMeter
 
         private static string LoadChangelog()
         {
-            string? pluginPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-
-            if (string.IsNullOrEmpty(pluginPath))
+            if (string.IsNullOrEmpty(AssemblyFileDir))
             {
                 return string.Empty;
             }
 
-            string changelogPath = Path.Combine(pluginPath, "changelog.md");
+            string changelogPath = Path.Combine(AssemblyFileDir, "changelog.md");
 
             if (File.Exists(changelogPath))
             {
@@ -166,7 +163,7 @@ namespace LMeter
                 }
                 catch (Exception ex)
                 {
-                    Singletons.Get<IPluginLog>().Warning($"Error loading changelog: {ex.ToString()}");
+                    Singletons.Get<IPluginLog>().Warning($"Error loading changelog: {ex}");
                 }
             }
 
