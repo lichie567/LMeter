@@ -5,8 +5,8 @@ namespace LMeter.Act
 {
     public class LazyFloat
     {
-        private Func<string>? _getStringInput;
-        private Func<float>? _getFloatInput;
+        private readonly Func<string>? _getStringInput;
+        private readonly Func<float>? _getFloatInput;
         private float _value = 0;
 
         public string? Input { get; private set; }

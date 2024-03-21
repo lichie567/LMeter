@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using Dalamud.Interface;
 using Dalamud.Interface.ManagedFontAtlas;
 using Dalamud.Interface.Utility;
@@ -215,7 +214,10 @@ namespace LMeter.Helpers
                 Singletons.Get<IPluginLog>().Warning($"Failed to create User Font Directory {ex}");
             }
 
-            if (!Directory.Exists(userFontPath)) return;
+            if (!Directory.Exists(userFontPath))
+            {
+                return;
+            }
 
             string[] pluginFonts;
             try
@@ -250,11 +252,10 @@ namespace LMeter.Helpers
 
         public static string GetPluginFontPath()
         {
-            string? path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-
+            string? path = Plugin.AssemblyFileDir;
             if (path is not null)
             {
-                return $"{path}\\Media\\Fonts\\";
+                return Path.Join(path, "Media\\Fonts\\");
             }
 
             return string.Empty;
@@ -262,12 +263,15 @@ namespace LMeter.Helpers
 
         public static string GetUserFontPath()
         {
-            return $"{Plugin.ConfigFileDir}\\Fonts\\";
+            return Path.Join(Plugin.ConfigFileDir, "\\Fonts\\");
         }
 
         public static string[] GetFontNamesFromPath(string? path)
         {
-            if (string.IsNullOrEmpty(path)) return [];
+            if (string.IsNullOrEmpty(path))
+            {
+                return [];
+            }
 
             string[] fonts;
             try

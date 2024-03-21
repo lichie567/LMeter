@@ -11,7 +11,7 @@ namespace LMeter.Config
     public class HeaderConfig : IConfigPage
     {
         [JsonIgnore]
-        private static string[] _anchorOptions = Enum.GetNames(typeof(DrawAnchor));
+        private static readonly string[] _anchorOptions = Enum.GetNames(typeof(DrawAnchor));
 
         public string Name => "Header";
 

@@ -6,8 +6,8 @@ namespace LMeter.Act
     public class LazyString<T>
     {
         private string _value = string.Empty;
-        private Func<T, string> _generator;
-        private Func<T> _getInput;
+        private readonly Func<T, string> _generator;
+        private readonly Func<T> _getInput;
 
         public bool WasGenerated { get; private set; }
         

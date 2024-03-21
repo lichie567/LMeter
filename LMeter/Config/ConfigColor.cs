@@ -6,7 +6,7 @@ namespace LMeter.Config
 {
     public class ConfigColor
     {
-        [JsonIgnore] private float[] _colorMapRatios = [-.8f, -.3f, .1f];
+        [JsonIgnore] private readonly float[] _colorMapRatios = [-.8f, -.3f, .1f];
         
         // Constructor for deserialization
         public ConfigColor() : this(Vector4.Zero) { }

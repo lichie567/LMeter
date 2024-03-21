@@ -18,12 +18,12 @@ namespace LMeter
     {
         private readonly Vector2 _configSize = new(550, 550);
 
-        private IClientState _clientState;
-        private DalamudPluginInterface _pluginInterface;
-        private ICommandManager _commandManager;
-        private WindowSystem _windowSystem;
-        private ConfigWindow _configRoot;
-        private LMeterConfig _config;
+        private readonly IClientState _clientState;
+        private readonly DalamudPluginInterface _pluginInterface;
+        private readonly ICommandManager _commandManager;
+        private readonly WindowSystem _windowSystem;
+        private readonly ConfigWindow _configRoot;
+        private readonly LMeterConfig _config;
         private Vector2 _origin;
 
         private readonly ImGuiWindowFlags _mainWindowFlags =

@@ -1,3 +1,8 @@
+# Version 0.3.0.1
+- Fix bug with fonts not copying to config directory
+- Fix bug with ACT config not loading
+- Fix issue with changelog not loading
+
 # Version 0.3.0.0
 - Merged downstream changes from Tischel's repository
 - Added IINACT IPC support

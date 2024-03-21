@@ -17,7 +17,7 @@ namespace LMeter.Windows
         private bool _home = false;
         private string _name = string.Empty;
         private Vector2 _windowSize;
-        private Stack<IConfigurable> _configStack;
+        private readonly Stack<IConfigurable> _configStack;
 
         public ConfigWindow(string id, Vector2 position, Vector2 size) : base(id)
         {

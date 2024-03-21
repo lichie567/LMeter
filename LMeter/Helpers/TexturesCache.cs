@@ -11,7 +11,7 @@ namespace LMeter.Helpers
 {
     public class TexturesCache : IPluginDisposable
     {
-        private Dictionary<uint, IDalamudTextureWrap> _desaturatedCache;
+        private readonly Dictionary<uint, IDalamudTextureWrap> _desaturatedCache;
 
         public TexturesCache()
         {

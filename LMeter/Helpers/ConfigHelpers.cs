@@ -154,7 +154,9 @@ namespace LMeter.Helpers
     public class LMeterSerializationBinder : ISerializationBinder
     {
         // TODO: Make this automatic somehow?
-        private static List<Type> _configTypes = [];
+        private static List<Type> _configTypes = [
+            typeof(ActConfig)
+        ];
 
         private readonly Dictionary<Type, string> typeToName = [];
         private readonly Dictionary<string, Type> nameToType = [];
@@ -165,8 +167,8 @@ namespace LMeter.Helpers
             {
                 if (type.FullName is not null)
                 {
-                    this.typeToName.Add(type, type.FullName);
-                    this.nameToType.Add(type.FullName, type);
+                    this.typeToName.Add(type, type.FullName.ToLower());
+                    this.nameToType.Add(type.FullName.ToLower(), type);
                 }
             }
         }
@@ -188,7 +190,7 @@ namespace LMeter.Helpers
         public Type BindToType(string? assemblyName, string? typeName)
         {
             if (typeName is not null &&
-                this.nameToType.TryGetValue(typeName, out Type? type))
+                this.nameToType.TryGetValue(typeName.ToLower(), out Type? type))
             {
                 return type;
             }

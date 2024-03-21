@@ -9,9 +9,9 @@ namespace LMeter.Act
     {
         public static Regex TextTagRegex { get; } = new Regex(@"\[(\w*)(:k)?\.?(\d+)?\]", RegexOptions.Compiled);
 
-        private string _format;
-        private Dictionary<string, MemberInfo> _members;
-        private object _source;
+        private readonly string _format;
+        private readonly Dictionary<string, MemberInfo> _members;
+        private readonly object _source;
 
         public TextTagFormatter(
             object source,
