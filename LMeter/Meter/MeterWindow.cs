@@ -118,7 +118,8 @@ namespace LMeter.Meter
             Vector2 localPos = pos + this.GeneralConfig.Position;
             Vector2 size = this.GeneralConfig.Size;
             
-            if (Singletons.Get<ClipRectsHelper>().GetClipRectForArea(localPos, size).HasValue)
+            if (this.VisibilityConfig.ShouldClip &&
+                Singletons.Get<ClipRectsHelper>().GetClipRectForArea(localPos, size).HasValue)
             {
                 return;
             }
