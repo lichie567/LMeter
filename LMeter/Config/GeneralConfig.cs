@@ -27,13 +27,13 @@ namespace LMeter.Config
         public IConfigPage GetDefault() => new GeneralConfig();
 
         public Vector2 Position = Vector2.Zero;
-        public Vector2 Size = new Vector2(ImGui.GetMainViewport().Size.Y * 16 / 90, ImGui.GetMainViewport().Size.Y / 10);
+        public Vector2 Size = new(ImGui.GetMainViewport().Size.Y * 16 / 90, ImGui.GetMainViewport().Size.Y / 10);
         public bool Lock = false;
         public bool ClickThrough = false;
-        public ConfigColor BackgroundColor = new ConfigColor(0, 0, 0, 0.5f);
+        public ConfigColor BackgroundColor = new(0, 0, 0, 0.5f);
         public bool ShowBorder = true;
         public bool BorderAroundBars = false;
-        public ConfigColor BorderColor = new ConfigColor(30f / 255f, 30f / 255f, 30f / 255f, 230f / 255f);
+        public ConfigColor BorderColor = new(30f / 255f, 30f / 255f, 30f / 255f, 230f / 255f);
         public int BorderThickness = 2;
         public MeterDataType DataType = MeterDataType.Damage;
         public bool ReturnToCurrent = true;
@@ -48,7 +48,6 @@ namespace LMeter.Config
                 ImGui.Checkbox("Lock", ref this.Lock);
                 ImGui.Checkbox("Click Through", ref this.ClickThrough);
                 ImGui.Checkbox("Preview", ref this.Preview);
-
                 ImGui.NewLine();
 
                 Vector4 vector = this.BackgroundColor.Vector;

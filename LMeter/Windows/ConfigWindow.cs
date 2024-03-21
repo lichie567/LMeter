@@ -107,7 +107,7 @@ namespace LMeter.Windows
                 
         private void DrawNavBar(IConfigPage? openPage, Vector2 size, float padX)
         {
-            Vector2 buttonsize = new Vector2(40, 0);
+            Vector2 buttonsize = new(40, 0);
             float textInputWidth = 150;
 
             if (ImGui.BeginChild($"##{this.WindowName}_NavBar", new Vector2(size.X, NavBarHeight), true))

@@ -1,11 +1,10 @@
 using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using System.Text.Json.Serialization;
-using Dalamud.Game.ClientState;
 using ImGuiNET;
-using LMeter.ACT;
+using LMeter.Act.DataStructures;
 using LMeter.Helpers;
+using Newtonsoft.Json;
 
 namespace LMeter.Config
 {
@@ -16,62 +15,65 @@ namespace LMeter.Config
         
         public string Name => "Bars";
 
-        private static string[] _jobIconStyleOptions = new string[] { "Style 1", "Style 2" };
+        private static string[] _jobIconStyleOptions = ["Style 1", "Style 2"];
 
         public int BarCount = 8;
         public int BarGaps = 1;
 
         public bool ShowJobIcon = true;
         public int JobIconStyle = 0;
-        public Vector2 JobIconOffset = new Vector2(0, 0);
+        public Vector2 JobIconOffset = new(0, 0);
         
         public bool ThousandsSeparators = true;
 
         public bool UseJobColor = true;
-        public ConfigColor BarColor = new ConfigColor(.3f, .3f, .3f, 1f);
+        public ConfigColor BarColor = new(.3f, .3f, .3f, 1f);
 
         public bool ShowRankText = false;
         public string RankTextFormat = "[rank].";
         public DrawAnchor RankTextAlign = DrawAnchor.Right;
-        public Vector2 RankTextOffset = new Vector2(0, 0);
+        public Vector2 RankTextOffset = new(0, 0);
         public bool RankTextJobColor = false;
-        public ConfigColor RankTextColor = new ConfigColor(1, 1, 1, 1);
+        public ConfigColor RankTextColor = new(1, 1, 1, 1);
         public bool RankTextShowOutline = true;
-        public ConfigColor RankTextOutlineColor = new ConfigColor(0, 0, 0, 0.5f);
+        public ConfigColor RankTextOutlineColor = new(0, 0, 0, 0.5f);
         public string RankTextFontKey = FontsManager.DalamudFontKey;
         public int RankTextFontId = 0;
+        public bool AlwaysShowSelf = false;
 
         public string LeftTextFormat = "[name]";
-        public Vector2 LeftTextOffset = new Vector2(0, 0);
+        public Vector2 LeftTextOffset = new(0, 0);
         public bool LeftTextJobColor = false;
-        public ConfigColor BarNameColor = new ConfigColor(1, 1, 1, 1);
+        public ConfigColor BarNameColor = new(1, 1, 1, 1);
         public bool BarNameShowOutline = true;
-        public ConfigColor BarNameOutlineColor = new ConfigColor(0, 0, 0, 0.5f);
+        public ConfigColor BarNameOutlineColor = new(0, 0, 0, 0.5f);
         public string BarNameFontKey = FontsManager.DalamudFontKey;
         public int BarNameFontId = 0;
         public bool UseCharacterName = false;
 
         public string RightTextFormat = "[damagetotal:k.1]  ([encdps:k.1], [damagepct])";
-        public Vector2 RightTextOffset = new Vector2(0, 0);
+        public Vector2 RightTextOffset = new(0, 0);
         public bool RightTextJobColor = false;
-        public ConfigColor BarDataColor = new ConfigColor(1, 1, 1, 1);
+        public ConfigColor BarDataColor = new(1, 1, 1, 1);
         public bool BarDataShowOutline = true;
-        public ConfigColor BarDataOutlineColor = new ConfigColor(0, 0, 0, 0.5f);
+        public ConfigColor BarDataOutlineColor = new(0, 0, 0, 0.5f);
         public string BarDataFontKey = FontsManager.DalamudFontKey;
         public int BarDataFontId = 0;
         
         public IConfigPage GetDefault()
         {
-            BarConfig defaultConfig = new BarConfig();
-            defaultConfig.BarNameFontKey = FontsManager.DefaultSmallFontKey;
-            defaultConfig.BarNameFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey);
+            BarConfig defaultConfig = new()
+            {
+                BarNameFontKey = FontsManager.DefaultSmallFontKey,
+                BarNameFontId = FontsManager.GetFontIndex(FontsManager.DefaultSmallFontKey),
 
-            defaultConfig.BarDataFontKey = FontsManager.DefaultSmallFontKey;
-            defaultConfig.BarDataFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey);
+                BarDataFontKey = FontsManager.DefaultSmallFontKey,
+                BarDataFontId = FontsManager.GetFontIndex(FontsManager.DefaultSmallFontKey),
 
-            defaultConfig.RankTextFontKey = FontsManager.DefaultSmallFontKey;
-            defaultConfig.RankTextFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey);
-            
+                RankTextFontKey = FontsManager.DefaultSmallFontKey,
+                RankTextFontId = FontsManager.GetFontIndex(FontsManager.DefaultSmallFontKey)
+            };
+
             return defaultConfig;
         }
 
@@ -86,8 +88,8 @@ namespace LMeter.Config
             float current)
         {
             float barHeight = (size.Y - (this.BarCount - 1) * this.BarGaps) / this.BarCount;
-            Vector2 barSize = new Vector2(size.X, barHeight);
-            Vector2 barFillSize = new Vector2(size.X * (current / top), barHeight);
+            Vector2 barSize = new(size.X, barHeight);
+            Vector2 barFillSize = new(size.X * (current / top), barHeight);
             drawList.AddRectFilled(localPos, localPos + barFillSize, this.UseJobColor ? jobColor.Base : barColor.Base);
 
             float textOffset = 5f;
@@ -102,7 +104,7 @@ namespace LMeter.Config
             if (this.ShowRankText)
             {
                 string rankText = combatant.GetFormattedString($"{this.RankTextFormat}", this.ThousandsSeparators ? "N" : "F");
-                using(FontsManager.PushFont(this.RankTextFontKey))
+                using (FontsManager.PushFont(this.RankTextFontKey))
                 {
                     textOffset += ImGui.CalcTextSize("00.").X;
                     Vector2 rankTextSize = ImGui.CalcTextSize(rankText);
@@ -120,13 +122,12 @@ namespace LMeter.Config
 
             using (FontsManager.PushFont(this.BarNameFontKey))
             {
-                string playerName = Singletons.Get<ClientState>().LocalPlayer?.Name.ToString() ?? "YOU";
-                if (this.UseCharacterName && combatant.Name.Contains("YOU"))
+                var leftText = combatant.Name;
+                if (!leftText.Contains("YOU"))
                 {
-                    combatant.Name = playerName;
+                    leftText = combatant.GetFormattedString($" {this.LeftTextFormat} ", this.ThousandsSeparators ? "N" : "F");
                 }
 
-                string leftText = combatant.GetFormattedString($" {this.LeftTextFormat} ", this.ThousandsSeparators ? "N" : "F");
                 Vector2 nameTextSize = ImGui.CalcTextSize(leftText);
                 Vector2 namePos = Utils.GetAnchoredPosition(localPos, -barSize, DrawAnchor.Left);
                 namePos = Utils.GetAnchoredPosition(namePos, nameTextSize, DrawAnchor.Left) + this.LeftTextOffset;
@@ -249,6 +250,7 @@ namespace LMeter.Config
 
                 ImGui.NewLine();
                 ImGui.Checkbox("Use your name instead of 'YOU'", ref this.UseCharacterName);
+                ImGui.Checkbox("Always show your own bar", ref this.AlwaysShowSelf);
                 ImGui.InputText("Left Text Format", ref this.LeftTextFormat, 128);
 
                 if (ImGui.IsItemHovered())
@@ -272,7 +274,6 @@ namespace LMeter.Config
                 
                 ImGui.Combo("Font##Name", ref this.BarNameFontId, fontOptions, fontOptions.Length);
                 this.BarNameFontKey = fontOptions[this.BarNameFontId];
-                
                 
                 ImGui.Checkbox("Use Job Color##LeftTextJobColor", ref this.LeftTextJobColor);
                 if (!this.LeftTextJobColor)

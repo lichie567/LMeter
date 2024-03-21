@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Numerics;
 using Dalamud.Interface;
+using Dalamud.Interface.ImGuiNotification;
+using Dalamud.Interface.Internal;
 using Dalamud.Interface.Internal.Notifications;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
-using ImGuiScene;
 
 namespace LMeter.Helpers
 {
@@ -37,11 +39,19 @@ namespace LMeter.Helpers
 
         public static void DrawNotification(
             string message,
-            NotificationType type = NotificationType.Success,
+            NotificationType type = NotificationType.Info,
             uint durationInMs = 3000,
             string title = "LMeter")
         {
-            Singletons.Get<UiBuilder>().AddNotification(message, title, type, durationInMs);
+            var notification = new Notification()
+            {
+                Title = title,
+                Content = message,
+                Type = type,
+                InitialDuration = TimeSpan.FromMilliseconds(durationInMs)
+            };
+
+            Singletons.Get<INotificationManager>().AddNotification(notification);
         }
 
         public static void DrawNestIndicator(int depth)
@@ -50,7 +60,7 @@ namespace LMeter.Helpers
             // Shift cursor to the right to pad for children with depth more than 1.
             // 26 is an arbitrary value I found to be around half the width of a checkbox
             Vector2 oldCursor = ImGui.GetCursorPos();
-            Vector2 offset = new Vector2(26 * Math.Max((depth - 1), 0), 2);
+            Vector2 offset = new(26 * Math.Max((depth - 1), 0), 2);
             ImGui.SetCursorPos(oldCursor + offset);
             ImGui.TextColored(new Vector4(229f / 255f, 57f / 255f, 57f / 255f, 1f), "\u2002\u2514");
             ImGui.SameLine();
@@ -71,7 +81,7 @@ namespace LMeter.Helpers
             Vector2 size,
             ImDrawListPtr drawList)
         {
-            TextureWrap? tex = Singletons.Get<TexturesCache>().GetTextureFromIconId(iconId, 0, true);
+            IDalamudTextureWrap? tex = Singletons.Get<TexturesCache>().GetTextureFromIconId(iconId, 0, true);
 
             if (tex is null)
             {
@@ -91,7 +101,7 @@ namespace LMeter.Helpers
             float opacity,
             ImDrawListPtr drawList)
         {
-            TextureWrap? tex = Singletons.Get<TexturesCache>().GetTextureFromIconId(iconId, (uint)stackCount, true, desaturate, opacity);
+            IDalamudTextureWrap? tex = Singletons.Get<TexturesCache>().GetTextureFromIconId(iconId, (uint)stackCount, true, desaturate);
 
             if (tex is null)
             {
@@ -100,10 +110,11 @@ namespace LMeter.Helpers
 
             (Vector2 uv0, Vector2 uv1) = GetTexCoordinates(tex, size, cropIcon);
 
-            drawList.AddImage(tex.ImGuiHandle, position, position + size, uv0, uv1);
+            uint alpha = (uint)(opacity * 255) << 24 | 0x00FFFFFF;
+            drawList.AddImage(tex.ImGuiHandle, position, position + size, uv0, uv1, alpha);
         }
 
-        public static (Vector2, Vector2) GetTexCoordinates(TextureWrap texture, Vector2 size, bool cropIcon = true)
+        public static (Vector2, Vector2) GetTexCoordinates(IDalamudTextureWrap texture, Vector2 size, bool cropIcon = true)
         {
             if (texture == null)
             {

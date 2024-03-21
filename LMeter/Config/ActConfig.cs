@@ -2,13 +2,13 @@ using System;
 using System.Numerics;
 using Dalamud.Interface;
 using ImGuiNET;
-using LMeter.ACT;
+using LMeter.Act;
 using LMeter.Helpers;
 using Newtonsoft.Json;
 
 namespace LMeter.Config
 {
-    public class ACTConfig : IConfigPage
+    public class ActConfig : IConfigPage
     {
         [JsonIgnore]
         private const string _defaultSocketAddress = "ws://127.0.0.1:10501/ws";
@@ -21,32 +21,53 @@ namespace LMeter.Config
 
         public string Name => "ACT";
         
-        public IConfigPage GetDefault() => new ACTConfig();
+        public IConfigPage GetDefault() => new ActConfig();
 
-        public string ACTSocketAddress;
-
+        public string ActSocketAddress;
         public int EncounterHistorySize = 15;
-
         public bool AutoReconnect = false;
         public int ReconnectDelay = 30;
-
-        public bool ClearACT = false;
+        public bool ClearAct = false;
         public bool AutoEnd = false;
         public int AutoEndDelay = 3;
+        public int ClientType = 0;
 
-        public ACTConfig()
+        public ActConfig()
         {
-            this.ACTSocketAddress = _defaultSocketAddress;
+            this.ActSocketAddress = _defaultSocketAddress;
         }
 
         public void DrawConfig(Vector2 size, float padX, float padY)
         {
             if (ImGui.BeginChild($"##{this.Name}", new Vector2(size.X, size.Y), true))
             {
-                Vector2 buttonSize = new Vector2(40, 0);
-                ImGui.Text($"ACT Status: {ACTClient.Status}");
-                ImGui.InputTextWithHint("ACT Websocket Address", $"Default: '{_defaultSocketAddress}'", ref this.ACTSocketAddress, 64);
-                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Sync, () => ACTClient.RetryConnection(this.ACTSocketAddress), "Reconnect", buttonSize);
+                int currentClientType = this.ClientType;
+                ImGui.Text("ACT Client Type:");
+                ImGui.RadioButton("WebSocket", ref this.ClientType, 0);
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.SetTooltip("Use this option if you are using the standard standalone Advanced Combat Tracker program.");
+                }
+                ImGui.SameLine();
+                ImGui.RadioButton("IINACT IPC", ref this.ClientType, 1);
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.SetTooltip("Use this option if you are using the IINACT dalamud plugin.");
+                }
+
+                if (currentClientType != this.ClientType)
+                {
+                    Singletons.Get<PluginManager>().ChangeClientType(this.ClientType);
+                }
+
+                Vector2 buttonSize = new(40, 0);
+                ImGui.Text($"ACT Status: {LogClient.GetStatus()}");
+                if (this.ClientType == 0)
+                {
+                    ImGui.InputTextWithHint("ACT Websocket Address", $"Default: '{_defaultSocketAddress}'", ref this.ActSocketAddress, 64);
+                }
+
+                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Sync, () => LogClient.RetryConnection(), "Reconnect", buttonSize);
 
                 ImGui.SameLine();
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() - 1f);
@@ -69,7 +90,7 @@ namespace LMeter.Config
 
 
                 ImGui.NewLine();
-                ImGui.Checkbox("Clear ACT when clearing LMeter", ref this.ClearACT);
+                ImGui.Checkbox("Clear ACT when clearing LMeter", ref this.ClearAct);
                 ImGui.Checkbox("Force ACT to end encounter after combat", ref this.AutoEnd);
                 if (ImGui.IsItemHovered())
                 {
@@ -86,7 +107,7 @@ namespace LMeter.Config
                 }
 
                 ImGui.NewLine();
-                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Stop, () => ACTClient.EndEncounter(), null, buttonSize);
+                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Stop, () => LogClient.EndEncounter(), null, buttonSize);
                 ImGui.SameLine();
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() - 1f);
                 ImGui.Text("Force End Combat");
@@ -103,13 +124,13 @@ namespace LMeter.Config
         public void TryReconnect()
         {
             if (this.LastReconnectAttempt.HasValue &&
-                (ACTClient.Status == ConnectionStatus.NotConnected ||
-                ACTClient.Status == ConnectionStatus.ConnectionFailed))
+                (LogClient.GetStatus() == ConnectionStatus.NotConnected ||
+                LogClient.GetStatus() == ConnectionStatus.ConnectionFailed))
             {
                 if (this.AutoReconnect &&
                     this.LastReconnectAttempt < DateTime.UtcNow - TimeSpan.FromSeconds(this.ReconnectDelay))
                 {
-                    ACTClient.RetryConnection(this.ACTSocketAddress);
+                    LogClient.RetryConnection();
                     this.LastReconnectAttempt = DateTime.UtcNow;
                 }
             }
@@ -121,7 +142,7 @@ namespace LMeter.Config
 
         public void TryEndEncounter()
         {
-            if (ACTClient.Status == ConnectionStatus.Connected)
+            if (LogClient.GetStatus() == ConnectionStatus.Connected)
             {
                 if (this.AutoEnd &&
                     CharacterState.IsInCombat())
@@ -131,7 +152,7 @@ namespace LMeter.Config
                 else if (this.LastCombatTime is not null && 
                          this.LastCombatTime < DateTime.UtcNow - TimeSpan.FromSeconds(this.AutoEndDelay))
                 {
-                    ACTClient.EndEncounter();
+                    LogClient.EndEncounter();
                     this.LastCombatTime = null;
                 }
             }

@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Collections.Generic;
+using System.Numerics;
 
 namespace LMeter.Helpers
 {
@@ -40,6 +41,19 @@ namespace LMeter.Helpers
             }
 
             return new Vector4(red, green, blue, vec.W);
+        }
+
+        public static void MoveItem<T>(this List<T> list, int oldIndex, int newIndex)
+        {
+            if (oldIndex < 0 || newIndex < 0 || list.Count < oldIndex || list.Count < newIndex)
+            {
+                return;
+            }
+
+            var itemToMove = list[oldIndex];
+
+            list.RemoveAt(oldIndex);
+            list.Insert(newIndex, itemToMove);
         }
     }
 }

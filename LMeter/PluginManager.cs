@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Numerics;
-using Dalamud.Game.ClientState;
 using Dalamud.Game.Command;
-using Dalamud.Interface;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
-using LMeter.ACT;
+using LMeter.Act;
 using LMeter.Config;
 using LMeter.Helpers;
 using LMeter.Meter;
@@ -16,17 +16,17 @@ namespace LMeter
 {
     public class PluginManager : IPluginDisposable
     {
-        private readonly Vector2 _origin = ImGui.GetMainViewport().Size / 2f;
-        private readonly Vector2 _configSize = new Vector2(550, 550);
+        private readonly Vector2 _configSize = new(550, 550);
 
-        private ClientState _clientState;
+        private IClientState _clientState;
         private DalamudPluginInterface _pluginInterface;
-        private CommandManager _commandManager;
+        private ICommandManager _commandManager;
         private WindowSystem _windowSystem;
         private ConfigWindow _configRoot;
         private LMeterConfig _config;
+        private Vector2 _origin;
 
-        private readonly ImGuiWindowFlags _mainWindowFlags = 
+        private readonly ImGuiWindowFlags _mainWindowFlags =
             ImGuiWindowFlags.NoTitleBar |
             ImGuiWindowFlags.NoScrollbar |
             ImGuiWindowFlags.AlwaysAutoResize |
@@ -36,8 +36,8 @@ namespace LMeter
             ImGuiWindowFlags.NoSavedSettings;
 
         public PluginManager(
-            ClientState clientState,
-            CommandManager commandManager,
+            IClientState clientState,
+            ICommandManager commandManager,
             DalamudPluginInterface pluginInterface,
             LMeterConfig config)
         {
@@ -46,6 +46,7 @@ namespace LMeter
             _pluginInterface = pluginInterface;
             _config = config;
 
+            _origin = ImGui.GetMainViewport().Size / 2f;
             _configRoot = new ConfigWindow("ConfigRoot", _origin, _configSize);
             _windowSystem = new WindowSystem("LMeter");
             _windowSystem.AddWindow(_configRoot);
@@ -55,8 +56,8 @@ namespace LMeter
                 new CommandInfo(PluginCommand)
                 {
                     HelpMessage = "Opens the LMeter configuration window.\n"
-                                + "/lm end → Ends current ACT Encounter.\n"
-                                + "/lm clear → Clears all ACT encounter log data.\n"
+                                + "/lm end → Ends current Act Encounter.\n"
+                                + "/lm clear → Clears all Act encounter log data.\n"
                                 + "/lm ct <number> → Toggles clickthrough status for the given profile.\n"
                                 + "/lm toggle <number> [on|off] → Toggles visibility for the given profile.",
                     ShowInHelp = true
@@ -74,17 +75,18 @@ namespace LMeter
             {
                 return;
             }
-
+            
+            _origin = ImGui.GetMainViewport().Size / 2f;
             _windowSystem.Draw();
-
-            _config.ACTConfig.TryReconnect();
-            _config.ACTConfig.TryEndEncounter();
+            _config.ActConfig.TryReconnect();
+            _config.ActConfig.TryEndEncounter();
 
             ImGuiHelpers.ForceNextWindowMainViewport();
             ImGui.SetNextWindowPos(Vector2.Zero);
             ImGui.SetNextWindowSize(ImGui.GetMainViewport().Size);
             if (ImGui.Begin("LMeter_Root", _mainWindowFlags))
             {
+                Singletons.Get<ClipRectsHelper>().Update();
                 foreach (var meter in _config.MeterList.Meters)
                 {
                     meter.Draw(_origin);
@@ -96,11 +98,26 @@ namespace LMeter
 
         public void Clear()
         {
-            Singletons.Get<ACTClient>().Clear();
+            Singletons.Get<LogClient>().Clear();
             foreach (var meter in _config.MeterList.Meters)
             {
                 meter.Clear();
             }
+        }
+
+        public void ChangeClientType(int clientType)
+        {
+            LogClient currentClient = Singletons.Get<LogClient>();
+            currentClient.Shutdown();
+            
+            LogClient newClient = clientType switch
+            {
+                1 => new IpcClient(_config.ActConfig),
+                _ => new WebSocketClient(_config.ActConfig)
+            };
+
+            newClient.Start();
+            Singletons.Update(newClient);
         }
 
         public void Edit(IConfigurable configItem)
@@ -125,7 +142,7 @@ namespace LMeter
             }
         }
 
-        private void OnLogout(object? sender, EventArgs? args)
+        private void OnLogout()
         {
             ConfigHelpers.SaveConfig();
         }
@@ -135,7 +152,7 @@ namespace LMeter
             switch (arguments)
             {
                 case "end":
-                    ACTClient.EndEncounter();
+                    LogClient.EndEncounter();
                     break;
                 case "clear":
                     this.Clear();

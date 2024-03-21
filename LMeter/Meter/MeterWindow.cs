@@ -1,11 +1,13 @@
-using System.Linq;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
+using LMeter.Act;
+using LMeter.Act.DataStructures;
 using LMeter.Config;
 using LMeter.Helpers;
-using LMeter.ACT;
 using Newtonsoft.Json;
 
 namespace LMeter.Meter
@@ -21,10 +23,10 @@ namespace LMeter.Meter
         [JsonIgnore] private bool _dragging = false;
         [JsonIgnore] private bool _locked = false;
         [JsonIgnore] private int _eventIndex = -1;
-        [JsonIgnore] private ACTEvent? _previewEvent = null;
+        [JsonIgnore] private ActEvent? _previewEvent = null;
         [JsonIgnore] private int _scrollPosition = 0;
         [JsonIgnore] private DateTime? _lastSortedTimestamp = null;
-        [JsonIgnore] private List<Combatant> _lastSortedCombatants = new List<Combatant>();
+        [JsonIgnore] private List<Combatant> _lastSortedCombatants = [];
 
         [JsonIgnore] public string ID { get; init; }
 
@@ -84,7 +86,7 @@ namespace LMeter.Meter
 
         public static MeterWindow GetDefaultMeter(string name)
         {
-            MeterWindow newMeter = new MeterWindow(name);
+            MeterWindow newMeter = new(name);
             newMeter.ImportPage(newMeter.HeaderConfig.GetDefault());
             newMeter.ImportPage(newMeter.BarConfig.GetDefault());
             return newMeter;
@@ -92,7 +94,7 @@ namespace LMeter.Meter
 
         public void Clear()
         {
-            _lastSortedCombatants = new List<Combatant>();
+            _lastSortedCombatants = [];
             _lastSortedTimestamp = null;
         }
         
@@ -115,6 +117,12 @@ namespace LMeter.Meter
 
             Vector2 localPos = pos + this.GeneralConfig.Position;
             Vector2 size = this.GeneralConfig.Size;
+            
+            if (this.VisibilityConfig.ShouldClip &&
+                Singletons.Get<ClipRectsHelper>().GetClipRectForArea(localPos, size).HasValue)
+            {
+                return;
+            }
 
             if (ImGui.IsMouseHoveringRect(localPos, localPos + size))
             {
@@ -130,7 +138,7 @@ namespace LMeter.Meter
             {
                 _eventIndex = index;
                 _lastSortedTimestamp = null;
-                _lastSortedCombatants = new List<Combatant>();
+                _lastSortedCombatants = [];
                 _scrollPosition = 0;
             }
 
@@ -169,7 +177,7 @@ namespace LMeter.Meter
 
                     for (int i = 0; i < this.GeneralConfig.BorderThickness; i++)
                     {
-                        Vector2 offset = new Vector2(i, i);
+                        Vector2 offset = new(i, i);
                         drawList.AddRect(borderPos + offset, borderPos + borderSize - offset, this.GeneralConfig.BorderColor.Base);
                     }
 
@@ -179,10 +187,10 @@ namespace LMeter.Meter
 
                 if (this.GeneralConfig.Preview && !_lastFrameWasPreview)
                 {
-                    _previewEvent = ACTEvent.GetTestData();
+                    _previewEvent = ActEvent.GetTestData();
                 }
 
-                ACTEvent? actEvent = this.GeneralConfig.Preview ? _previewEvent : ACTClient.GetEvent(_eventIndex);
+                ActEvent? actEvent = this.GeneralConfig.Preview ? _previewEvent : LogClient.GetEvent(_eventIndex);
 
                 (localPos, size) = this.HeaderConfig.DrawHeader(localPos, size, actEvent?.Encounter, drawList);
                 drawList.AddRectFilled(localPos, localPos + size, this.GeneralConfig.BackgroundColor.Base);
@@ -194,11 +202,13 @@ namespace LMeter.Meter
             _lastFrameWasCombat = combat;
         }
 
-        private void DrawBars(ImDrawListPtr drawList, Vector2 localPos, Vector2 size, ACTEvent? actEvent)
+        private void DrawBars(ImDrawListPtr drawList, Vector2 localPos, Vector2 size, ActEvent? actEvent)
         {                
             if (actEvent?.Combatants is not null && actEvent.Combatants.Any())
             {
-                List<Combatant> sortedCombatants = this.GetSortedCombatants(actEvent, this.GeneralConfig.DataType);
+                // We don't want to corrupt the cache. The entire logic past this point mutates the sorted Act combatants instead of using a rendering cache
+                // This has the issue that some settings can't behave properly and or don't update till the following combat update/fight
+                List<Combatant> sortedCombatants = [.. this.GetSortedCombatants(actEvent, this.GeneralConfig.DataType)];
                 
                 float top = this.GeneralConfig.DataType switch
                 {
@@ -208,18 +218,26 @@ namespace LMeter.Meter
                     _ => 0
                 };
 
-                int i = 0;
+                int currentIndex = 0;
+                var playerName = Singletons.Get<IClientState>().LocalPlayer?.Name.ToString() ?? "YOU";
+                
                 if (sortedCombatants.Count > this.BarConfig.BarCount)
                 {
-                    i = Math.Clamp(_scrollPosition, 0, sortedCombatants.Count - this.BarConfig.BarCount);
-                    _scrollPosition = i;
+                    currentIndex = Math.Clamp(_scrollPosition, 0, sortedCombatants.Count - this.BarConfig.BarCount);
+                    _scrollPosition = currentIndex;
+
+                    if (this.BarConfig.AlwaysShowSelf)
+                    {
+                        MovePlayerIntoViewableRange(sortedCombatants, _scrollPosition, playerName);
+                    }
                 }
 
-                int maxIndex = Math.Min(i + this.BarConfig.BarCount, sortedCombatants.Count);
-                for (; i < maxIndex; i++)
+                int maxIndex = Math.Min(currentIndex + this.BarConfig.BarCount, sortedCombatants.Count);
+                for (; currentIndex < maxIndex; currentIndex++)
                 {
-                    Combatant combatant = sortedCombatants[i];
-                    combatant.Rank = (i + 1).ToString();
+                    Combatant combatant = sortedCombatants[currentIndex];
+                    combatant.Rank = (currentIndex + 1).ToString();
+                    UpdatePlayerName(combatant, playerName);
 
                     float current = this.GeneralConfig.DataType switch
                     {
@@ -234,6 +252,34 @@ namespace LMeter.Meter
                     localPos = this.BarConfig.DrawBar(drawList, localPos, size, combatant, jobColor, barColor, top, current);
                 }
             }
+        }
+
+        private void MovePlayerIntoViewableRange(List<Combatant> sortedCombatants, int scrollPosition, string playerName)
+        {
+            int oldPlayerIndex = sortedCombatants.FindIndex(combatant => combatant.Name.Contains("YOU") || combatant.Name.Contains(playerName));
+            if (oldPlayerIndex == -1)
+            {
+                return;
+            }
+
+            int newPlayerIndex = Math.Clamp(oldPlayerIndex, scrollPosition, this.BarConfig.BarCount + scrollPosition - 1);
+
+            if (oldPlayerIndex == newPlayerIndex)
+            {
+                return;
+            }
+
+            sortedCombatants.MoveItem(oldPlayerIndex, newPlayerIndex);
+        }
+        
+        private void UpdatePlayerName(Combatant combatant, string localPlayerName)
+        {
+            combatant.NameOverwrite = this.BarConfig.UseCharacterName switch
+            {
+                true when combatant.Name.Contains("YOU") => localPlayerName,
+                false when combatant.NameOverwrite is not null => null,
+                _ => combatant.NameOverwrite
+            };
         }
         
         private bool DrawContextMenu(string popupId, out int selectedIndex)
@@ -253,7 +299,7 @@ namespace LMeter.Meter
                     selected = true;
                 }
 
-                List<ACTEvent> events = ACTClient.PastEvents;
+                List<ActEvent> events = LogClient.PastEvents;
                 if (events.Count > 0)
                 {
                     ImGui.Separator();
@@ -287,7 +333,7 @@ namespace LMeter.Meter
             return selected;
         }
 
-        private List<Combatant> GetSortedCombatants(ACTEvent actEvent, MeterDataType dataType)
+        private List<Combatant> GetSortedCombatants(ActEvent actEvent, MeterDataType dataType)
         {
             if (actEvent.Combatants is null ||
                 _lastSortedTimestamp.HasValue &&
@@ -297,7 +343,7 @@ namespace LMeter.Meter
                 return _lastSortedCombatants;
             }
 
-            List<Combatant> sortedCombatants = actEvent.Combatants.Values.ToList();
+            List<Combatant> sortedCombatants = [.. actEvent.Combatants.Values];
 
             sortedCombatants.Sort((x, y) =>
             {

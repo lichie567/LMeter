@@ -2,7 +2,7 @@ using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using ImGuiNET;
-using LMeter.ACT;
+using LMeter.Act.DataStructures;
 using LMeter.Helpers;
 using Newtonsoft.Json;
 
@@ -17,32 +17,32 @@ namespace LMeter.Config
 
         public bool ShowHeader = true;
         public int HeaderHeight = 25;
-        public ConfigColor BackgroundColor = new ConfigColor(30f / 255f, 30f / 255f, 30f / 255f, 230 / 255f);
+        public ConfigColor BackgroundColor = new(30f / 255f, 30f / 255f, 30f / 255f, 230 / 255f);
 
         public bool ShowEncounterDuration = true;
-        public ConfigColor DurationColor = new ConfigColor(0f / 255f, 190f / 255f, 225f / 255f, 1f);
+        public ConfigColor DurationColor = new(0f / 255f, 190f / 255f, 225f / 255f, 1f);
         public bool DurationShowOutline = true;
-        public ConfigColor DurationOutlineColor = new ConfigColor(0, 0, 0, 0.5f);
+        public ConfigColor DurationOutlineColor = new(0, 0, 0, 0.5f);
         public DrawAnchor DurationAlign = DrawAnchor.Left;
-        public Vector2 DurationOffset = new Vector2(0, 0);
+        public Vector2 DurationOffset = new(0, 0);
         public int DurationFontId = 0;
         public string DurationFontKey = FontsManager.DalamudFontKey;
 
         public bool ShowEncounterName = true;
-        public ConfigColor NameColor = new ConfigColor(1, 1, 1, 1);
+        public ConfigColor NameColor = new(1, 1, 1, 1);
         public bool NameShowOutline = true;
-        public ConfigColor NameOutlineColor = new ConfigColor(0, 0, 0, 0.5f);
+        public ConfigColor NameOutlineColor = new(0, 0, 0, 0.5f);
         public DrawAnchor NameAlign = DrawAnchor.Left;
-        public Vector2 NameOffset = new Vector2(0, 0);
+        public Vector2 NameOffset = new(0, 0);
         public int NameFontId = 0;
         public string NameFontKey = FontsManager.DalamudFontKey;
         
         public bool ShowRaidStats = true;
-        public ConfigColor RaidStatsColor = new ConfigColor(0.5f, 0.5f, 0.5f, 1f);
+        public ConfigColor RaidStatsColor = new(0.5f, 0.5f, 0.5f, 1f);
         public bool StatsShowOutline = true;
-        public ConfigColor StatsOutlineColor = new ConfigColor(0, 0, 0, 0.5f);
+        public ConfigColor StatsOutlineColor = new(0, 0, 0, 0.5f);
         public DrawAnchor StatsAlign = DrawAnchor.Right;
-        public Vector2 StatsOffset = new Vector2(0, 0);
+        public Vector2 StatsOffset = new(0, 0);
         public int StatsFontId = 0;
         public string StatsFontKey = FontsManager.DalamudFontKey;
         public string RaidStatsFormat = "[dps]rdps [hps]rhps Deaths: [deaths]";
@@ -50,13 +50,18 @@ namespace LMeter.Config
         
         public IConfigPage GetDefault()
         {
-            HeaderConfig defaultConfig = new HeaderConfig();
-            defaultConfig.DurationFontKey = FontsManager.DefaultSmallFontKey;
-            defaultConfig.DurationFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey);
-            defaultConfig.NameFontKey = FontsManager.DefaultSmallFontKey;
-            defaultConfig.NameFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey);
-            defaultConfig.StatsFontKey = FontsManager.DefaultSmallFontKey;
-            defaultConfig.StatsFontId = Singletons.Get<FontsManager>().GetFontIndex(FontsManager.DefaultSmallFontKey);
+            HeaderConfig defaultConfig = new()
+            {
+                DurationFontKey = FontsManager.DefaultSmallFontKey,
+                DurationFontId = FontsManager.GetFontIndex(FontsManager.DefaultSmallFontKey),
+
+                NameFontKey = FontsManager.DefaultSmallFontKey,
+                NameFontId = FontsManager.GetFontIndex(FontsManager.DefaultSmallFontKey),
+
+                StatsFontKey = FontsManager.DefaultSmallFontKey,
+                StatsFontId = FontsManager.GetFontIndex(FontsManager.DefaultSmallFontKey)
+            };
+            
             return defaultConfig;
         }
 
@@ -67,7 +72,7 @@ namespace LMeter.Config
                 return (pos, size);
             }
             
-            Vector2 headerSize = new Vector2(size.X, this.HeaderHeight);
+            Vector2 headerSize = new(size.X, this.HeaderHeight);
             drawList.AddRectFilled(pos, pos + headerSize, this.BackgroundColor.Base);
             
             Vector2 durationPos = pos;

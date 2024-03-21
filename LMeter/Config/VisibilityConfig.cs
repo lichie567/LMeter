@@ -1,12 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using ImGuiNET;
-using Newtonsoft.Json;
+using LMeter.Act;
 using LMeter.Helpers;
-using System.Linq;
-using System.Collections.Generic;
-using LMeter.ACT;
+using Newtonsoft.Json;
 
 namespace LMeter.Config
 {
@@ -18,7 +18,6 @@ namespace LMeter.Config
         public IConfigPage GetDefault() => new VisibilityConfig();
 
         [JsonIgnore] private string _customJobInput = string.Empty;
-        [JsonIgnore] private string _hideIfValueInput = string.Empty;
 
         public bool AlwaysHide = false;
         public bool HideInCombat = false;
@@ -27,10 +26,11 @@ namespace LMeter.Config
         public bool HideWhilePerforming = false;
         public bool HideInGoldenSaucer = false;
         public bool HideIfNotConnected = false;
+        public bool ShouldClip = true;
 
         public JobType ShowForJobTypes = JobType.All;
         public string CustomJobString = string.Empty;
-        public List<Job> CustomJobList = new List<Job>();
+        public List<Job> CustomJobList = [];
 
         public bool IsVisible()
         {
@@ -64,7 +64,7 @@ namespace LMeter.Config
                 return false;
             }
 
-            if (this.HideIfNotConnected && ACTClient.Status != ConnectionStatus.Connected)
+            if (this.HideIfNotConnected && LogClient.GetStatus() != ConnectionStatus.Connected)
             {
                 return false;
             }
@@ -83,6 +83,7 @@ namespace LMeter.Config
                 ImGui.Checkbox("Hide While Performing", ref this.HideWhilePerforming);
                 ImGui.Checkbox("Hide In Golden Saucer", ref this.HideInGoldenSaucer);
                 ImGui.Checkbox("Hide While Not Connected to ACT", ref this.HideIfNotConnected);
+                ImGui.Checkbox("Hide When Covered by Game UI Window", ref this.ShouldClip);
                 
                 DrawHelpers.DrawSpacing(1);
                 string[] jobTypeOptions = Enum.GetNames(typeof(JobType));
@@ -98,7 +99,7 @@ namespace LMeter.Config
                     if (ImGui.InputTextWithHint("Custom Job List", "Comma Separated List (ex: WAR, SAM, BLM)", ref _customJobInput, 100, ImGuiInputTextFlags.EnterReturnsTrue))
                     {
                         IEnumerable<string> jobStrings = _customJobInput.Split(',').Select(j => j.Trim());
-                        List<Job> jobList = new List<Job>();
+                        List<Job> jobList = [];
                         foreach (string j in jobStrings)
                         {
                             if (Enum.TryParse(j, true, out Job parsed))
