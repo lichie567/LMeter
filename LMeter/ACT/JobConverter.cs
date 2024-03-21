@@ -1,5 +1,4 @@
 using System;
-using Dalamud.Utility;
 using LMeter.Helpers;
 using Newtonsoft.Json;
 
@@ -25,12 +24,12 @@ namespace LMeter.Act
             }
 
             string? value = serializer.Deserialize(reader, typeof(string))?.ToString();
-            if (value.IsNullOrEmpty() || value.Equals("Limit Break"))
+            if (value is not null && Enum.TryParse(value, true, out Job job))
             {
-                return Job.UKN;
+                return job;
             }
 
-            return Enum.Parse<Job>(value.ToUpper());
+            return Job.UKN;
         }
 
         public override bool CanConvert(Type objectType)

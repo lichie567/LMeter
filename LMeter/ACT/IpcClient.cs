@@ -23,7 +23,6 @@ namespace LMeter.Act
         {
             _subscriptionReceiver = Singletons.Get<DalamudPluginInterface>().GetIpcProvider<JObject, bool>(LMeterSubscriptionIpcEndpoint);
             _subscriptionReceiver.RegisterFunc(ReceiveIpcMessage);
-
         }
 
         public override void Start()

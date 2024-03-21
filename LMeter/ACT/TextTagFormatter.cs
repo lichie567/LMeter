@@ -37,15 +37,15 @@ namespace LMeter.Act
             string? value = null;
             string key = m.Groups[1].Value;
 
-            if (!_members.TryGetValue(key, out var fieldInfo))
+            if (!_members.TryGetValue(key, out var memberInfo))
             {
                 return value ?? m.Value;
             }
             
-            var memberValue = fieldInfo?.MemberType switch
+            var memberValue = memberInfo?.MemberType switch
             {
-                MemberTypes.Field => ((FieldInfo)fieldInfo).GetValue(_source),
-                MemberTypes.Property => ((PropertyInfo)fieldInfo).GetValue(_source),
+                MemberTypes.Field => ((FieldInfo)memberInfo).GetValue(_source),
+                MemberTypes.Property => ((PropertyInfo)memberInfo).GetValue(_source),
                 // Default should null because we don't want people accidentally trying to access a method and then throw an exception
                 _ => null
             };

@@ -86,30 +86,30 @@ public class Combatant
     public LazyFloat? HealingTotal { get; set; }
 
     [JsonProperty("healed%")]
-    public string HealingPct  { get; set; }= string.Empty;
+    public string HealingPct { get; set; }= string.Empty;
 
     [JsonProperty("overHeal")]
     [JsonConverter(typeof(LazyFloatConverter))]
     public LazyFloat? OverHeal { get; set; }
 
     [JsonProperty("OverHealPct")]
-    public string OverHealPct  { get; set; }= string.Empty;
+    public string OverHealPct { get; set; }= string.Empty;
 
     [JsonProperty("damagetaken")]
     [JsonConverter(typeof(LazyFloatConverter))]
     public LazyFloat? DamageTaken { get; set; }
 
     [JsonProperty("deaths")]
-    public string Deaths  { get; set; }= string.Empty;
+    public string Deaths { get; set; }= string.Empty;
 
     [JsonProperty("kills")]
-    public string Kills  { get; set; }= string.Empty;
+    public string Kills { get; set; }= string.Empty;
 
     [JsonProperty("maxhit")]
-    public string MaxHit  { get; set; } = string.Empty;
+    public string MaxHit { get; set; } = string.Empty;
 
     [JsonProperty("MAXHIT")]
-    private string _maxHit  { get; set; } = string.Empty;
+    private string _maxHit { get; set; } = string.Empty;
 
     public LazyString<string?> MaxHitName { get; set; }
 
