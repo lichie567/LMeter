@@ -11,11 +11,11 @@ namespace LMeter.Config
     public class BarConfig : IConfigPage
     {
         [JsonIgnore]
-        private static string[] _anchorOptions = Enum.GetNames(typeof(DrawAnchor));
+        private static readonly string[] _anchorOptions = Enum.GetNames(typeof(DrawAnchor));
         
         public string Name => "Bars";
 
-        private static string[] _jobIconStyleOptions = ["Style 1", "Style 2"];
+        private static readonly string[] _jobIconStyleOptions = ["Style 1", "Style 2"];
 
         public int BarCount = 8;
         public int BarGaps = 1;

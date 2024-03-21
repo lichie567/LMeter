@@ -138,7 +138,7 @@ namespace LMeter.Helpers
             "SelectYesno"
         ];
 
-        private List<ClipRect> _clipRects = [];
+        private readonly List<ClipRect> _clipRects = [];
 
         public unsafe void Update()
         {

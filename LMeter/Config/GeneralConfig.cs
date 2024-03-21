@@ -17,7 +17,7 @@ namespace LMeter.Config
     public class GeneralConfig : IConfigPage
     {
         [JsonIgnore]
-        private static string[] _meterTypeOptions = Enum.GetNames(typeof(MeterDataType));
+        private static readonly string[] _meterTypeOptions = Enum.GetNames(typeof(MeterDataType));
         
         [JsonIgnore]
         public bool Preview = false;

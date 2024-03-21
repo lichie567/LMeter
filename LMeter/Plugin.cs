@@ -1,4 +1,7 @@
-﻿using Dalamud.Game;
+﻿using System;
+using System.IO;
+using System.Reflection;
+using Dalamud.Game;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Interface;
 using Dalamud.Interface.Internal;
@@ -8,9 +11,6 @@ using LMeter.Act;
 using LMeter.Config;
 using LMeter.Helpers;
 using LMeter.Meter;
-using System;
-using System.IO;
-using System.Reflection;
 
 namespace LMeter
 {
@@ -18,11 +18,13 @@ namespace LMeter
     {
         public const string ConfigFileName = "LMeter.json";
 
-        public static string Version { get; private set; } = "0.3.0.0";
+        public static string Version { get; private set; } = "0.3.0.1";
 
         public static string ConfigFileDir { get; private set; } = "";
 
         public static string ConfigFilePath { get; private set; } = "";
+
+        public static string AssemblyFileDir { get; private set; } = "";
 
         public static IDalamudTextureWrap? IconTexture { get; private set; } = null;
 
@@ -53,6 +55,7 @@ namespace LMeter
             Plugin.Version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? Plugin.Version;
             Plugin.ConfigFileDir = pluginInterface.GetPluginConfigDirectory();
             Plugin.ConfigFilePath = Path.Combine(pluginInterface.GetPluginConfigDirectory(), Plugin.ConfigFileName);
+            Plugin.AssemblyFileDir = pluginInterface.AssemblyLocation.DirectoryName ?? "";
 
             // Register Dalamud APIs
             Singletons.Register(clientState);

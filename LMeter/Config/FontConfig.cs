@@ -15,11 +15,11 @@ namespace LMeter.Config
         
         public IConfigPage GetDefault() => new FontConfig();
 
-        [JsonIgnore] private static string? _fontPath = FontsManager.GetUserFontPath();
+        [JsonIgnore] private static readonly string? _fontPath = FontsManager.GetUserFontPath();
         [JsonIgnore] private int _selectedFont = 0;
         [JsonIgnore] private int _selectedSize = 23;
         [JsonIgnore] private string[] _fonts = FontsManager.GetFontNamesFromPath(FontsManager.GetUserFontPath());
-        [JsonIgnore] private string[] _sizes = Enumerable.Range(1, 40).Select(i => i.ToString()).ToArray();
+        [JsonIgnore] private readonly string[] _sizes = Enumerable.Range(1, 40).Select(i => i.ToString()).ToArray();
         [JsonIgnore] private bool _chinese = false;
         [JsonIgnore] private bool _korean = false;
 
