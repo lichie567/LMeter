@@ -48,7 +48,7 @@ namespace LMeter.Windows
 
         public override void PreDraw()
         {
-            if (_configStack.Any())
+            if (_configStack.Count != 0)
             {
                 this.WindowName = this.GetWindowTitle();
                 ImGui.SetNextWindowSize(_windowSize);
@@ -64,7 +64,7 @@ namespace LMeter.Windows
 
         public override void Draw()
         {
-            if (!_configStack.Any())
+            if (_configStack.Count == 0)
             {
                 this.IsOpen = false;
                 return;
@@ -185,7 +185,7 @@ namespace LMeter.Windows
 
         private void Rename(string name)
         {
-            if (_configStack.Any())
+            if (_configStack.Count != 0)
             {
                 _configStack.Peek().Name = name;
             }

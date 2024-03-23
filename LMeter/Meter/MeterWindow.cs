@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
@@ -204,7 +203,7 @@ namespace LMeter.Meter
 
         private void DrawBars(ImDrawListPtr drawList, Vector2 localPos, Vector2 size, ActEvent? actEvent)
         {                
-            if (actEvent?.Combatants is not null && actEvent.Combatants.Any())
+            if (actEvent?.Combatants is not null && actEvent.Combatants.Count != 0)
             {
                 // We don't want to corrupt the cache. The entire logic past this point mutates the sorted Act combatants instead of using a rendering cache
                 // This has the issue that some settings can't behave properly and or don't update till the following combat update/fight

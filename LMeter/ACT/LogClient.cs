@@ -82,7 +82,7 @@ namespace LMeter.Act
 
                 if (newEvent?.Encounter is not null &&
                     newEvent?.Combatants is not null &&
-                    newEvent.Combatants.Any() &&
+                    newEvent.Combatants.Count != 0 &&
                     !newEvent.Equals(_lastEvent))
                 {
                     if (!newEvent.IsEncounterActive() &&
