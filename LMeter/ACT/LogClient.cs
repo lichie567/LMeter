@@ -15,20 +15,19 @@ namespace LMeter.Act
     {
         protected const string SubscriptionMessage = "{\"call\":\"subscribe\",\"events\":[\"CombatData\"]}";
 
-        protected  ActConfig Config { get; set; }
-        protected ConnectionStatus Status { get; set; }
+        protected ActConfig Config { get; set; }
+        
+        public ConnectionStatus Status { get; protected set; }
+        public List<ActEvent> PastEvents { get; protected init; }
+
         private ActEvent? _lastEvent;
         private ActEvent? _currentEvent;
-        private List<ActEvent> _pastEvents;
-
-        public static ConnectionStatus GetStatus() => Singletons.Get<LogClient>().Status;
-        public static List<ActEvent> PastEvents => Singletons.Get<LogClient>()._pastEvents;
 
         public LogClient(ActConfig config)
         {
             this.Config = config;
             this.Status = ConnectionStatus.NotConnected;
-            _pastEvents = [];
+            this.PastEvents = [];
         }
         
         public abstract void Start();
@@ -37,9 +36,9 @@ namespace LMeter.Act
         
         public ActEvent? GetEvent(int index = -1)
         {
-            if (index >= 0 && index < _pastEvents.Count)
+            if (index >= 0 && index < this.PastEvents.Count)
             {
-                return _pastEvents[index];
+                return this.PastEvents[index];
             }
 
             return _currentEvent;
@@ -58,16 +57,16 @@ namespace LMeter.Act
         private void HandleNewEvent(ActEvent? newEvent)
         {
             if (newEvent?.Encounter is not null &&
-                    newEvent?.Combatants is not null &&
-                    !newEvent.Equals(_lastEvent))
+                newEvent?.Combatants is not null &&
+                !newEvent.Equals(_lastEvent))
             {
                 if (!newEvent.IsEncounterActive() &&
-                    !newEvent.Equals(_pastEvents.LastOrDefault()))
+                    !newEvent.Equals(this.PastEvents.LastOrDefault()))
                 {
-                    _pastEvents.Add(newEvent);
-                    while (_pastEvents.Count > Config.EncounterHistorySize)
+                    this.PastEvents.Add(newEvent);
+                    while (this.PastEvents.Count > Config.EncounterHistorySize)
                     {
-                        _pastEvents.RemoveAt(0);
+                        this.PastEvents.RemoveAt(0);
                     }
                 }
 
@@ -91,7 +90,7 @@ namespace LMeter.Act
         public virtual void Clear()
         {
             _currentEvent = null;
-            _pastEvents = [];
+            this.PastEvents.Clear();
             if (Config.ClearAct)
             {
                 IChatGui chat = Singletons.Get<IChatGui>();
@@ -105,7 +104,7 @@ namespace LMeter.Act
             }
         }
 
-        protected void LogConnectionFailure(string error, Exception? ex = null)
+        protected static void LogConnectionFailure(string error, Exception? ex = null)
         {
             Singletons.Get<IPluginLog>().Error(error);
             if (ex is not null)

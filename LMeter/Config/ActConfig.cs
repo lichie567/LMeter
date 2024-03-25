@@ -14,10 +14,10 @@ namespace LMeter.Config
         private const string _defaultSocketAddress = "ws://127.0.0.1:10501/ws";
 
         [JsonIgnore]
-        private DateTime? LastCombatTime { get; set; } = null;
+        private DateTime? LastCombatTime { get; set; }
 
         [JsonIgnore]
-        private DateTime? LastReconnectAttempt { get; set; } = null;
+        private DateTime? LastReconnectAttempt { get; set; }
 
         public string Name => "ACT";
         
@@ -61,7 +61,7 @@ namespace LMeter.Config
                 }
 
                 Vector2 buttonSize = new(40, 0);
-                ImGui.Text($"ACT Status: {LogClient.GetStatus()}");
+                ImGui.Text($"ACT Status: {Singletons.Get<LogClient>().Status}");
                 if (this.ClientType == 0)
                 {
                     ImGui.InputTextWithHint("ACT Websocket Address", $"Default: '{_defaultSocketAddress}'", ref this.ActSocketAddress, 64);
@@ -123,9 +123,9 @@ namespace LMeter.Config
 
         public void TryReconnect()
         {
+            ConnectionStatus status = Singletons.Get<LogClient>().Status;
             if (this.LastReconnectAttempt.HasValue &&
-                (LogClient.GetStatus() == ConnectionStatus.NotConnected ||
-                LogClient.GetStatus() == ConnectionStatus.ConnectionFailed))
+                (status == ConnectionStatus.NotConnected || status == ConnectionStatus.ConnectionFailed))
             {
                 if (this.AutoReconnect &&
                     this.LastReconnectAttempt < DateTime.UtcNow - TimeSpan.FromSeconds(this.ReconnectDelay))
@@ -142,7 +142,7 @@ namespace LMeter.Config
 
         public void TryEndEncounter()
         {
-            if (LogClient.GetStatus() == ConnectionStatus.Connected)
+            if (Singletons.Get<LogClient>().Status == ConnectionStatus.Connected)
             {
                 if (this.AutoEnd &&
                     CharacterState.IsInCombat())

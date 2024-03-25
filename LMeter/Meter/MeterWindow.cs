@@ -298,7 +298,7 @@ namespace LMeter.Meter
                     selected = true;
                 }
 
-                List<ActEvent> events = LogClient.PastEvents;
+                List<ActEvent> events = Singletons.Get<LogClient>().PastEvents;
                 if (events.Count > 0)
                 {
                     ImGui.Separator();

@@ -37,7 +37,7 @@ namespace LMeter.Act
             catch (Exception ex)
             {
                 this.Status = ConnectionStatus.ConnectionFailed;
-                this.LogConnectionFailure(ex.ToString());
+                LogConnectionFailure(ex.ToString());
             }
         }
 
@@ -57,7 +57,7 @@ namespace LMeter.Act
             catch (Exception ex)
             {
                 this.Status = ConnectionStatus.ConnectionFailed;
-                this.LogConnectionFailure(ex.ToString());
+                LogConnectionFailure(ex.ToString());
                 return;
             }
 
@@ -65,7 +65,7 @@ namespace LMeter.Act
             if (buffer.Array is null)
             {
                 this.Status = ConnectionStatus.ConnectionFailed;
-                this.LogConnectionFailure("Failed to allocate receive buffer!");
+                LogConnectionFailure("Failed to allocate receive buffer!");
                 return;
             }
 
@@ -100,7 +100,7 @@ namespace LMeter.Act
                             }
                             catch (Exception ex)
                             {
-                                this.LogConnectionFailure(ex.ToString());
+                                LogConnectionFailure(ex.ToString());
                             }
                         }
                     }
