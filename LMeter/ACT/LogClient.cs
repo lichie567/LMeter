@@ -26,8 +26,8 @@ namespace LMeter.Act
 
         public LogClient(ActConfig config)
         {
-            Config = config;
-            Status = ConnectionStatus.NotConnected;
+            this.Config = config;
+            this.Status = ConnectionStatus.NotConnected;
             _pastEvents = [];
         }
         
@@ -35,15 +35,14 @@ namespace LMeter.Act
         public abstract void Shutdown();
         public abstract void Reset();
         
-        public static ActEvent? GetEvent(int index = -1)
+        public ActEvent? GetEvent(int index = -1)
         {
-            LogClient client = Singletons.Get<LogClient>();
-            if (index >= 0 && index < client._pastEvents.Count)
+            if (index >= 0 && index < _pastEvents.Count)
             {
-                return client._pastEvents[index];
+                return _pastEvents[index];
             }
 
-            return client._currentEvent;
+            return _currentEvent;
         }
 
         protected void ParseLogData(string data)
@@ -58,27 +57,22 @@ namespace LMeter.Act
 
         private void HandleNewEvent(ActEvent? newEvent)
         {
-            if (newEvent is not null)
-            {
-                newEvent.Timestamp = DateTime.UtcNow;
-
-                if (newEvent?.Encounter is not null &&
+            if (newEvent?.Encounter is not null &&
                     newEvent?.Combatants is not null &&
                     !newEvent.Equals(_lastEvent))
+            {
+                if (!newEvent.IsEncounterActive() &&
+                    !newEvent.Equals(_pastEvents.LastOrDefault()))
                 {
-                    if (!newEvent.IsEncounterActive() &&
-                        !newEvent.Equals(_pastEvents.LastOrDefault()))
+                    _pastEvents.Add(newEvent);
+                    while (_pastEvents.Count > Config.EncounterHistorySize)
                     {
-                        _pastEvents.Add(newEvent);
-                        while (_pastEvents.Count > Config.EncounterHistorySize)
-                        {
-                            _pastEvents.RemoveAt(0);
-                        }
+                        _pastEvents.RemoveAt(0);
                     }
-
-                    _lastEvent = newEvent;
-                    _currentEvent = newEvent;
                 }
+
+                _lastEvent = newEvent;
+                _currentEvent = newEvent;
             }
         }
         

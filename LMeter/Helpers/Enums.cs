@@ -1,5 +1,12 @@
 namespace LMeter.Helpers
 {
+    public enum MeterDataType
+    {
+        Damage,
+        Healing,
+        DamageTaken
+    }
+
     public enum ConnectionStatus
     {
         NotConnected,

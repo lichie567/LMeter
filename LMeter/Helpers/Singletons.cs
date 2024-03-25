@@ -57,8 +57,7 @@ namespace LMeter.Helpers
         }
     }
 
-    public interface IPluginDisposable
+    public interface IPluginDisposable : IDisposable
     {
-        void Dispose();
     }
 }

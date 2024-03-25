@@ -6,7 +6,7 @@ namespace LMeter.Act
     public class LazyString<T>
     {
         private string _value = string.Empty;
-        private readonly Func<T, string> _generator;
+        private readonly Func<T, string> _converter;
         private readonly Func<T> _getInput;
 
         public bool WasGenerated { get; private set; }
@@ -20,16 +20,16 @@ namespace LMeter.Act
                     return _value;
                 }
                 
-                _value = _generator.Invoke(_getInput.Invoke());
+                _value = _converter.Invoke(_getInput.Invoke());
                 this.WasGenerated = true;
                 return _value;
             }
         }
 
-        public LazyString(Func<T> getInput, Func<T, string> generator)
+        public LazyString(Func<T> getInput, Func<T, string> converter)
         {
             _getInput = getInput;
-            _generator = generator;
+            _converter = converter;
         }
 
         public override string? ToString()

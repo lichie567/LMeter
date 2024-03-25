@@ -72,15 +72,16 @@ namespace LMeter.Act
             _getStringInput = input;
         }
 
-        public string? ToString(string format, bool kilo)
-        {
-            return kilo ? KiloFormat(this.Value, format) : this.Value.ToString(format, CultureInfo.InvariantCulture);
-        }
-
         public override string? ToString()
         {
             return this.Value.ToString();
         }
+
+        public string? ToString(string format, bool kilo) => kilo switch
+        {
+            true => KiloFormat(this.Value, format),
+            false => this.Value.ToString(format, CultureInfo.InvariantCulture)
+        };
 
         private static string KiloFormat(float num, string format) => num switch
         {

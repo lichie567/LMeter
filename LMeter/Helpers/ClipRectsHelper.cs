@@ -220,7 +220,7 @@ namespace LMeter.Helpers
         }
     }
 
-    public struct ClipRect
+    public readonly struct ClipRect
     {
         public readonly Vector2 Min;
         public readonly Vector2 Max;

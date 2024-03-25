@@ -6,6 +6,15 @@ namespace LMeter.Act
 {
     public class JobConverter : JsonConverter
     {
+        public override bool CanRead => true;
+
+        public override bool CanWrite => false;
+        
+        public override bool CanConvert(Type objectType)
+        {
+            return objectType == typeof(Job);
+        }
+
         public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
             throw new NotImplementedException("Write not supported.");
@@ -30,11 +39,6 @@ namespace LMeter.Act
             }
 
             return Job.UKN;
-        }
-
-        public override bool CanConvert(Type objectType)
-        {
-            return objectType == typeof(Job);
         }
     }
 }

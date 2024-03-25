@@ -9,7 +9,7 @@ namespace LMeter.Act.DataStructures
         private bool _parsedActive;
         private bool _active;
 
-        public DateTime Timestamp { get; set; }
+        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
         public string Data { get; set; } = string.Empty;
 
         [JsonProperty("type")]

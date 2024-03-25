@@ -7,13 +7,6 @@ using Newtonsoft.Json;
 
 namespace LMeter.Config
 {
-    public enum MeterDataType
-    {
-        Damage,
-        Healing,
-        DamageTaken
-    }
-
     public class GeneralConfig : IConfigPage
     {
         [JsonIgnore]
