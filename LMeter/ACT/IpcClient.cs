@@ -46,9 +46,11 @@ namespace LMeter.Act
             try
             {
                 this.Status = ConnectionStatus.Connecting;
-                var connectSuccess = Singletons.Get<DalamudPluginInterface>().GetIpcSubscriber<bool>(IinactListeningIpcEndpoint).InvokeFunc();
-                Singletons.Get<IPluginLog>().Info("Check if IINACT installed and running: " + connectSuccess);
-                if (!connectSuccess)
+                bool result = Singletons.Get<DalamudPluginInterface>()
+                    .GetIpcSubscriber<bool>(IinactListeningIpcEndpoint).InvokeFunc();
+
+                Singletons.Get<IPluginLog>().Info("Check if IINACT installed and running: " + result);
+                if (!result)
                 {
                     this.Status = ConnectionStatus.ConnectionFailed;
                     return;
@@ -64,11 +66,11 @@ namespace LMeter.Act
             Singletons.Get<IPluginLog>().Info("Successfully discovered IINACT IPC endpoint");
             try
             {
-                var subscribeStatus = Singletons.Get<DalamudPluginInterface>()
+                bool result = Singletons.Get<DalamudPluginInterface>()
                     .GetIpcSubscriber<string, bool>(IinactSubscribeIpcEndpoint)
                     .InvokeFunc(LMeterSubscriptionIpcEndpoint);
 
-                if (!subscribeStatus)
+                if (!result)
                 {
                     this.Status = ConnectionStatus.ConnectionFailed;
                     return;
@@ -124,12 +126,12 @@ namespace LMeter.Act
 
             try
             {
-                var success = Singletons.Get<DalamudPluginInterface>()
+                bool result = Singletons.Get<DalamudPluginInterface>()
                     .GetIpcSubscriber<string, bool>(IinactUnsubscribeIpcEndpoint)
                     .InvokeFunc(LMeterSubscriptionIpcEndpoint);
 
                 Singletons.Get<IPluginLog>().Info(
-                    success
+                    result
                         ? "Successfully unsubscribed from IINACT IPC"
                         : "Failed to unsubscribe from IINACT IPC"
                 );

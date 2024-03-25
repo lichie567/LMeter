@@ -6,6 +6,7 @@ using Dalamud.Interface.Windowing;
 using ImGuiNET;
 using LMeter.Config;
 using LMeter.Helpers;
+using LMeter.Meter;
 
 namespace LMeter.Windows
 {
@@ -219,8 +220,8 @@ namespace LMeter.Windows
             ConfigHelpers.SaveConfig();
             _configStack.Clear();
 
-            var config = Singletons.Get<LMeterConfig>();
-            foreach (var meter in config.MeterList.Meters)
+            LMeterConfig config = Singletons.Get<LMeterConfig>();
+            foreach (MeterWindow meter in config.MeterList.Meters)
             {
                 meter.GeneralConfig.Preview = false;
             }

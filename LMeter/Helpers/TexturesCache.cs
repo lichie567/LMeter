@@ -94,9 +94,9 @@ namespace LMeter.Helpers
         {
             if (disposing)
             {
-                foreach (var text in _desaturatedCache.Values)
+                foreach (IDalamudTextureWrap tex in _desaturatedCache.Values)
                 {
-                    text.Dispose();
+                    tex.Dispose();
                 }
 
                 _desaturatedCache.Clear();

@@ -50,8 +50,7 @@ namespace LMeter.Helpers
                 return;
             }
 
-            var itemToMove = list[oldIndex];
-
+            T itemToMove = list[oldIndex];
             list.RemoveAt(oldIndex);
             list.Insert(newIndex, itemToMove);
         }

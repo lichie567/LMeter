@@ -37,12 +37,12 @@ namespace LMeter.Act
             string? value = null;
             string key = m.Groups[1].Value;
 
-            if (!_members.TryGetValue(key, out var memberInfo))
+            if (!_members.TryGetValue(key, out MemberInfo? memberInfo))
             {
                 return value ?? m.Value;
             }
             
-            var memberValue = memberInfo?.MemberType switch
+            object? memberValue = memberInfo?.MemberType switch
             {
                 MemberTypes.Field => ((FieldInfo)memberInfo).GetValue(_source),
                 MemberTypes.Property => ((PropertyInfo)memberInfo).GetValue(_source),

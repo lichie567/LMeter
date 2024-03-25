@@ -153,7 +153,7 @@ namespace LMeter.Helpers
             AtkUnitList* loadedUnitsList = &manager->AtkUnitManager.AllLoadedUnitsList;
             if (loadedUnitsList == null) { return; }
 
-            for (var i = 0; i < loadedUnitsList->Count; i++)
+            for (int i = 0; i < loadedUnitsList->Count; i++)
             {
                 try
                 {
@@ -169,10 +169,10 @@ namespace LMeter.Helpers
                         continue;
                     }
 
-                    var margin = 5 * addon->Scale;
-                    var bottomMargin = 13 * addon->Scale;
+                    float margin = 5 * addon->Scale;
+                    float bottomMargin = 13 * addon->Scale;
 
-                    var clipRect = new ClipRect(
+                    ClipRect clipRect = new(
                         new Vector2(addon->X + margin, addon->Y + margin),
                         new Vector2(
                             addon->X + addon->WindowNode->AtkResNode.Width * addon->Scale - margin,
@@ -194,7 +194,7 @@ namespace LMeter.Helpers
 
         public ClipRect? GetClipRectForArea(Vector2 pos, Vector2 size)
         {
-            var area = new ClipRect(pos, pos + size);
+            ClipRect area = new(pos, pos + size);
             foreach (ClipRect clipRect in _clipRects)
             {
                 if (clipRect.IntersectsWith(area))
@@ -227,7 +227,7 @@ namespace LMeter.Helpers
 
         public ClipRect(Vector2 min, Vector2 max)
         {
-            var screenSize = ImGui.GetMainViewport().Size;
+            Vector2 screenSize = ImGui.GetMainViewport().Size;
 
             Min = Clamp(min, Vector2.Zero, screenSize);
             Max = Clamp(max, Vector2.Zero, screenSize);

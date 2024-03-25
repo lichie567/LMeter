@@ -67,7 +67,7 @@ namespace LMeter.Config
                     ImGui.InputTextWithHint("ACT Websocket Address", $"Default: '{_defaultSocketAddress}'", ref this.ActSocketAddress, 64);
                 }
 
-                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Sync, () => LogClient.RetryConnection(), "Reconnect", buttonSize);
+                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Sync, () => Singletons.Get<LogClient>().Reset(), "Reconnect", buttonSize);
 
                 ImGui.SameLine();
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() - 1f);
@@ -107,7 +107,7 @@ namespace LMeter.Config
                 }
 
                 ImGui.NewLine();
-                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Stop, () => LogClient.EndEncounter(), null, buttonSize);
+                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Stop, () => Singletons.Get<LogClient>().EndEncounter(), null, buttonSize);
                 ImGui.SameLine();
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() - 1f);
                 ImGui.Text("Force End Combat");
@@ -130,7 +130,7 @@ namespace LMeter.Config
                 if (this.AutoReconnect &&
                     this.LastReconnectAttempt < DateTime.UtcNow - TimeSpan.FromSeconds(this.ReconnectDelay))
                 {
-                    LogClient.RetryConnection();
+                    Singletons.Get<LogClient>().Reset();
                     this.LastReconnectAttempt = DateTime.UtcNow;
                 }
             }
@@ -152,7 +152,7 @@ namespace LMeter.Config
                 else if (this.LastCombatTime is not null && 
                          this.LastCombatTime < DateTime.UtcNow - TimeSpan.FromSeconds(this.AutoEndDelay))
                 {
-                    LogClient.EndEncounter();
+                    Singletons.Get<LogClient>().EndEncounter();
                     this.LastCombatTime = null;
                 }
             }

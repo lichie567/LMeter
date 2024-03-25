@@ -87,7 +87,7 @@ namespace LMeter
             if (ImGui.Begin("LMeter_Root", _mainWindowFlags))
             {
                 Singletons.Get<ClipRectsHelper>().Update();
-                foreach (var meter in _config.MeterList.Meters)
+                foreach (MeterWindow meter in _config.MeterList.Meters)
                 {
                     meter.Draw(_origin);
                 }
@@ -99,7 +99,7 @@ namespace LMeter
         public void Clear()
         {
             Singletons.Get<LogClient>().Clear();
-            foreach (var meter in _config.MeterList.Meters)
+            foreach (MeterWindow meter in _config.MeterList.Meters)
             {
                 meter.Clear();
             }
@@ -152,7 +152,7 @@ namespace LMeter
             switch (arguments)
             {
                 case "end":
-                    LogClient.EndEncounter();
+                    Singletons.Get<LogClient>().EndEncounter();
                     break;
                 case "clear":
                     this.Clear();

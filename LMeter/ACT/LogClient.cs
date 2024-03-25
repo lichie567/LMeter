@@ -46,24 +46,6 @@ namespace LMeter.Act
             return client._currentEvent;
         }
 
-        public static void EndEncounter()
-        {
-            IChatGui chat = Singletons.Get<IChatGui>();
-            XivChatEntry message = new()
-            {
-                Message = "end",
-                Type = XivChatType.Echo
-            };
-
-            chat.Print(message);
-        }
-
-        public static void RetryConnection()
-        {
-            LogClient client = Singletons.Get<LogClient>();
-            client.Reset();
-        }
-
         protected void ParseLogData(string data)
         {
             this.HandleNewEvent(JsonConvert.DeserializeObject<ActEvent>(data));
@@ -82,7 +64,6 @@ namespace LMeter.Act
 
                 if (newEvent?.Encounter is not null &&
                     newEvent?.Combatants is not null &&
-                    newEvent.Combatants.Count != 0 &&
                     !newEvent.Equals(_lastEvent))
                 {
                     if (!newEvent.IsEncounterActive() &&
@@ -100,8 +81,20 @@ namespace LMeter.Act
                 }
             }
         }
+        
+        public virtual void EndEncounter()
+        {
+            IChatGui chat = Singletons.Get<IChatGui>();
+            XivChatEntry message = new()
+            {
+                Message = "end",
+                Type = XivChatType.Echo
+            };
 
-        public void Clear()
+            chat.Print(message);
+        }
+
+        public virtual void Clear()
         {
             _currentEvent = null;
             _pastEvents = [];

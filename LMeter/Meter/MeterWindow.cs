@@ -218,7 +218,7 @@ namespace LMeter.Meter
                 };
 
                 int currentIndex = 0;
-                var playerName = Singletons.Get<IClientState>().LocalPlayer?.Name.ToString() ?? "YOU";
+                string playerName = Singletons.Get<IClientState>().LocalPlayer?.Name.ToString() ?? "YOU";
                 
                 if (sortedCombatants.Count > this.BarConfig.BarCount)
                 {

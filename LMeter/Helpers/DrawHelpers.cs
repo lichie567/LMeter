@@ -43,7 +43,7 @@ namespace LMeter.Helpers
             uint durationInMs = 3000,
             string title = "LMeter")
         {
-            var notification = new Notification()
+            Notification notification = new()
             {
                 Title = title,
                 Content = message,
