@@ -48,6 +48,7 @@ namespace LMeter.Config
                 {
                     ImGui.SetTooltip("Use this option if you are using the standard standalone Advanced Combat Tracker program.");
                 }
+                
                 ImGui.SameLine();
                 ImGui.RadioButton("IINACT IPC", ref this.ClientType, 1);
                 if (ImGui.IsItemHovered())
@@ -144,8 +145,7 @@ namespace LMeter.Config
         {
             if (Singletons.Get<LogClient>().Status == ConnectionStatus.Connected)
             {
-                if (this.AutoEnd &&
-                    CharacterState.IsInCombat())
+                if (this.AutoEnd && CharacterState.IsInCombat())
                 {
                     this.LastCombatTime = DateTime.UtcNow;
                 }

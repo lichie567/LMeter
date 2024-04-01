@@ -9,7 +9,7 @@ namespace LMeter.Helpers
 
         public static T Get<T>()
         {
-            if (ActiveInstances.TryGetValue(typeof(T), out object? o) && o != null)
+            if (ActiveInstances.TryGetValue(typeof(T), out object? o) && o is not null)
             {
                 return (T)o;
             }
@@ -24,7 +24,10 @@ namespace LMeter.Helpers
 
         public static void Register<T>(T newSingleton)
         {
-            if (newSingleton == null) { return; }
+            if (newSingleton is null)
+            { 
+                return;
+            }
 
             if (!ActiveInstances.TryAdd(typeof(T), newSingleton))
             {
@@ -34,7 +37,10 @@ namespace LMeter.Helpers
 
         public static void Update<T>(T newSingleton)
         {
-            if (newSingleton == null) { return; }
+            if (newSingleton is null) 
+            {
+                return;
+            }
 
             if (ActiveInstances.ContainsKey(typeof(T)))
             {

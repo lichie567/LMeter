@@ -107,9 +107,14 @@ namespace LMeter
 
         public void ChangeClientType(int clientType)
         {
-            LogClient currentClient = Singletons.Get<LogClient>();
-            currentClient.Shutdown();
+            if (!Singletons.IsRegistered<LogClient>())
+            {
+                return;
+            }
             
+            LogClient oldClient = Singletons.Get<LogClient>();
+            oldClient.Shutdown();
+
             LogClient newClient = clientType switch
             {
                 1 => new IpcClient(_config.ActConfig),
