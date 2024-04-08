@@ -84,7 +84,7 @@ namespace LMeter.Helpers
         DoH,
         DoL
     }
-    
+
     public enum DrawAnchor
     {
         Center = 0,

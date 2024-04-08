@@ -20,7 +20,7 @@ namespace LMeter.Config
         private DateTime? LastReconnectAttempt { get; set; }
 
         public string Name => "ACT";
-        
+
         public IConfigPage GetDefault() => new ActConfig();
 
         public string ActSocketAddress;
@@ -48,7 +48,7 @@ namespace LMeter.Config
                 {
                     ImGui.SetTooltip("Use this option if you are using the standard standalone Advanced Combat Tracker program.");
                 }
-                
+
                 ImGui.SameLine();
                 ImGui.RadioButton("IINACT IPC", ref this.ClientType, 1);
                 if (ImGui.IsItemHovered())
@@ -98,7 +98,7 @@ namespace LMeter.Config
                     ImGui.SetTooltip("It is recommended to disable ACT Command Sounds if you use this feature.\n" +
                                      "The option can be found in ACT under Options -> Sound Settings.");
                 }
-                
+
                 if (this.AutoEnd)
                 {
                     DrawHelpers.DrawNestIndicator(1);
@@ -118,7 +118,7 @@ namespace LMeter.Config
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() - 1f);
                 ImGui.Text("Clear LMeter");
             }
-            
+
             ImGui.EndChild();
         }
 
@@ -149,7 +149,7 @@ namespace LMeter.Config
                 {
                     this.LastCombatTime = DateTime.UtcNow;
                 }
-                else if (this.LastCombatTime is not null && 
+                else if (this.LastCombatTime is not null &&
                          this.LastCombatTime < DateTime.UtcNow - TimeSpan.FromSeconds(this.AutoEndDelay))
                 {
                     Singletons.Get<LogClient>().EndEncounter();

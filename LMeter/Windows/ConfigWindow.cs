@@ -54,7 +54,7 @@ namespace LMeter.Windows
                 this.WindowName = this.GetWindowTitle();
                 ImGui.SetNextWindowSize(_windowSize);
             }
-        }        
+        }
 
         private string GetWindowTitle()
         {
@@ -105,7 +105,7 @@ namespace LMeter.Windows
             this.Position = ImGui.GetWindowPos();
             _windowSize = ImGui.GetWindowSize();
         }
-                
+
         private void DrawNavBar(IConfigPage? openPage, Vector2 size, float padX)
         {
             Vector2 buttonsize = new(40, 0);
@@ -139,7 +139,7 @@ namespace LMeter.Windows
                 {
                     Rename(_name);
                 }
-                
+
                 if (ImGui.IsItemHovered())
                 {
                     ImGui.SetTooltip("Rename");

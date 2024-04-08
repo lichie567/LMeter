@@ -9,7 +9,7 @@ namespace LMeter.Act
         public override bool CanRead => true;
 
         public override bool CanWrite => false;
-        
+
         public override bool CanConvert(Type objectType)
         {
             return objectType == typeof(Job);
@@ -21,7 +21,7 @@ namespace LMeter.Act
         }
 
         public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
-        {            
+        {
             if (!objectType.IsEnum)
             {
                 return serializer.Deserialize(reader, objectType);

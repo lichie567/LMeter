@@ -18,7 +18,7 @@ public class Combatant
 
     [JsonProperty("name")]
     public string OriginalName { get; set; } = string.Empty;
-    
+
     public string? NameOverwrite { get; set; } = null;
 
     [JsonIgnore]
@@ -45,8 +45,8 @@ public class Combatant
 
     [JsonIgnore]
     public LazyString<string?>? Duration;
-    
-        
+
+
     [JsonProperty("encdps")]
     [JsonConverter(typeof(LazyFloatConverter))]
     public LazyFloat? EncDps { get; set; }
@@ -70,11 +70,11 @@ public class Combatant
 
     [JsonProperty("CritDirectHitPct")]
     public string CritDirectHitPct { get; set; } = string.Empty;
-        
+
     [JsonProperty("enchps")]
     [JsonConverter(typeof(LazyFloatConverter))]
     public LazyFloat? EncHps { get; set; }
-        
+
     [JsonProperty("hps")]
     [JsonConverter(typeof(LazyFloatConverter))]
     public LazyFloat? Hps { get; set; }
@@ -125,7 +125,7 @@ public class Combatant
         this.MaxHitName = new LazyString<string?>(() => this.MaxHit, LazyStringConverters.MaxHitName);
         this.MaxHitValue = new LazyFloat(() => LazyStringConverters.MaxHitValue(this.MaxHit));
     }
-    
+
     public string GetFormattedString(string format, string numberFormat)
     {
         return TextTagFormatter.TextTagRegex.Replace(format, new TextTagFormatter(this, numberFormat, _members).Evaluate);
@@ -148,7 +148,7 @@ public class Combatant
             { "11", GetCombatant("BLM", "SMN", "RDM") },
             { "12", GetCombatant("DNC", "MCH", "BRD") }
         };
-        
+
         return mockCombatants;
     }
 

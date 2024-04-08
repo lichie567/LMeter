@@ -47,7 +47,7 @@ namespace LMeter.Helpers
         private readonly Dictionary<string, IFontHandle> _imGuiFonts = [];
         private string[] _fontList;
         private readonly UiBuilder _uiBuilder;
-        
+
         public const string DalamudFontKey = "Dalamud Font";
         public static readonly List<string> DefaultFontKeys = ["Expressway_24", "Expressway_20", "Expressway_16"];
         public static string DefaultBigFontKey => DefaultFontKeys[0];
@@ -120,7 +120,7 @@ namespace LMeter.Helpers
             {
                 value.Dispose();
             }
-            
+
             _imGuiFonts.Clear();
         }
 
@@ -130,7 +130,7 @@ namespace LMeter.Helpers
             {
                 return null;
             }
-            
+
             ImGuiIOPtr io = ImGui.GetIO();
             using (ImGuiHelpers.NewFontGlyphRangeBuilderPtrScoped(out ImFontGlyphRangesBuilderPtr builder))
             {

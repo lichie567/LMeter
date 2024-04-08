@@ -24,35 +24,35 @@ public class Encounter
 
     [JsonProperty("duration")]
     public string DurationRaw { get; set; } = string.Empty;
-    
+
     [JsonIgnore]
     public LazyString<string?>? Duration;
-        
+
     [JsonProperty("encdps")]
     [JsonConverter(typeof(LazyFloatConverter))]
-    public LazyFloat? Dps { get; set; } 
+    public LazyFloat? Dps { get; set; }
 
     [JsonProperty("damage")]
     [JsonConverter(typeof(LazyFloatConverter))]
-    public LazyFloat? DamageTotal { get; set; } 
-        
+    public LazyFloat? DamageTotal { get; set; }
+
     [JsonProperty("enchps")]
     [JsonConverter(typeof(LazyFloatConverter))]
-    public LazyFloat? Hps { get; set; } 
+    public LazyFloat? Hps { get; set; }
 
     [JsonProperty("healed")]
     [JsonConverter(typeof(LazyFloatConverter))]
-    public LazyFloat? HealingTotal { get; set; } 
+    public LazyFloat? HealingTotal { get; set; }
 
     [JsonProperty("damagetaken")]
     [JsonConverter(typeof(LazyFloatConverter))]
-    public LazyFloat? DamageTaken { get; set; } 
+    public LazyFloat? DamageTaken { get; set; }
 
     [JsonProperty("deaths")]
-    public string? Deaths { get; set; } 
+    public string? Deaths { get; set; }
 
     [JsonProperty("kills")]
-    public string? Kills { get; set; } 
+    public string? Kills { get; set; }
 
     public Encounter()
     {

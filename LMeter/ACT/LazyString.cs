@@ -10,7 +10,7 @@ namespace LMeter.Act
         private readonly Func<T> _getInput;
 
         public bool WasGenerated { get; private set; }
-        
+
         public string Value
         {
             get
@@ -19,7 +19,7 @@ namespace LMeter.Act
                 {
                     return _value;
                 }
-                
+
                 _value = _converter.Invoke(_getInput.Invoke());
                 this.WasGenerated = true;
                 return _value;
@@ -76,7 +76,7 @@ namespace LMeter.Act
 
             return splits[0];
         }
-        
+
         public static string LastName(string? input)
         {
             if (string.IsNullOrWhiteSpace(input))

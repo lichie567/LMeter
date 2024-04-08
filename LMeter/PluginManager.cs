@@ -75,7 +75,7 @@ namespace LMeter
             {
                 return;
             }
-            
+
             _origin = ImGui.GetMainViewport().Size / 2f;
             _windowSystem.Draw();
             _config.ActConfig.TryReconnect();
@@ -111,7 +111,7 @@ namespace LMeter
             {
                 return;
             }
-            
+
             LogClient oldClient = Singletons.Get<LogClient>();
             oldClient.Shutdown();
 

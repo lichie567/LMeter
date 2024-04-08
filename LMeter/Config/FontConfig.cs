@@ -12,7 +12,7 @@ namespace LMeter.Config
     public class FontConfig : IConfigPage
     {
         public string Name => "Fonts";
-        
+
         public IConfigPage GetDefault() => new FontConfig();
 
         [JsonIgnore] private static readonly string? _fontPath = FontsManager.GetUserFontPath();

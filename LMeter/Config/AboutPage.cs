@@ -43,7 +43,7 @@ namespace LMeter.Config
                     ImGui.Text(Plugin.Changelog);
                     ImGui.EndChild();
                 }
-                
+
                 ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 0);
                 Vector2 buttonSize = new((size.X - padX * 2 - padX * 2) / 3, 30 - padY * 2);
                 if (ImGui.Button("Github", buttonSize))

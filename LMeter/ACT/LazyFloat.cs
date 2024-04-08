@@ -12,7 +12,7 @@ namespace LMeter.Act
         public string? Input { get; private set; }
 
         public bool WasGenerated { get; private set; }
-        
+
         public float Value
         {
             get

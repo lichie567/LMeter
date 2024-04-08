@@ -7,9 +7,9 @@ namespace LMeter.Config
     public class BarColorsConfig : IConfigPage
     {
         public string Name => "Colors";
-        
+
         public IConfigPage GetDefault() => new BarColorsConfig();
-        
+
         public ConfigColor PLDColor = new(168f / 255f, 210f / 255f, 230f / 255f, 1f);
         public ConfigColor DRKColor = new(209f / 255f, 38f / 255f, 204f / 255f, 1f);
         public ConfigColor WARColor = new(207f / 255f, 38f / 255f, 33f / 255f, 1f);
@@ -31,7 +31,7 @@ namespace LMeter.Config
         public ConfigColor PGLColor = new(214f / 255f, 156f / 255f, 0f / 255f, 1f);
         public ConfigColor ROGColor = new(175f / 255f, 25f / 255f, 100f / 255f, 1f);
         public ConfigColor LNCColor = new(65f / 255f, 100f / 255f, 205f / 255f, 1f);
-        
+
         public ConfigColor BRDColor = new(145f / 255f, 186f / 255f, 94f / 255f, 1f);
         public ConfigColor MCHColor = new(110f / 255f, 225f / 255f, 214f / 255f, 1f);
         public ConfigColor DNCColor = new(226f / 255f, 176f / 255f, 175f / 255f, 1f);
@@ -91,124 +91,124 @@ namespace LMeter.Config
                 Vector4 vector = PLDColor.Vector;
                 ImGui.ColorEdit4("PLD", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                 this.PLDColor.Vector = vector;
-                
+
                 vector = WARColor.Vector;
                 ImGui.ColorEdit4("WAR", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                 this.WARColor.Vector = vector;
                 vector = DRKColor.Vector;
                 ImGui.ColorEdit4("DRK", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                 this.DRKColor.Vector = vector;
-                
+
                 vector = GNBColor.Vector;
                 ImGui.ColorEdit4("GNB", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                 this.GNBColor.Vector = vector;
 
                 ImGui.NewLine();
-                
+
                 vector = SCHColor.Vector;
                 ImGui.ColorEdit4("SCH", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                 this.SCHColor.Vector = vector;
-                
+
                 vector = WHMColor.Vector;
                 ImGui.ColorEdit4("WHM", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                 this.WHMColor.Vector = vector;
-                
+
                 vector = ASTColor.Vector;
                 ImGui.ColorEdit4("AST", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                 this.ASTColor.Vector = vector;
-                
+
                 vector = SGEColor.Vector;
                 ImGui.ColorEdit4("SGE", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                 this.SGEColor.Vector = vector;
 
                 ImGui.NewLine();
-                
+
                 vector = MNKColor.Vector;
                 ImGui.ColorEdit4("MNK", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                 this.MNKColor.Vector = vector;
-                
+
                 vector = NINColor.Vector;
                 ImGui.ColorEdit4("NIN", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                 this.NINColor.Vector = vector;
-                
+
                 vector = DRGColor.Vector;
                 ImGui.ColorEdit4("DRG", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                 this.DRGColor.Vector = vector;
-                
+
                 vector = SAMColor.Vector;
                 ImGui.ColorEdit4("SAM", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                 this.SAMColor.Vector = vector;
-                
+
                 vector = RPRColor.Vector;
                 ImGui.ColorEdit4("RPR", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                 this.RPRColor.Vector = vector;
 
                 ImGui.NewLine();
-                
+
                 vector = BRDColor.Vector;
                 ImGui.ColorEdit4("BRD", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                 this.BRDColor.Vector = vector;
-                
+
                 vector = MCHColor.Vector;
                 ImGui.ColorEdit4("MCH", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                 this.MCHColor.Vector = vector;
-                
+
                 vector = DNCColor.Vector;
                 ImGui.ColorEdit4("DNC", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                 this.DNCColor.Vector = vector;
 
                 ImGui.NewLine();
-                
+
                 vector = BLMColor.Vector;
                 ImGui.ColorEdit4("BLM", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                 this.BLMColor.Vector = vector;
-                
+
                 vector = SMNColor.Vector;
                 ImGui.ColorEdit4("SMN", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                 this.SMNColor.Vector = vector;
-                
+
                 vector = RDMColor.Vector;
                 ImGui.ColorEdit4("RDM", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                 this.RDMColor.Vector = vector;
-                
+
                 vector = BLUColor.Vector;
                 ImGui.ColorEdit4("BLU", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                 this.BLUColor.Vector = vector;
 
                 ImGui.NewLine();
-                
+
                 vector = GLAColor.Vector;
                 ImGui.ColorEdit4("GLA", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                 this.GLAColor.Vector = vector;
-                
+
                 vector = MRDColor.Vector;
                 ImGui.ColorEdit4("MRD", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                 this.MRDColor.Vector = vector;
-                
+
                 vector = CNJColor.Vector;
                 ImGui.ColorEdit4("CNJ", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                 this.CNJColor.Vector = vector;
-                
+
                 vector = PGLColor.Vector;
                 ImGui.ColorEdit4("PGL", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                 this.PGLColor.Vector = vector;
-                
+
                 vector = ROGColor.Vector;
                 ImGui.ColorEdit4("ROG", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                 this.ROGColor.Vector = vector;
-                
+
                 vector = LNCColor.Vector;
                 ImGui.ColorEdit4("LNC", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                 this.LNCColor.Vector = vector;
-                
+
                 vector = ARCColor.Vector;
                 ImGui.ColorEdit4("ARC", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                 this.ARCColor.Vector = vector;
-                
+
                 vector = THMColor.Vector;
                 ImGui.ColorEdit4("THM", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                 this.THMColor.Vector = vector;
-                
+
                 vector = ACNColor.Vector;
                 ImGui.ColorEdit4("ACN", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                 this.ACNColor.Vector = vector;

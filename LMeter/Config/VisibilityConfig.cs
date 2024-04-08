@@ -14,7 +14,7 @@ namespace LMeter.Config
     public class VisibilityConfig : IConfigPage
     {
         public string Name => "Visibility";
-        
+
         public IConfigPage GetDefault() => new VisibilityConfig();
 
         [JsonIgnore] private string _customJobInput = string.Empty;
@@ -84,7 +84,7 @@ namespace LMeter.Config
                 ImGui.Checkbox("Hide In Golden Saucer", ref this.HideInGoldenSaucer);
                 ImGui.Checkbox("Hide While Not Connected to ACT", ref this.HideIfNotConnected);
                 ImGui.Checkbox("Hide When Covered by Game UI Window", ref this.ShouldClip);
-                
+
                 DrawHelpers.DrawSpacing(1);
                 string[] jobTypeOptions = Enum.GetNames(typeof(JobType));
                 ImGui.Combo("Show for Jobs", ref Unsafe.As<JobType, int>(ref this.ShowForJobTypes), jobTypeOptions, jobTypeOptions.Length);
@@ -120,7 +120,7 @@ namespace LMeter.Config
                     }
                 }
             }
-            
+
             ImGui.EndChild();
         }
     }

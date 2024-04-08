@@ -96,7 +96,7 @@ namespace LMeter.Meter
             _lastSortedCombatants = [];
             _lastSortedTimestamp = null;
         }
-        
+
         // Dont ask
         protected void UpdateDragData(Vector2 pos, Vector2 size, bool locked)
         {
@@ -161,7 +161,7 @@ namespace LMeter.Meter
                         this.GeneralConfig.Size = size;
                     }
                 }
-                
+
                 if (this.GeneralConfig.ShowBorder)
                 {
                     Vector2 borderPos = localPos;
@@ -201,13 +201,13 @@ namespace LMeter.Meter
         }
 
         private void DrawBars(ImDrawListPtr drawList, Vector2 localPos, Vector2 size, ActEvent? actEvent)
-        {                
+        {
             if (actEvent?.Combatants is not null && actEvent.Combatants.Count != 0)
             {
                 // We don't want to corrupt the cache. The entire logic past this point mutates the sorted Act combatants instead of using a rendering cache
                 // This has the issue that some settings can't behave properly and or don't update till the following combat update/fight
                 List<Combatant> sortedCombatants = [.. this.GetSortedCombatants(actEvent, this.GeneralConfig.DataType)];
-                
+
                 float top = this.GeneralConfig.DataType switch
                 {
                     MeterDataType.Damage => sortedCombatants[0].DamageTotal?.Value ?? 0,
@@ -218,7 +218,7 @@ namespace LMeter.Meter
 
                 int currentIndex = 0;
                 string playerName = Singletons.Get<IClientState>().LocalPlayer?.Name.ToString() ?? "YOU";
-                
+
                 if (sortedCombatants.Count > this.BarConfig.BarCount)
                 {
                     currentIndex = Math.Clamp(_scrollPosition, 0, sortedCombatants.Count - this.BarConfig.BarCount);
@@ -269,7 +269,7 @@ namespace LMeter.Meter
 
             sortedCombatants.MoveItem(oldPlayerIndex, newPlayerIndex);
         }
-        
+
         private void UpdatePlayerName(Combatant combatant, string localPlayerName)
         {
             combatant.NameOverwrite = this.BarConfig.UseCharacterName switch
@@ -279,12 +279,12 @@ namespace LMeter.Meter
                 _ => combatant.NameOverwrite
             };
         }
-        
+
         private bool DrawContextMenu(string popupId, out int selectedIndex)
         {
             selectedIndex = -1;
             bool selected = false;
-            
+
             if (ImGui.BeginPopup(popupId))
             {
                 if (!ImGui.IsAnyItemActive() && !ImGui.IsMouseClicked(ImGuiMouseButton.Left))
@@ -318,7 +318,7 @@ namespace LMeter.Meter
                     Singletons.Get<PluginManager>().Clear();
                     selected = true;
                 }
-                
+
                 if (ImGui.Selectable("Configure"))
                 {
                     Singletons.Get<PluginManager>().ConfigureMeter(this);
@@ -360,7 +360,7 @@ namespace LMeter.Meter
                     MeterDataType.DamageTaken => y.DamageTaken?.Value ?? 0,
                     _ => 0
                 };
-                
+
                 return (int)(yFloat - xFloat);
             });
 

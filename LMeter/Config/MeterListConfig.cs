@@ -24,7 +24,7 @@ namespace LMeter.Config
         {
             this.Meters = [];
         }
-        
+
         public IConfigPage GetDefault() => new MeterListConfig();
 
         public void DrawConfig(Vector2 size, float padX, float padY)
@@ -32,7 +32,7 @@ namespace LMeter.Config
             this.DrawCreateMenu(size, padX);
             this.DrawMeterTable(size.AddY(-padY), padX);
         }
-        
+
         public void ToggleMeter(int meterIndex, bool? toggle = null)
         {
             if (meterIndex >= 0 && meterIndex < this.Meters.Count)
@@ -42,7 +42,7 @@ namespace LMeter.Config
                     : !this.Meters[meterIndex].VisibilityConfig.AlwaysHide;
             }
         }
-        
+
         public void ToggleClickThrough(int meterIndex)
         {
             if (meterIndex >= 0 && meterIndex < this.Meters.Count)

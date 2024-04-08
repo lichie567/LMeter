@@ -14,13 +14,13 @@ namespace LMeter.Act.DataStructures
 
         [JsonProperty("type")]
         public string EventType { get; set; } = string.Empty;
-        
+
         [JsonProperty("isActive")]
         public string IsActive { get; set; } = string.Empty;
-        
+
         [JsonProperty("Encounter")]
         public Encounter? Encounter { get; set; }
-        
+
         [JsonProperty("Combatant")]
         public Dictionary<string, Combatant>? Combatants { get; set; }
 
@@ -30,7 +30,7 @@ namespace LMeter.Act.DataStructures
             {
                 return _active;
             }
-            
+
             bool.TryParse(this.IsActive, out _active);
             _parsedActive = true;
             return _active;

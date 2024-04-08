@@ -16,7 +16,7 @@ namespace LMeter.Act
         protected const string SubscriptionMessage = "{\"call\":\"subscribe\",\"events\":[\"CombatData\"]}";
 
         protected ActConfig Config { get; set; }
-        
+
         public ConnectionStatus Status { get; protected set; }
         public List<ActEvent> PastEvents { get; protected init; }
 
@@ -29,11 +29,11 @@ namespace LMeter.Act
             this.Status = ConnectionStatus.NotConnected;
             this.PastEvents = [];
         }
-        
+
         public abstract void Start();
         public abstract void Shutdown();
         public abstract void Reset();
-        
+
         public ActEvent? GetEvent(int index = -1)
         {
             if (index >= 0 && index < this.PastEvents.Count)
@@ -75,7 +75,7 @@ namespace LMeter.Act
                 _currentEvent = newEvent;
             }
         }
-        
+
         public virtual void EndEncounter()
         {
             IChatGui chat = Singletons.Get<IChatGui>();

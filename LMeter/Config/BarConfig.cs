@@ -12,7 +12,7 @@ namespace LMeter.Config
     {
         [JsonIgnore]
         private static readonly string[] _anchorOptions = Enum.GetNames(typeof(DrawAnchor));
-        
+
         public string Name => "Bars";
 
         private static readonly string[] _jobIconStyleOptions = ["Style 1", "Style 2"];
@@ -23,7 +23,7 @@ namespace LMeter.Config
         public bool ShowJobIcon = true;
         public int JobIconStyle = 0;
         public Vector2 JobIconOffset = new(0, 0);
-        
+
         public bool ThousandsSeparators = true;
 
         public bool UseJobColor = true;
@@ -59,7 +59,7 @@ namespace LMeter.Config
         public ConfigColor BarDataOutlineColor = new(0, 0, 0, 0.5f);
         public string BarDataFontKey = FontsManager.DalamudFontKey;
         public int BarDataFontId = 0;
-        
+
         public IConfigPage GetDefault()
         {
             BarConfig defaultConfig = new()
@@ -154,7 +154,7 @@ namespace LMeter.Config
         }
 
         public void DrawConfig(Vector2 size, float padX, float padY)
-        {            
+        {
             string[] fontOptions = FontsManager.GetFontList();
             if (fontOptions.Length == 0)
             {
@@ -185,7 +185,7 @@ namespace LMeter.Config
                     ImGui.ColorEdit4("Bar Color", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                     this.BarColor.Vector = vector;
                 }
-                
+
                 ImGui.Checkbox("Use Thousands Separators for Numbers", ref this.ThousandsSeparators);
 
                 ImGui.NewLine();
@@ -199,7 +199,7 @@ namespace LMeter.Config
                     {
                         ImGui.SetTooltip(Utils.GetTagsTooltip(Combatant.TextTags));
                     }
-                    
+
                     DrawHelpers.DrawNestIndicator(1);
                     ImGui.Combo("Rank Text Align", ref Unsafe.As<DrawAnchor, int>(ref this.RankTextAlign), _anchorOptions, _anchorOptions.Length);
 
@@ -217,11 +217,11 @@ namespace LMeter.Config
                             }
                         }
                     }
-                    
+
                     DrawHelpers.DrawNestIndicator(1);
                     ImGui.Combo("Font##Rank", ref this.RankTextFontId, fontOptions, fontOptions.Length);
                     this.RankTextFontKey = fontOptions[this.RankTextFontId];
-                    
+
                     DrawHelpers.DrawNestIndicator(1);
                     ImGui.Checkbox("Use Job Color##RankTextJobColor", ref this.RankTextJobColor);
                     if (!this.RankTextJobColor)
@@ -266,10 +266,10 @@ namespace LMeter.Config
                         }
                     }
                 }
-                
+
                 ImGui.Combo("Font##Name", ref this.BarNameFontId, fontOptions, fontOptions.Length);
                 this.BarNameFontKey = fontOptions[this.BarNameFontId];
-                
+
                 ImGui.Checkbox("Use Job Color##LeftTextJobColor", ref this.LeftTextJobColor);
                 if (!this.LeftTextJobColor)
                 {
@@ -309,10 +309,10 @@ namespace LMeter.Config
                         }
                     }
                 }
-                
+
                 ImGui.Combo("Font##Data", ref this.BarDataFontId, fontOptions, fontOptions.Length);
                 this.BarDataFontKey = fontOptions[this.BarDataFontId];
-                
+
                 ImGui.Checkbox("Use Job Color##RightTextJobColor", ref this.RightTextJobColor);
                 if (!this.RightTextJobColor)
                 {

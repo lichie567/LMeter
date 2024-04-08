@@ -9,7 +9,7 @@ namespace LMeter.Config
     public class LMeterConfig : IConfigurable, IPluginDisposable
     {
         public string Name
-        { 
+        {
             get => "LMeter";
             set {}
         }

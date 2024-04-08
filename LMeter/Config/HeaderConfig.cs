@@ -36,7 +36,7 @@ namespace LMeter.Config
         public Vector2 NameOffset = new(0, 0);
         public int NameFontId = 0;
         public string NameFontKey = FontsManager.DalamudFontKey;
-        
+
         public bool ShowRaidStats = true;
         public ConfigColor RaidStatsColor = new(0.5f, 0.5f, 0.5f, 1f);
         public bool StatsShowOutline = true;
@@ -47,7 +47,7 @@ namespace LMeter.Config
         public string StatsFontKey = FontsManager.DalamudFontKey;
         public string RaidStatsFormat = "[dps]rdps [hps]rhps Deaths: [deaths]";
         public bool ThousandsSeparators = true;
-        
+
         public IConfigPage GetDefault()
         {
             HeaderConfig defaultConfig = new()
@@ -61,7 +61,7 @@ namespace LMeter.Config
                 StatsFontKey = FontsManager.DefaultSmallFontKey,
                 StatsFontId = FontsManager.GetFontIndex(FontsManager.DefaultSmallFontKey)
             };
-            
+
             return defaultConfig;
         }
 
@@ -71,10 +71,10 @@ namespace LMeter.Config
             {
                 return (pos, size);
             }
-            
+
             Vector2 headerSize = new(size.X, this.HeaderHeight);
             drawList.AddRectFilled(pos, pos + headerSize, this.BackgroundColor.Base);
-            
+
             Vector2 durationPos = pos;
             Vector2 durationSize = Vector2.Zero;
             if (this.ShowEncounterDuration)
@@ -130,7 +130,7 @@ namespace LMeter.Config
                     DrawHelpers.DrawText(drawList, name, namePos, this.NameColor.Base, this.NameShowOutline, this.NameOutlineColor.Base);
                 }
             }
-            
+
             return (pos.AddY(this.HeaderHeight), size.AddY(-this.HeaderHeight));
         }
 
@@ -174,7 +174,7 @@ namespace LMeter.Config
                                 }
                             }
                         }
-                        
+
                         DrawHelpers.DrawNestIndicator(2);
                         ImGui.Combo("Font##Duration", ref this.DurationFontId, fontOptions, fontOptions.Length);
                         this.DurationFontKey = fontOptions[this.DurationFontId];
@@ -217,7 +217,7 @@ namespace LMeter.Config
                                 }
                             }
                         }
-                        
+
                         DrawHelpers.DrawNestIndicator(2);
                         ImGui.Combo("Font##Name", ref this.NameFontId, fontOptions, fontOptions.Length);
                         this.NameFontKey = fontOptions[this.NameFontId];
@@ -252,7 +252,7 @@ namespace LMeter.Config
                         {
                             ImGui.SetTooltip(Utils.GetTagsTooltip(Encounter.TextTags));
                         }
-                        
+
                         DrawHelpers.DrawNestIndicator(2);
                         ImGui.Checkbox("Use Thousands Separators for Numbers", ref this.ThousandsSeparators);
 
@@ -270,7 +270,7 @@ namespace LMeter.Config
                                 }
                             }
                         }
-                        
+
                         DrawHelpers.DrawNestIndicator(2);
                         ImGui.Combo("Font##Stats", ref this.StatsFontId, fontOptions, fontOptions.Length);
                         this.StatsFontKey = fontOptions[this.StatsFontId];

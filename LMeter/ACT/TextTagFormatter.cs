@@ -35,7 +35,7 @@ namespace LMeter.Act
             string format = string.IsNullOrEmpty(m.Groups[3].Value)
                 ? $"{_format}0"
                 : $"{_format}{m.Groups[3].Value}";
-            
+
             string? value = null;
             string key = m.Groups[1].Value;
 
@@ -43,7 +43,7 @@ namespace LMeter.Act
             {
                 return value ?? m.Value;
             }
-            
+
             object? memberValue = memberInfo?.MemberType switch
             {
                 MemberTypes.Field => ((FieldInfo)memberInfo).GetValue(_source),

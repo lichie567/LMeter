@@ -46,7 +46,7 @@
     <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
         <DalamudXIVLauncher>$(APPDATA)\XIVLauncher\addon\Hooks\$(DalamudVersion)</DalamudXIVLauncher>
     </PropertyGroup>
-    
+
     <!-- Dalamud Configuration (Linux-specific) -->
     <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Linux'))">
         <DalamudXIVLauncher>$(HOME)/.xlcore/dalamud/Hooks/$(DalamudVersion)</DalamudXIVLauncher>
@@ -83,7 +83,7 @@
         </Reference>
         <Reference Include="ImGuiScene">
             <Private>false</Private>
-        </Reference>        
+        </Reference>
         <Reference Include="Lumina">
             <Private>false</Private>
         </Reference>

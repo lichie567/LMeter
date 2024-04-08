@@ -25,7 +25,7 @@ namespace LMeter.Helpers
         public static void Register<T>(T newSingleton)
         {
             if (newSingleton is null)
-            { 
+            {
                 return;
             }
 
@@ -37,7 +37,7 @@ namespace LMeter.Helpers
 
         public static void Update<T>(T newSingleton)
         {
-            if (newSingleton is null) 
+            if (newSingleton is null)
             {
                 return;
             }

@@ -11,12 +11,12 @@ namespace LMeter.Config
     {
         [JsonIgnore]
         private static readonly string[] _meterTypeOptions = Enum.GetNames(typeof(MeterDataType));
-        
+
         [JsonIgnore]
         public bool Preview = false;
 
         public string Name => "General";
-        
+
         public IConfigPage GetDefault() => new GeneralConfig();
 
         public Vector2 Position = Vector2.Zero;
