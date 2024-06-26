@@ -7,6 +7,7 @@ using Dalamud.Interface.Internal.Notifications;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 using LMeter.Config;
+using LMeter.Meter;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
@@ -143,6 +144,19 @@ namespace LMeter.Helpers
             catch (Exception ex)
             {
                 Singletons.Get<IPluginLog>().Error(ex.ToString());
+            }
+        }
+
+        public static void ConvertOldConfigs(LMeterConfig config)
+        {
+            // Convert old visibility configs to new ones
+            foreach (MeterWindow meter in config.MeterList.Meters)
+            {
+                if (!meter.VisibilityConfig2.Initialized &&
+                    meter.VisibilityConfig2.VisibilityOptions.Count == 0)
+                {
+                    meter.VisibilityConfig2.SetOldConfig(meter.VisibilityConfig);
+                }
             }
         }
     }

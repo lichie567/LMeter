@@ -1,3 +1,7 @@
+# Version 0.3.1.0
+- Window clipping logic was improved
+- Improved the Visibility options for more complex configurations
+
 # Version 0.3.0.1
 - Fix bug with fonts not copying to config directory
 - Fix bug with ACT config not loading

@@ -41,6 +41,8 @@ namespace LMeter.Meter
 
         public VisibilityConfig VisibilityConfig { get; set; }
 
+        public VisibilityConfig2 VisibilityConfig2 { get; set; }
+
         public MeterWindow(string name)
         {
             this.Name = name;
@@ -50,6 +52,7 @@ namespace LMeter.Meter
             this.BarConfig = new BarConfig();
             this.BarColorsConfig = new BarColorsConfig();
             this.VisibilityConfig = new VisibilityConfig();
+            this.VisibilityConfig2 = new VisibilityConfig2();
         }
 
         public IEnumerable<IConfigPage> GetConfigPages()
@@ -58,7 +61,7 @@ namespace LMeter.Meter
             yield return this.HeaderConfig;
             yield return this.BarConfig;
             yield return this.BarColorsConfig;
-            yield return this.VisibilityConfig;
+            yield return this.VisibilityConfig2;
         }
 
         public void ImportPage(IConfigPage page)
@@ -109,7 +112,7 @@ namespace LMeter.Meter
 
         public void Draw(Vector2 pos)
         {
-            if (!this.GeneralConfig.Preview && !this.VisibilityConfig.IsVisible())
+            if (!this.GeneralConfig.Preview && !this.VisibilityConfig2.IsVisible())
             {
                 return;
             }
@@ -134,7 +137,7 @@ namespace LMeter.Meter
                 _lastSortedCombatants = [];
                 _scrollPosition = 0;
             }
-            else if (this.VisibilityConfig.ShouldClip &&
+            else if (this.VisibilityConfig2.ShouldClip &&
                     Singletons.Get<ClipRectsHelper>().GetClipRectForArea(localPos, size).HasValue)
             {
                 return;
