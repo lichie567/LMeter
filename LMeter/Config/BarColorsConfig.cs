@@ -28,6 +28,7 @@ namespace LMeter.Config
         public ConfigColor DRGColor = new(65f / 255f, 100f / 255f, 205f / 255f, 1f);
         public ConfigColor SAMColor = new(228f / 255f, 109f / 255f, 4f / 255f, 1f);
         public ConfigColor RPRColor = new(150f / 255f, 90f / 255f, 144f / 255f, 1f);
+        public ConfigColor VPRColor = new(16f / 255f, 130f / 255f, 16f / 255f, 1f);
         public ConfigColor PGLColor = new(214f / 255f, 156f / 255f, 0f / 255f, 1f);
         public ConfigColor ROGColor = new(175f / 255f, 25f / 255f, 100f / 255f, 1f);
         public ConfigColor LNCColor = new(65f / 255f, 100f / 255f, 205f / 255f, 1f);
@@ -40,6 +41,7 @@ namespace LMeter.Config
         public ConfigColor BLMColor = new(165f / 255f, 121f / 255f, 214f / 255f, 1f);
         public ConfigColor SMNColor = new(45f / 255f, 155f / 255f, 120f / 255f, 1f);
         public ConfigColor RDMColor = new(232f / 255f, 123f / 255f, 123f / 255f, 1f);
+        public ConfigColor PCTColor = new(252f / 255f, 146f / 255f, 225f / 255f, 1f);
         public ConfigColor BLUColor = new(0f / 255f, 185f / 255f, 247f / 255f, 1f);
         public ConfigColor THMColor = new(165f / 255f, 121f / 255f, 214f / 255f, 1f);
         public ConfigColor ACNColor = new(45f / 255f, 155f / 255f, 120f / 255f, 1f);
@@ -69,6 +71,7 @@ namespace LMeter.Config
             Job.NIN => this.NINColor,
             Job.SAM => this.SAMColor,
             Job.RPR => this.RPRColor,
+            Job.VPR => this.VPRColor,
 
             Job.ARC => this.ARCColor,
             Job.BRD => this.BRDColor,
@@ -80,6 +83,7 @@ namespace LMeter.Config
             Job.BLM => this.BLMColor,
             Job.SMN => this.SMNColor,
             Job.RDM => this.RDMColor,
+            Job.PCT => this.PCTColor,
             Job.BLU => this.BLUColor,
             _       => this.UKNColor
         };
@@ -143,6 +147,10 @@ namespace LMeter.Config
                 ImGui.ColorEdit4("RPR", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                 this.RPRColor.Vector = vector;
 
+                vector = VPRColor.Vector;
+                ImGui.ColorEdit4("VPR", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
+                this.VPRColor.Vector = vector;
+
                 ImGui.NewLine();
 
                 vector = BRDColor.Vector;
@@ -170,6 +178,10 @@ namespace LMeter.Config
                 vector = RDMColor.Vector;
                 ImGui.ColorEdit4("RDM", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                 this.RDMColor.Vector = vector;
+
+                vector = PCTColor.Vector;
+                ImGui.ColorEdit4("PCT", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
+                this.PCTColor.Vector = vector;
 
                 vector = BLUColor.Vector;
                 ImGui.ColorEdit4("BLU", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);

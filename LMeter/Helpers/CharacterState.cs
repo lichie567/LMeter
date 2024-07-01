@@ -65,8 +65,8 @@ namespace LMeter.Helpers
         {
             JobType.All => true,
             JobType.Tanks => job is Job.GLA or Job.MRD or Job.PLD or Job.WAR or Job.DRK or Job.GNB,
-            JobType.Casters => job is Job.THM or Job.ACN or Job.BLM or Job.SMN or Job.RDM or Job.BLU,
-            JobType.Melee => job is Job.PGL or Job.LNC or Job.ROG or Job.MNK or Job.DRG or Job.NIN or Job.SAM or Job.RPR,
+            JobType.Casters => job is Job.THM or Job.ACN or Job.BLM or Job.SMN or Job.RDM or Job.PCT or Job.BLU,
+            JobType.Melee => job is Job.PGL or Job.LNC or Job.ROG or Job.MNK or Job.DRG or Job.NIN or Job.SAM or Job.RPR or Job.VPR,
             JobType.Ranged => job is Job.ARC or Job.BRD or Job.MCH or Job.DNC,
             JobType.Healers => job is Job.CNJ or Job.WHM or Job.SCH or Job.AST or Job.SGE,
             JobType.DoH => job is Job.CRP or Job.BSM or Job.ARM or Job.GSM or Job.LTW or Job.WVR or Job.ALC or Job.CUL,
