@@ -1,4 +1,6 @@
 # Version 0.3.1.0
+- Updated plugin for Dawntrail
+- Added support for Viper and Pictomancer
 - Window clipping logic was improved
 - Improved the Visibility options for more complex configurations
 

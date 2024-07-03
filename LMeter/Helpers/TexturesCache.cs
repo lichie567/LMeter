@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using Dalamud.Interface;
-using Dalamud.Interface.Internal;
+using Dalamud.Interface.Textures;
+using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility;
 using Lumina.Data.Files;
-using static Dalamud.Plugin.Services.ITextureProvider;
 
 namespace LMeter.Helpers
 {
@@ -24,11 +23,9 @@ namespace LMeter.Helpers
             bool hdIcon = true,
             bool greyScale = false)
         {
-            IconFlags flags = hdIcon ? IconFlags.HiRes : IconFlags.None;
-
             if (!greyScale)
             {
-                return Singletons.Get<ITextureProvider>().GetIcon(iconId + stackCount, flags);
+                return Singletons.Get<ITextureProvider>().GetFromGameIcon(iconId + stackCount).GetWrapOrDefault();
             }
 
             if (_desaturatedCache.TryGetValue(iconId + stackCount, out IDalamudTextureWrap? t))
@@ -36,7 +33,7 @@ namespace LMeter.Helpers
                 return t;
             }
 
-            string? path = Singletons.Get<ITextureProvider>().GetIconPath(iconId + stackCount, flags);
+            string? path = Singletons.Get<ITextureProvider>().GetIconPath(new GameIconLookup(iconId: iconId, hiRes: hdIcon));
             if (path != null)
             {
                 path = Singletons.Get<ITextureSubstitutionProvider>().GetSubstitutedPath(path);
@@ -55,16 +52,17 @@ namespace LMeter.Helpers
         private static IDalamudTextureWrap? GetDesaturatedTextureWrap(string path)
         {
             TexFile? file = Singletons.Get<IDataManager>().GetFile<TexFile>(path);
-            if (file == null) { return null; }
+            if (file is null)
+            {
+                return null;
+            }
 
-            UiBuilder uiBuilder = Singletons.Get<UiBuilder>();
             byte[] bytes = file.GetRgbaImageData();
-            ConvertBytes(ref bytes);
-
-            return uiBuilder.LoadImageRaw(bytes, file.Header.Width, file.Header.Height, 4);
+            DesaturateBytes(ref bytes);
+            return Singletons.Get<ITextureProvider>().CreateFromRaw(RawImageSpecification.Rgba32(file.Header.Width, file.Header.Height), bytes);
         }
 
-        private static void ConvertBytes(ref byte[] bytes)
+        private static void DesaturateBytes(ref byte[] bytes)
         {
             if (bytes.Length % 4 != 0)
             {

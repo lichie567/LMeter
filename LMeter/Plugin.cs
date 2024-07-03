@@ -3,8 +3,7 @@ using System.IO;
 using System.Reflection;
 using Dalamud.Game;
 using Dalamud.Game.ClientState.Objects;
-using Dalamud.Interface;
-using Dalamud.Interface.Internal;
+using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using LMeter.Act;
@@ -36,7 +35,7 @@ namespace LMeter
             IClientState clientState,
             ICommandManager commandManager,
             ICondition condition,
-            DalamudPluginInterface pluginInterface,
+            IDalamudPluginInterface pluginInterface,
             IDataManager dataManager,
             IFramework framework,
             IGameGui gameGui,
@@ -84,7 +83,7 @@ namespace LMeter
             Singletons.Register(new TexturesCache());
 
             // Load Icon Texure
-            Plugin.IconTexture = LoadIconTexture(pluginInterface.UiBuilder);
+            Plugin.IconTexture = LoadIconTexture(textureProvider);
 
             // Load changelog
             Plugin.Changelog = LoadChangelog();
@@ -126,7 +125,7 @@ namespace LMeter
             Singletons.Register(new PluginManager(clientState, commandManager, pluginInterface, config));
         }
 
-        private static IDalamudTextureWrap? LoadIconTexture(UiBuilder uiBuilder)
+        private static IDalamudTextureWrap? LoadIconTexture(ITextureProvider textureProvider)
         {
             if (string.IsNullOrEmpty(AssemblyFileDir))
             {
@@ -142,7 +141,8 @@ namespace LMeter
             IDalamudTextureWrap? texture = null;
             try
             {
-                texture = uiBuilder.LoadImage(iconPath);
+                texture = textureProvider.GetFromFile(iconPath).GetWrapOrDefault();
+                
             }
             catch (Exception ex)
             {

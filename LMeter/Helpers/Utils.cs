@@ -26,7 +26,7 @@ namespace LMeter.Helpers
             };
         }
 
-        public static GameObject? FindTargetOfTarget(GameObject? player, GameObject? target)
+        public static IGameObject? FindTargetOfTarget(IGameObject? player, IGameObject? target)
         {
             if (target == null)
             {
@@ -43,8 +43,8 @@ namespace LMeter.Helpers
             IObjectTable objectTable = Singletons.Get<IObjectTable>();
             for (int i = 0; i < 200; i += 2)
             {
-                GameObject? actor = objectTable[i];
-                if (actor?.ObjectId == target.TargetObjectId)
+                IGameObject? actor = objectTable[i];
+                if (actor?.GameObjectId == target.TargetObjectId)
                 {
                     return actor;
                 }

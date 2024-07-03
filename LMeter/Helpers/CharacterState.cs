@@ -49,7 +49,7 @@ namespace LMeter.Helpers
 
         public static Job GetCharacterJob()
         {
-            PlayerCharacter? player = Singletons.Get<IClientState>().LocalPlayer;
+            IPlayerCharacter? player = Singletons.Get<IClientState>().LocalPlayer;
             if (player is null)
             {
                 return Job.UKN;

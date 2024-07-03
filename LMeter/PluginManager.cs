@@ -19,7 +19,7 @@ namespace LMeter
         private readonly Vector2 _configSize = new(550, 550);
 
         private readonly IClientState _clientState;
-        private readonly DalamudPluginInterface _pluginInterface;
+        private readonly IDalamudPluginInterface _pluginInterface;
         private readonly ICommandManager _commandManager;
         private readonly WindowSystem _windowSystem;
         private readonly ConfigWindow _configRoot;
@@ -38,7 +38,7 @@ namespace LMeter
         public PluginManager(
             IClientState clientState,
             ICommandManager commandManager,
-            DalamudPluginInterface pluginInterface,
+            IDalamudPluginInterface pluginInterface,
             LMeterConfig config)
         {
             _clientState = clientState;

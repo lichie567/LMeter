@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Numerics;
 using Dalamud.Interface;
-using Dalamud.Interface.Internal.Notifications;
+using Dalamud.Interface.ImGuiNotification;
 using ImGuiNET;
 using LMeter.Helpers;
 using LMeter.Meter;

@@ -2,8 +2,7 @@
 using System.Numerics;
 using Dalamud.Interface;
 using Dalamud.Interface.ImGuiNotification;
-using Dalamud.Interface.Internal;
-using Dalamud.Interface.Internal.Notifications;
+using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 

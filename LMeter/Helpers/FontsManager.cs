@@ -46,7 +46,7 @@ namespace LMeter.Helpers
     {
         private readonly Dictionary<string, IFontHandle> _imGuiFonts = [];
         private string[] _fontList;
-        private readonly UiBuilder _uiBuilder;
+        private readonly IUiBuilder _uiBuilder;
 
         public const string DalamudFontKey = "Dalamud Font";
         public static readonly List<string> DefaultFontKeys = ["Expressway_24", "Expressway_20", "Expressway_16"];
@@ -54,7 +54,7 @@ namespace LMeter.Helpers
         public static string DefaultMediumFontKey => DefaultFontKeys[1];
         public static string DefaultSmallFontKey => DefaultFontKeys[2];
 
-        public FontsManager(UiBuilder uiBuilder, IEnumerable<FontData> fonts)
+        public FontsManager(IUiBuilder uiBuilder, IEnumerable<FontData> fonts)
         {
             _uiBuilder = uiBuilder;
             _fontList = [DalamudFontKey];
