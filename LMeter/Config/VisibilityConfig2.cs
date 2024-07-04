@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using Dalamud.Interface;
 using ImGuiNET;
 using LMeter.Act;
@@ -123,6 +124,8 @@ namespace LMeter.Config
         [JsonIgnore] private int _swapX = -1;
         [JsonIgnore] private int _swapY = -1;
         [JsonIgnore] private int _selectedIndex = 0;
+        [JsonIgnore] private bool _previouslyVisible = false;
+        [JsonIgnore] private volatile Timer? _visibilityTimer;
 
         public string Name => "Visibility";
         public IConfigPage GetDefault() => new VisibilityConfig2();
@@ -130,6 +133,7 @@ namespace LMeter.Config
         public bool Initialized = false;
         public List<VisibilityOption> VisibilityOptions = [];
         public bool ShouldClip = true;
+        public float HideDelay = 0.0f;
 
         public void SetOldConfig(VisibilityConfig oldConfig)
         {
@@ -177,6 +181,30 @@ namespace LMeter.Config
                 };
             }
 
+            if (this._previouslyVisible && !active && this.HideDelay > 0.0f)
+            {
+                // transition from visible to inactive -- start hide timer, will hide once timer is gone
+                // always cancel (dispose) old timer if there was one
+                Interlocked.Exchange(ref this._visibilityTimer, new((_) =>
+                {
+                    Interlocked.Exchange(ref this._visibilityTimer, null)?.Dispose();
+                }, null, TimeSpan.FromSeconds(this.HideDelay), Timeout.InfiniteTimeSpan))?.Dispose();
+            }
+
+            this._previouslyVisible = active;
+
+            // not interlocked (volatile read) but it's fine if it mispredicts
+            if (this._visibilityTimer != null)
+            {
+                if (active)
+                {
+                    // natural reactivation; cancel the hide timer
+                    Interlocked.Exchange(ref this._visibilityTimer, null)?.Dispose();
+                }
+
+                return true;
+            }
+
             return active;
         }
 
@@ -189,6 +217,8 @@ namespace LMeter.Config
 
             float posY = ImGui.GetCursorPosY();
             ImGui.Checkbox("Hide When Covered by Game UI Window", ref this.ShouldClip);
+            ImGui.SetNextItemWidth(10.0f * ImGui.GetFontSize());
+            ImGui.DragFloat("Delay Before Hiding", ref this.HideDelay, 0.5f, 0.0f, 60.0f, "%.1f seconds");
             size = new(size.X, size.Y - (ImGui.GetCursorPosY() - posY));
 
             if (ImGui.BeginChild("##VisibilityOptionConfig", new Vector2(size.X, size.Y), true))
