@@ -80,7 +80,7 @@ namespace LMeter
             Singletons.Register(new ClipRectsHelper());
 
             // Init TexturesCache
-            Singletons.Register(new TexturesCache());
+            Singletons.Register(new TextureCache());
 
             // Load Icon Texure
             Plugin.IconTexture = LoadIconTexture(textureProvider);

@@ -8,12 +8,14 @@ using Lumina.Data.Files;
 
 namespace LMeter.Helpers
 {
-    public class TexturesCache : IPluginDisposable
+    public class TextureCache : IPluginDisposable
     {
-        private readonly Dictionary<uint, IDalamudTextureWrap> _desaturatedCache;
+        private readonly Dictionary<string, IDalamudTextureWrap> _cache;
+        private readonly Dictionary<string, IDalamudTextureWrap> _desaturatedCache;
 
-        public TexturesCache()
+        public TextureCache()
         {
+            _cache = [];
             _desaturatedCache = [];
         }
 
@@ -21,45 +23,74 @@ namespace LMeter.Helpers
             uint iconId,
             uint stackCount = 0,
             bool hdIcon = true,
-            bool greyScale = false)
+            bool desaturate = false)
         {
-            if (!greyScale)
-            {
-                return Singletons.Get<ITextureProvider>().GetFromGameIcon(iconId + stackCount).GetWrapOrDefault();
-            }
-
-            if (_desaturatedCache.TryGetValue(iconId + stackCount, out IDalamudTextureWrap? t))
-            {
-                return t;
-            }
-
-            string? path = Singletons.Get<ITextureProvider>().GetIconPath(new GameIconLookup(iconId: iconId, hiRes: hdIcon));
-            if (path != null)
-            {
-                path = Singletons.Get<ITextureSubstitutionProvider>().GetSubstitutedPath(path);
-                IDalamudTextureWrap? texture = GetDesaturatedTextureWrap(path);
-                if (texture != null)
-                {
-                    _desaturatedCache.Add(iconId + stackCount, texture);
-                }
-
-                return texture;
-            }
-
-            return null;
-        }
-
-        private static IDalamudTextureWrap? GetDesaturatedTextureWrap(string path)
-        {
-            TexFile? file = Singletons.Get<IDataManager>().GetFile<TexFile>(path);
-            if (file is null)
+            string? path = Singletons.Get<ITextureProvider>().GetIconPath(new GameIconLookup(iconId: iconId + stackCount, hiRes: hdIcon));
+            if (path is null)
             {
                 return null;
             }
 
-            byte[] bytes = file.GetRgbaImageData();
-            DesaturateBytes(ref bytes);
-            return Singletons.Get<ITextureProvider>().CreateFromRaw(RawImageSpecification.Rgba32(file.Header.Width, file.Header.Height), bytes);
+            if (desaturate && _desaturatedCache.TryGetValue(path, out IDalamudTextureWrap? dtex))
+            {
+                return dtex;
+            }
+            else if (_cache.TryGetValue(path, out IDalamudTextureWrap? tex))
+            {
+                return tex;
+            }
+
+            return this.GetTextureFromPenumbraOrGame(path, desaturate);
+        }
+
+        private IDalamudTextureWrap? GetTextureFromPenumbraOrGame(string path, bool desaturate)
+        {
+            TexFile? texFile = GetTexFile(path);
+            if (texFile is null)
+            {
+                return null;
+            }
+
+            byte[] bytes = texFile.GetRgbaImageData();
+            if (desaturate)
+            {
+                DesaturateBytes(ref bytes);
+            }
+
+            IDalamudTextureWrap texWrap = Singletons.Get<ITextureProvider>()
+                .CreateFromRaw(RawImageSpecification.Rgba32(texFile.Header.Width, texFile.Header.Width), bytes);
+
+            if (desaturate)
+            {
+                _desaturatedCache.Add(path, texWrap);
+            }
+            else
+            {
+                _cache.Add(path, texWrap);
+            }
+
+            return texWrap;
+        }
+
+        private static TexFile? GetTexFile(string path)
+        {
+            path = Singletons.Get<ITextureSubstitutionProvider>().GetSubstitutedPath(path);
+            TexFile? texFile = null;
+
+            if (path[0] is '/' or '\\' || path[1] == ':')
+            {
+                try
+                {
+                    texFile = Singletons.Get<IDataManager>().GameData.GetFileFromDisk<TexFile>(path);
+                }
+                catch (Exception e)
+                {
+                    Singletons.Get<IPluginLog>().Error($"Failed to get tex at {path}:\n{e}");
+                    texFile = Singletons.Get<IDataManager>().GetFile<TexFile>(path);
+                }
+            }
+
+            return texFile;
         }
 
         private static void DesaturateBytes(ref byte[] bytes)
