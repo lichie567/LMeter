@@ -1,4 +1,8 @@
-# Version 0.3.1.0
+# Version 0.3.2.0
+- Added Visbility option to always show meter if hovered by mouse
+- 
+
+# Version 0.3.2.0
 - Updated plugin for Dawntrail
 - Added support for Viper and Pictomancer
 - Window clipping logic was improved

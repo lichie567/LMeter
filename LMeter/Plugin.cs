@@ -17,7 +17,7 @@ namespace LMeter
     {
         public const string ConfigFileName = "LMeter.json";
 
-        public static string Version { get; private set; } = "0.3.1.0";
+        public static string Version { get; private set; } = "0.3.2.0";
 
         public static string ConfigFileDir { get; private set; } = "";
 
@@ -119,6 +119,7 @@ namespace LMeter
             {
                 config.MeterList.Meters.Add(MeterWindow.GetDefaultMeter("Profile 1"));
             }
+            
             config.FirstLoad = false;
 
             // Start the plugin

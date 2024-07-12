@@ -130,6 +130,7 @@ namespace LMeter.Config
         public bool Initialized = false;
         public List<VisibilityOption> VisibilityOptions = [];
         public bool ShouldClip = true;
+        public bool ShowOnMouseover = false;
 
         public void SetOldConfig(VisibilityConfig oldConfig)
         {
@@ -189,6 +190,7 @@ namespace LMeter.Config
 
             float posY = ImGui.GetCursorPosY();
             ImGui.Checkbox("Hide When Covered by Game UI Window", ref this.ShouldClip);
+            ImGui.Checkbox("Always Show When Hovered by Mouse", ref this.ShowOnMouseover);
             size = new(size.X, size.Y - (ImGui.GetCursorPosY() - posY));
 
             if (ImGui.BeginChild("##VisibilityOptionConfig", new Vector2(size.X, size.Y), true))

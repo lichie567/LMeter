@@ -112,13 +112,14 @@ namespace LMeter.Meter
 
         public void Draw(Vector2 pos)
         {
-            if (!this.GeneralConfig.Preview && !this.VisibilityConfig2.IsVisible())
+            Vector2 localPos = pos + this.GeneralConfig.Position;
+            Vector2 size = this.GeneralConfig.Size;
+
+            if (!this.GeneralConfig.Preview && !this.VisibilityConfig2.IsVisible() &&
+                !(this.VisibilityConfig2.ShowOnMouseover && ImGui.IsMouseHoveringRect(localPos, localPos + size)))
             {
                 return;
             }
-
-            Vector2 localPos = pos + this.GeneralConfig.Position;
-            Vector2 size = this.GeneralConfig.Size;
 
             if (ImGui.IsMouseHoveringRect(localPos, localPos + size))
             {
