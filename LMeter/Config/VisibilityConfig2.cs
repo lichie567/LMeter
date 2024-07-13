@@ -150,6 +150,14 @@ namespace LMeter.Config
             this.AddOption(newOption);
         }
 
+        public void ToggleMeterVisibility(bool? value)
+        {
+            VisibilityOptions.ForEach(option =>
+            {
+                option.AlwaysHide = !value ?? !option.AlwaysHide;
+            });
+        }
+
         public bool IsVisible()
         {
             if (this.VisibilityOptions.Count == 0)

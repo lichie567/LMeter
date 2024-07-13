@@ -37,9 +37,12 @@ namespace LMeter.Config
         {
             if (meterIndex >= 0 && meterIndex < this.Meters.Count)
             {
+                /*
                 this.Meters[meterIndex].VisibilityConfig.AlwaysHide = toggle.HasValue
                     ? !toggle.Value
                     : !this.Meters[meterIndex].VisibilityConfig.AlwaysHide;
+                */
+                this.Meters[meterIndex].VisibilityConfig2.ToggleMeterVisibility(toggle);
             }
         }
 
