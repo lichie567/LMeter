@@ -26,22 +26,15 @@ namespace LMeter.Meter
         [JsonIgnore] private int _scrollPosition = 0;
         [JsonIgnore] private DateTime? _lastSortedTimestamp = null;
         [JsonIgnore] private List<Combatant> _lastSortedCombatants = [];
-
         [JsonIgnore] public string Id { get; init; }
 
         public string Name { get; set; }
 
         public GeneralConfig GeneralConfig { get; set; }
-
         public HeaderConfig HeaderConfig { get; set; }
-
         public BarConfig BarConfig { get; set; }
-
         public BarColorsConfig BarColorsConfig { get; set; }
-
         public VisibilityConfig VisibilityConfig { get; set; }
-
-        public VisibilityConfig2 VisibilityConfig2 { get; set; }
 
         public MeterWindow(string name)
         {
@@ -52,7 +45,6 @@ namespace LMeter.Meter
             this.BarConfig = new BarConfig();
             this.BarColorsConfig = new BarColorsConfig();
             this.VisibilityConfig = new VisibilityConfig();
-            this.VisibilityConfig2 = new VisibilityConfig2();
         }
 
         public IEnumerable<IConfigPage> GetConfigPages()
@@ -61,7 +53,7 @@ namespace LMeter.Meter
             yield return this.HeaderConfig;
             yield return this.BarConfig;
             yield return this.BarColorsConfig;
-            yield return this.VisibilityConfig2;
+            yield return this.VisibilityConfig;
         }
 
         public void ImportPage(IConfigPage page)
@@ -115,13 +107,13 @@ namespace LMeter.Meter
             if (_dragging)
                 return true;
 
-            if (!this.GeneralConfig.Preview && !this.VisibilityConfig2.IsVisible() &&
-                !(this.VisibilityConfig2.ShowOnMouseover && ImGui.IsMouseHoveringRect(pos, pos + size)))
+            if (!this.GeneralConfig.Preview && !this.VisibilityConfig.IsVisible() &&
+                !(this.VisibilityConfig.ShowOnMouseover && ImGui.IsMouseHoveringRect(pos, pos + size)))
             {
                 return false;
             }
 
-            if (this.VisibilityConfig2.ShouldClip &&
+            if (this.VisibilityConfig.ShouldClip &&
                     Singletons.Get<ClipRectsHelper>().GetClipRectForArea(pos, size).HasValue)
             {
                 return false;

@@ -7,7 +7,6 @@ using Dalamud.Interface.ImGuiNotification;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 using LMeter.Config;
-using LMeter.Meter;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
@@ -146,19 +145,6 @@ namespace LMeter.Helpers
                 Singletons.Get<IPluginLog>().Error(ex.ToString());
             }
         }
-
-        public static void ConvertOldConfigs(LMeterConfig config)
-        {
-            // Convert old visibility configs to new ones
-            foreach (MeterWindow meter in config.MeterList.Meters)
-            {
-                if (!meter.VisibilityConfig2.Initialized &&
-                    meter.VisibilityConfig2.VisibilityConditions.Count == 0)
-                {
-                    meter.VisibilityConfig2.SetOldConfig(meter.VisibilityConfig);
-                }
-            }
-        }
     }
 
     /// <summary>
@@ -167,13 +153,15 @@ namespace LMeter.Helpers
     /// </summary>
     public class LMeterSerializationBinder : ISerializationBinder
     {
-        // TODO: Make this automatic somehow?
-        private static List<Type> _configTypes = [
-            typeof(ActConfig)
-        ];
+        private static readonly List<Type> _configTypes = [];
 
-        private readonly Dictionary<Type, string> typeToName = [];
-        private readonly Dictionary<string, Type> nameToType = [];
+        private static readonly Dictionary<string, string> _typeNameConversions = new()
+        {
+            { "VisibilityConfig2", "VisibilityConfig" }
+        };
+
+        private readonly Dictionary<Type, string> _typeToName = [];
+        private readonly Dictionary<string, Type> _nameToType = [];
 
         public LMeterSerializationBinder()
         {
@@ -181,15 +169,15 @@ namespace LMeter.Helpers
             {
                 if (type.FullName is not null)
                 {
-                    this.typeToName.Add(type, type.FullName.ToLower());
-                    this.nameToType.Add(type.FullName.ToLower(), type);
+                    _typeToName.Add(type, type.FullName.ToLower());
+                    _nameToType.Add(type.FullName.ToLower(), type);
                 }
             }
         }
 
         public void BindToName(Type serializedType, out string? assemblyName, out string? typeName)
         {
-            if (this.typeToName.TryGetValue(serializedType, out string? name))
+            if (_typeToName.TryGetValue(serializedType, out string? name))
             {
                 assemblyName = null;
                 typeName = name;
@@ -203,10 +191,26 @@ namespace LMeter.Helpers
 
         public Type BindToType(string? assemblyName, string? typeName)
         {
-            if (typeName is not null &&
-                this.nameToType.TryGetValue(typeName.ToLower(), out Type? type))
+            if (typeName is null)
+            {
+                throw new TypeLoadException("Type name was null.");
+            }
+
+            if (_nameToType.TryGetValue(typeName.ToLower(), out Type? type))
             {
                 return type;
+            }
+
+            Type? loadedType = Type.GetType($"{typeName}, {assemblyName}", false);
+            if (loadedType is null)
+            {
+                foreach (var entry in _typeNameConversions)
+                {
+                    if (typeName.Contains(entry.Key))
+                    {
+                        typeName = typeName.Replace(entry.Key, entry.Value);
+                    }
+                }
             }
 
             return Type.GetType($"{typeName}, {assemblyName}", true) ??

@@ -18,15 +18,10 @@ namespace LMeter
         public const string ConfigFileName = "LMeter.json";
 
         public static string Version { get; private set; } = "0.3.2.0";
-
         public static string ConfigFileDir { get; private set; } = "";
-
         public static string ConfigFilePath { get; private set; } = "";
-
         public static string AssemblyFileDir { get; private set; } = "";
-
         public static IDalamudTextureWrap? IconTexture { get; private set; } = null;
-
         public static string Changelog { get; private set; } = string.Empty;
 
         public string Name => "LMeter";
@@ -91,9 +86,6 @@ namespace LMeter
             // Load config
             FontsManager.CopyPluginFontsToUserPath();
             LMeterConfig config = ConfigHelpers.LoadConfig(Plugin.ConfigFilePath);
-
-            // Check if any old configs need to be converted
-            ConfigHelpers.ConvertOldConfigs(config);
 
             // Refresh fonts
             config.FontConfig.RefreshFontList();
