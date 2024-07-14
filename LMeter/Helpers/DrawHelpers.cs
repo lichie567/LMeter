@@ -80,7 +80,7 @@ namespace LMeter.Helpers
             Vector2 size,
             ImDrawListPtr drawList)
         {
-            IDalamudTextureWrap? tex = Singletons.Get<TextureCache>().GetTextureFromIconId(iconId);
+            IDalamudTextureWrap? tex = Singletons.Get<TextureCache>().GetTextureById(iconId);
 
             if (tex is null)
             {
@@ -100,7 +100,7 @@ namespace LMeter.Helpers
             float opacity,
             ImDrawListPtr drawList)
         {
-            IDalamudTextureWrap? tex = Singletons.Get<TextureCache>().GetTextureFromIconId(iconId, (uint)stackCount, true, desaturate);
+            IDalamudTextureWrap? tex = Singletons.Get<TextureCache>().GetTextureById(iconId, (uint)stackCount, true, desaturate);
 
             if (tex is null)
             {

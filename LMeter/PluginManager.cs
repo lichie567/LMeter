@@ -16,7 +16,7 @@ namespace LMeter
 {
     public class PluginManager : IPluginDisposable
     {
-        private readonly Vector2 _configSize = new(550, 550);
+        private readonly Vector2 _configSize = new(600, 650);
 
         private readonly IClientState _clientState;
         private readonly IDalamudPluginInterface _pluginInterface;

@@ -148,6 +148,7 @@ namespace LMeter.Act
             Job.NIN => "Ninja",
             Job.SAM => "Samurai",
             Job.RPR => "Reaper",
+            Job.VPR => "Viper",
 
             Job.ARC => "Archer",
             Job.BRD => "Bard",
@@ -159,6 +160,7 @@ namespace LMeter.Act
             Job.BLM => "Black Mage",
             Job.SMN => "Summoner",
             Job.RDM => "Red Mage",
+            Job.PCT => "Pictomancer",
             Job.BLU => "Blue Mage",
 
             Job.CRP => "Carpenter",

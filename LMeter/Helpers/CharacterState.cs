@@ -10,7 +10,7 @@ namespace LMeter.Helpers
 {
     public static class CharacterState
     {
-        private static readonly uint[] _goldenSaucerIDs = [144, 388, 389, 390, 391, 579, 792, 899, 941];
+        private static readonly uint[] _goldSaucerIDs = [144, 388, 389, 390, 391, 579, 792, 899, 941];
 
         public static bool IsCharacterBusy()
         {
@@ -42,9 +42,9 @@ namespace LMeter.Helpers
             return condition[ConditionFlag.Performing];
         }
 
-        public static bool IsInGoldenSaucer()
+        public static bool IsInGoldSaucer()
         {
-            return _goldenSaucerIDs.Any(id => id == Singletons.Get<IClientState>().TerritoryType);
+            return _goldSaucerIDs.Any(id => id == Singletons.Get<IClientState>().TerritoryType);
         }
 
         public static Job GetCharacterJob()

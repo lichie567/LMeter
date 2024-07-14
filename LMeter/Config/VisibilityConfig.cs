@@ -59,7 +59,7 @@ namespace LMeter.Config
                 return false;
             }
 
-            if (this.HideInGoldenSaucer && CharacterState.IsInGoldenSaucer())
+            if (this.HideInGoldenSaucer && CharacterState.IsInGoldSaucer())
             {
                 return false;
             }

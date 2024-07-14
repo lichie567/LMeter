@@ -27,7 +27,7 @@ namespace LMeter.Meter
         [JsonIgnore] private DateTime? _lastSortedTimestamp = null;
         [JsonIgnore] private List<Combatant> _lastSortedCombatants = [];
 
-        [JsonIgnore] public string ID { get; init; }
+        [JsonIgnore] public string Id { get; init; }
 
         public string Name { get; set; }
 
@@ -46,7 +46,7 @@ namespace LMeter.Meter
         public MeterWindow(string name)
         {
             this.Name = name;
-            this.ID = $"LMeter_MeterWindow_{Guid.NewGuid()}";
+            this.Id = $"LMeter_MeterWindow_{Guid.NewGuid()}";
             this.GeneralConfig = new GeneralConfig();
             this.HeaderConfig = new HeaderConfig();
             this.BarConfig = new BarConfig();
@@ -110,16 +110,30 @@ namespace LMeter.Meter
             _lastFrameWasDragging = _hovered || _dragging;
         }
 
+        private bool ShouldDraw(Vector2 pos, Vector2 size)
+        {
+            if (_dragging)
+                return true;
+
+            if (!this.GeneralConfig.Preview && !this.VisibilityConfig2.IsVisible() &&
+                !(this.VisibilityConfig2.ShowOnMouseover && ImGui.IsMouseHoveringRect(pos, pos + size)))
+            {
+                return false;
+            }
+
+            if (this.VisibilityConfig2.ShouldClip &&
+                    Singletons.Get<ClipRectsHelper>().GetClipRectForArea(pos, size).HasValue)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         public void Draw(Vector2 pos)
         {
             Vector2 localPos = pos + this.GeneralConfig.Position;
             Vector2 size = this.GeneralConfig.Size;
-
-            if (!this.GeneralConfig.Preview && !this.VisibilityConfig2.IsVisible() &&
-                !(this.VisibilityConfig2.ShowOnMouseover && ImGui.IsMouseHoveringRect(localPos, localPos + size)))
-            {
-                return;
-            }
 
             if (ImGui.IsMouseHoveringRect(localPos, localPos + size))
             {
@@ -127,19 +141,20 @@ namespace LMeter.Meter
 
                 if (ImGui.IsMouseClicked(ImGuiMouseButton.Right) && !this.GeneralConfig.Preview)
                 {
-                    ImGui.OpenPopup($"{this.ID}_ContextMenu", ImGuiPopupFlags.MouseButtonRight);
+                    ImGui.OpenPopup($"{this.Id}_ContextMenu", ImGuiPopupFlags.MouseButtonRight);
                 }
             }
 
-            if (this.DrawContextMenu($"{this.ID}_ContextMenu", out int index))
+            bool contextMenuOpen = this.DrawContextMenu($"{this.Id}_ContextMenu", out bool selected, out int index);
+            if (contextMenuOpen && selected)
             {
                 _eventIndex = index;
                 _lastSortedTimestamp = null;
                 _lastSortedCombatants = [];
                 _scrollPosition = 0;
             }
-            else if (this.VisibilityConfig2.ShouldClip &&
-                    Singletons.Get<ClipRectsHelper>().GetClipRectForArea(localPos, size).HasValue)
+            
+            if (!contextMenuOpen && !this.ShouldDraw(localPos, size))
             {
                 return;
             }
@@ -152,7 +167,7 @@ namespace LMeter.Meter
 
             this.UpdateDragData(localPos, size, this.GeneralConfig.Lock);
             bool needsInput = !this.GeneralConfig.ClickThrough;
-            DrawHelpers.DrawInWindow($"##{this.ID}", localPos, size, needsInput, _locked || this.GeneralConfig.Lock, (drawList) =>
+            DrawHelpers.DrawInWindow($"##{this.Id}", localPos, size, needsInput, _locked || this.GeneralConfig.Lock, (drawList) =>
             {
                 if (_unlocked)
                 {
@@ -284,12 +299,13 @@ namespace LMeter.Meter
             };
         }
 
-        private bool DrawContextMenu(string popupId, out int selectedIndex)
+        private bool DrawContextMenu(string popupId, out bool selected, out int selectedIndex)
         {
             selectedIndex = -1;
-            bool selected = false;
+            selected = false;
 
-            if (ImGui.BeginPopup(popupId))
+            bool popupDrawn = ImGui.BeginPopup(popupId);
+            if (popupDrawn)
             {
                 if (!ImGui.IsAnyItemActive() && !ImGui.IsMouseClicked(ImGuiMouseButton.Left))
                 {
@@ -332,7 +348,7 @@ namespace LMeter.Meter
                 ImGui.EndPopup();
             }
 
-            return selected;
+            return popupDrawn;
         }
 
         private List<Combatant> GetSortedCombatants(ActEvent actEvent, MeterDataType dataType)

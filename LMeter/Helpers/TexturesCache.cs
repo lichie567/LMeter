@@ -19,13 +19,15 @@ namespace LMeter.Helpers
             _desaturatedCache = [];
         }
 
-        public IDalamudTextureWrap? GetTextureFromIconId(
+        public IDalamudTextureWrap? GetTextureById(
             uint iconId,
             uint stackCount = 0,
             bool hdIcon = true,
             bool desaturate = false)
         {
             string? path = Singletons.Get<ITextureProvider>().GetIconPath(new GameIconLookup(iconId: iconId + stackCount, hiRes: hdIcon));
+            path = Singletons.Get<ITextureSubstitutionProvider>().GetSubstitutedPath(path);
+
             if (path is null)
             {
                 return null;
@@ -45,7 +47,7 @@ namespace LMeter.Helpers
 
         private IDalamudTextureWrap? GetTextureFromPenumbraOrGame(string path, bool desaturate)
         {
-            TexFile? texFile = GetTexFile(path);
+            TexFile? texFile = Singletons.Get<IDataManager>().GameData.GetFile<TexFile>(path);
             if (texFile is null)
             {
                 return null;
@@ -70,27 +72,6 @@ namespace LMeter.Helpers
             }
 
             return texWrap;
-        }
-
-        private static TexFile? GetTexFile(string path)
-        {
-            path = Singletons.Get<ITextureSubstitutionProvider>().GetSubstitutedPath(path);
-            TexFile? texFile = null;
-
-            if (path[0] is '/' or '\\' || path[1] == ':')
-            {
-                try
-                {
-                    texFile = Singletons.Get<IDataManager>().GameData.GetFileFromDisk<TexFile>(path);
-                }
-                catch (Exception e)
-                {
-                    Singletons.Get<IPluginLog>().Error($"Failed to get tex at {path}:\n{e}");
-                    texFile = Singletons.Get<IDataManager>().GetFile<TexFile>(path);
-                }
-            }
-
-            return texFile;
         }
 
         private static void DesaturateBytes(ref byte[] bytes)
@@ -128,7 +109,13 @@ namespace LMeter.Helpers
                     tex.Dispose();
                 }
 
+                foreach (IDalamudTextureWrap tex in _cache.Values)
+                {
+                    tex.Dispose();
+                }
+
                 _desaturatedCache.Clear();
+                _cache.Clear();
             }
         }
     }

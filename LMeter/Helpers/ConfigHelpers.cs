@@ -153,7 +153,7 @@ namespace LMeter.Helpers
             foreach (MeterWindow meter in config.MeterList.Meters)
             {
                 if (!meter.VisibilityConfig2.Initialized &&
-                    meter.VisibilityConfig2.VisibilityOptions.Count == 0)
+                    meter.VisibilityConfig2.VisibilityConditions.Count == 0)
                 {
                     meter.VisibilityConfig2.SetOldConfig(meter.VisibilityConfig);
                 }

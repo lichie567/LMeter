@@ -10,12 +10,15 @@ namespace LMeter.Act.DataStructures;
 public class Combatant
 {
     [JsonIgnore]
-    public static string[] TextTags { get; } = typeof(Combatant).GetFields().Select(x => $"[{x.Name.ToLower()}]").ToArray();
+    public static string[] TextTags { get; } = 
+        typeof(Combatant).GetMembers().Where(x => x is PropertyInfo || x is FieldInfo).Select(x => $"[{x.Name.ToLower()}]").ToArray();
+
+    private static readonly Dictionary<string, MemberInfo> _members = 
+        typeof(Combatant).GetMembers().Where(x => x is PropertyInfo || x is FieldInfo).ToDictionary((x) => x.Name.ToLower());
 
     // TODO: move this to a global place so it can be shared between encounter and combatant
     private static readonly Random _rand = new();
-    private static readonly Dictionary<string, MemberInfo> _members = typeof(Combatant).GetMembers().ToDictionary((x) => x.Name.ToLower());
-
+    
     [JsonProperty("name")]
     public string OriginalName { get; set; } = string.Empty;
 
@@ -45,7 +48,6 @@ public class Combatant
 
     [JsonIgnore]
     public LazyString<string?>? Duration;
-
 
     [JsonProperty("encdps")]
     [JsonConverter(typeof(LazyFloatConverter))]
@@ -139,13 +141,13 @@ public class Combatant
             { "2", GetCombatant("GNB", "DRK", "WAR", "PLD") },
             { "3", GetCombatant("WHM", "AST", "SCH", "SGE") },
             { "4", GetCombatant("WHM", "AST", "SCH", "SGE") },
-            { "5", GetCombatant("SAM", "DRG", "MNK", "NIN", "RPR") },
-            { "6", GetCombatant("SAM", "DRG", "MNK", "NIN", "RPR") },
-            { "7", GetCombatant("BLM", "SMN", "RDM") },
+            { "5", GetCombatant("SAM", "DRG", "MNK", "NIN", "RPR", "VPR") },
+            { "6", GetCombatant("SAM", "DRG", "MNK", "NIN", "RPR", "VPR") },
+            { "7", GetCombatant("BLM", "SMN", "RDM", "PCT") },
             { "8", GetCombatant("DNC", "MCH", "BRD") },
-            { "9", GetCombatant("SAM", "DRG", "MNK", "NIN", "RPR") },
-            { "10", GetCombatant("SAM", "DRG", "MNK", "NIN", "RPR") },
-            { "11", GetCombatant("BLM", "SMN", "RDM") },
+            { "9", GetCombatant("SAM", "DRG", "MNK", "NIN", "RPR", "VPR") },
+            { "10", GetCombatant("SAM", "DRG", "MNK", "NIN", "RPR", "VPR") },
+            { "11", GetCombatant("BLM", "SMN", "RDM", "PCT") },
             { "12", GetCombatant("DNC", "MCH", "BRD") }
         };
 

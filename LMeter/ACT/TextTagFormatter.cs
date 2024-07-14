@@ -11,9 +11,9 @@ namespace LMeter.Act
         private static partial Regex GeneratedRegex();
         public static Regex TextTagRegex { get; } = GeneratedRegex();
 
+        private readonly object _source;
         private readonly string _format;
         private readonly Dictionary<string, MemberInfo> _members;
-        private readonly object _source;
 
         public TextTagFormatter(
             object source,
@@ -32,37 +32,30 @@ namespace LMeter.Act
                 return m.Value;
             }
 
-            string format = string.IsNullOrEmpty(m.Groups[3].Value)
-                ? $"{_format}0"
-                : $"{_format}{m.Groups[3].Value}";
-
-            string? value = null;
             string key = m.Groups[1].Value;
-
             if (!_members.TryGetValue(key, out MemberInfo? memberInfo))
             {
-                return value ?? m.Value;
+                return m.Value;
             }
 
             object? memberValue = memberInfo?.MemberType switch
             {
                 MemberTypes.Field => ((FieldInfo)memberInfo).GetValue(_source),
                 MemberTypes.Property => ((PropertyInfo)memberInfo).GetValue(_source),
-                // Default should null because we don't want people accidentally trying to access a method and then throw an exception
                 _ => null
             };
 
-            if (memberValue is null)
-            {
-                return string.Empty;
-            }
-
+            string? value = null;
             if (memberValue is LazyFloat lazyFloat)
             {
+                string format = string.IsNullOrEmpty(m.Groups[3].Value)
+                    ? $"{_format}0"
+                    : $"{_format}{m.Groups[3].Value}";
+
                 bool kilo = !string.IsNullOrEmpty(m.Groups[2].Value);
                 value = lazyFloat.ToString(format, kilo) ?? m.Value;
             }
-            else
+            else if (memberValue is not null)
             {
                 value = memberValue.ToString();
                 if (!string.IsNullOrEmpty(value) &&
