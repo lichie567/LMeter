@@ -31,9 +31,9 @@ namespace LMeter.Config
         public MeterDataType DataType = MeterDataType.Damage;
         public bool ReturnToCurrent = true;
 
-        public void DrawConfig(Vector2 size, float padX, float padY)
+        public void DrawConfig(Vector2 size, float padX, float padY, bool border = true)
         {
-            if (ImGui.BeginChild($"##{this.Name}", new Vector2(size.X, size.Y), true))
+            if (ImGui.BeginChild($"##{this.Name}", new Vector2(size.X, size.Y), border))
             {
                 Vector2 screenSize = ImGui.GetMainViewport().Size;
                 ImGui.DragFloat2("Position", ref this.Position, 1, -screenSize.X / 2, screenSize.X / 2);

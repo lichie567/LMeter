@@ -6,54 +6,62 @@ using Newtonsoft.Json;
 
 namespace LMeter.Act.DataStructures;
 
-public class Encounter
+public class Encounter : IActData<Encounter>
 {
     [JsonIgnore]
     public static string[] TextTags { get; } = 
-        typeof(Encounter).GetMembers().Where(x => x is PropertyInfo || x is FieldInfo).Select(x => $"[{x.Name.ToLower()}]").ToArray();
+        typeof(Encounter).GetMembers().Where(x => Attribute.IsDefined(x, typeof(TextTagAttribute))).Select(x => $"[{x.Name.ToLower()}]").ToArray();
 
-    private static readonly Dictionary<string, MemberInfo> _members = 
-        typeof(Encounter).GetMembers().Where(x => x is PropertyInfo || x is FieldInfo).ToDictionary((x) => x.Name.ToLower());
-
-    private static readonly Random _rand = new();
+    private static readonly Dictionary<string, MemberInfo> _textTagMembers = 
+        typeof(Encounter).GetMembers().Where(x => Attribute.IsDefined(x, typeof(TextTagAttribute))).ToDictionary((x) => x.Name.ToLower());
 
     public string GetFormattedString(string format, string numberFormat)
     {
-        return TextTagFormatter.TextTagRegex.Replace(format, new TextTagFormatter(this, numberFormat, _members).Evaluate);
+        return TextTagFormatter.TextTagRegex.Replace(format, new TextTagFormatter(this, numberFormat, _textTagMembers).Evaluate);
     }
 
+    [TextTag]
     [JsonProperty("title")]
     public string Title { get; set; } = string.Empty;
 
+    [TextTag]
     [JsonProperty("duration")]
     public string DurationRaw { get; set; } = string.Empty;
 
+    [TextTag]
     [JsonIgnore]
     public LazyString<string?>? Duration;
 
+    [TextTag]
     [JsonProperty("encdps")]
     [JsonConverter(typeof(LazyFloatConverter))]
     public LazyFloat? Dps { get; set; }
 
+    [TextTag]
     [JsonProperty("damage")]
     [JsonConverter(typeof(LazyFloatConverter))]
     public LazyFloat? DamageTotal { get; set; }
 
+    [TextTag]
     [JsonProperty("enchps")]
     [JsonConverter(typeof(LazyFloatConverter))]
     public LazyFloat? Hps { get; set; }
 
+    [TextTag]
     [JsonProperty("healed")]
     [JsonConverter(typeof(LazyFloatConverter))]
     public LazyFloat? HealingTotal { get; set; }
 
+    [TextTag]
     [JsonProperty("damagetaken")]
     [JsonConverter(typeof(LazyFloatConverter))]
     public LazyFloat? DamageTaken { get; set; }
 
+    [TextTag]
     [JsonProperty("deaths")]
     public string? Deaths { get; set; }
 
+    [TextTag]
     [JsonProperty("kills")]
     public string? Kills { get; set; }
 
@@ -64,8 +72,8 @@ public class Encounter
 
     public static Encounter GetTestData()
     {
-        float damage = _rand.Next(212345 * 8);
-        float healing = _rand.Next(41234 * 8);
+        float damage = IActData<Encounter>.Random.Next(212345 * 12);
+        float healing = IActData<Encounter>.Random.Next(41234 * 12);
 
         return new Encounter()
         {

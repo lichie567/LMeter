@@ -1,6 +1,10 @@
-# Version 0.3.2.0
-- Added Visbility option to always show meter if hovered by mouse
-- Fix loading textures replaced by penumbra
+# Version 0.4.0.0
+- Redesigned Bar Text options to allowed significantly more customization
+    - Can now create as many separate bar texts as you would like
+    - Bar Texts can now be configured with fixed width
+    - Bar Texts can be anchored relative to other texts
+- Overhauled Visibility settings (again)
+- Bar height can now be set to a specific value
 
 # Version 0.3.1.0
 - Updated plugin for Dawntrail

@@ -32,7 +32,9 @@ namespace LMeter.Meter
 
         public GeneralConfig GeneralConfig { get; set; }
         public HeaderConfig HeaderConfig { get; set; }
+        public TextListConfig<Encounter> HeaderTextConfig { get; set; }
         public BarConfig BarConfig { get; set; }
+        public TextListConfig<Combatant> BarTextConfig { get; set; }
         public BarColorsConfig BarColorsConfig { get; set; }
         public VisibilityConfig VisibilityConfig { get; set; }
 
@@ -42,7 +44,9 @@ namespace LMeter.Meter
             this.Id = $"LMeter_MeterWindow_{Guid.NewGuid()}";
             this.GeneralConfig = new GeneralConfig();
             this.HeaderConfig = new HeaderConfig();
+            this.HeaderTextConfig = new("Header Texts");
             this.BarConfig = new BarConfig();
+            this.BarTextConfig = new("Bar Texts");
             this.BarColorsConfig = new BarColorsConfig();
             this.VisibilityConfig = new VisibilityConfig();
         }
@@ -51,7 +55,9 @@ namespace LMeter.Meter
         {
             yield return this.GeneralConfig;
             yield return this.HeaderConfig;
+            yield return this.HeaderTextConfig;
             yield return this.BarConfig;
+            yield return this.BarTextConfig;
             yield return this.BarColorsConfig;
             yield return this.VisibilityConfig;
         }
@@ -66,8 +72,14 @@ namespace LMeter.Meter
                 case HeaderConfig newPage:
                     this.HeaderConfig = newPage;
                     break;
+                case TextListConfig<Encounter> newPage:
+                        this.HeaderTextConfig = newPage;
+                    break;
                 case BarConfig newPage:
                     this.BarConfig = newPage;
+                    break;
+                case TextListConfig<Combatant> newPage:
+                        this.BarTextConfig = newPage;
                     break;
                 case BarColorsConfig newPage:
                     this.BarColorsConfig = newPage;
@@ -105,7 +117,9 @@ namespace LMeter.Meter
         private bool ShouldDraw(Vector2 pos, Vector2 size)
         {
             if (_dragging)
+            {
                 return true;
+            }
 
             if (!this.GeneralConfig.Preview && !this.VisibilityConfig.IsVisible() &&
                 !(this.VisibilityConfig.ShowOnMouseover && ImGui.IsMouseHoveringRect(pos, pos + size)))
@@ -194,21 +208,57 @@ namespace LMeter.Meter
                     size -= Vector2.One * this.GeneralConfig.BorderThickness * 2;
                 }
 
+                ImGui.PushClipRect(localPos, localPos + size, false);
                 if (this.GeneralConfig.Preview && !_lastFrameWasPreview)
                 {
                     _previewEvent = ActEvent.GetTestData();
                 }
 
                 ActEvent? actEvent = this.GeneralConfig.Preview ? _previewEvent : Singletons.Get<LogClient>().GetEvent(_eventIndex);
-
-                (localPos, size) = this.HeaderConfig.DrawHeader(localPos, size, actEvent?.Encounter, drawList);
+                (localPos, size) = this.DrawHeader(drawList, localPos, size, actEvent?.Encounter);
                 drawList.AddRectFilled(localPos, localPos + size, this.GeneralConfig.BackgroundColor.Base);
                 this.DrawBars(drawList, localPos, size, actEvent);
+                ImGui.PopClipRect();
             });
 
             _lastFrameWasUnlocked = _unlocked;
             _lastFrameWasPreview = this.GeneralConfig.Preview;
             _lastFrameWasCombat = combat;
+        }
+
+        private (Vector2, Vector2) DrawHeader(
+            ImDrawListPtr drawList,
+            Vector2 pos,
+            Vector2 size,
+            Encounter? encounter)
+        {
+            HeaderConfig headerConfig = this.HeaderConfig;
+            TextListConfig<Encounter> headerTextConfig = this.HeaderTextConfig;
+            if (!headerConfig.ShowHeader)
+            {
+                return (pos, size);
+            }
+
+            Vector2 headerSize = new(size.X, headerConfig.HeaderHeight);
+            drawList.AddRectFilled(pos, pos + headerSize, headerConfig.BackgroundColor.Base);
+
+            if (encounter is null)
+            {
+                using (FontsManager.PushFont(FontsManager.DefaultSmallFontKey))
+                {
+                    string version = $" LMeter v{Plugin.Version} ";
+                    Vector2 versionSize = ImGui.CalcTextSize(version);
+                    Vector2 versionPos = Utils.GetAnchoredPosition(pos, -headerSize, DrawAnchor.Left);
+                    versionPos = Utils.GetAnchoredPosition(versionPos, versionSize, DrawAnchor.Left);
+                    DrawHelpers.DrawText(drawList, version, versionPos, headerConfig.DurationColor.Base, headerConfig.DurationShowOutline, headerConfig.DurationOutlineColor.Base);
+                }
+            }
+            else
+            {
+                DrawBarTexts(drawList, headerTextConfig.Texts, pos, headerSize, this.BarColorsConfig.GetColor(CharacterState.GetCharacterJob()), encounter);
+            }
+
+            return (pos.AddY(headerConfig.HeaderHeight), size.AddY(-headerConfig.HeaderHeight));
         }
 
         private void DrawBars(ImDrawListPtr drawList, Vector2 localPos, Vector2 size, ActEvent? actEvent)
@@ -258,7 +308,103 @@ namespace LMeter.Meter
 
                     ConfigColor barColor = this.BarConfig.BarColor;
                     ConfigColor jobColor = this.BarColorsConfig.GetColor(combatant.Job);
-                    localPos = this.BarConfig.DrawBar(drawList, localPos, size, combatant, jobColor, barColor, top, current);
+                    localPos = this.DrawBar(drawList, localPos, size, combatant, jobColor, barColor, top, current);
+                }
+            }
+        }
+
+        private Vector2 DrawBar(
+            ImDrawListPtr drawList,
+            Vector2 localPos,
+            Vector2 size,
+            Combatant combatant,
+            ConfigColor jobColor,
+            ConfigColor barColor,
+            float top,
+            float current)
+        {
+            BarConfig barConfig = this.BarConfig;
+            float barHeight = barConfig.BarHeightType == 0
+                ? (size.Y - (barConfig.BarCount - 1) * barConfig.BarGaps) / barConfig.BarCount
+                : barConfig.BarHeight;
+
+            Vector2 barSize = new(size.X, barHeight);
+            Vector2 barFillSize = new(size.X * (current / top), barHeight);
+            drawList.AddRectFilled(localPos, localPos + barFillSize, barConfig.UseJobColor ? jobColor.Base : barColor.Base);
+
+            if (barConfig.ShowJobIcon && combatant.Job != Job.UKN)
+            {
+                uint jobIconId = 62000u + (uint)combatant.Job + 100u * (uint)barConfig.JobIconStyle;
+                Vector2 jobIconSize = barConfig.JobIconSizeType == 0 ? Vector2.One * barHeight : barConfig.JobIconSize;
+                DrawHelpers.DrawIcon(jobIconId, localPos + barConfig.JobIconOffset, jobIconSize, drawList);
+            }
+
+            DrawBarTexts(drawList, this.BarTextConfig.Texts, localPos, barSize, jobColor, combatant);
+            return localPos.AddY(barHeight + barConfig.BarGaps);
+        }
+
+        private static void DrawBarTexts<T>(
+            ImDrawListPtr drawList,
+            List<Text> texts,
+            Vector2 parentPos,
+            Vector2 parentSize,
+            ConfigColor jobColor,
+            IActData<T> actData)
+        {
+            Dictionary<int, (Vector2, Vector2)> lookup = new() { { 0, (parentPos, parentSize) } };
+            for (int i = 0; i < texts.Count + 1; i++)
+            {
+                for (int j = 0; j < texts.Count; j++)
+                {
+                    Text text = texts[j];
+                    if (text.AnchorParent == i)
+                    {
+                        using (FontsManager.PushFont(text.FontKey))
+                        {
+                            string formattedText = actData.GetFormattedString($" {text.TextFormat} ", text.ThousandsSeparators ? "N" : "F");
+                            Vector2 textSize = ImGui.CalcTextSize(formattedText);
+                            
+                            if (text.FixedTextWidth && textSize.X > text.TextWidth)
+                            {
+                                float ellipsisWidth = text.UseEllipsis ? ImGui.CalcTextSize("... ").X : ImGui.CalcTextSize(" ").X;
+                                do
+                                {
+                                    formattedText = formattedText.AsSpan(0, formattedText.Length - 1).ToString();
+                                    textSize = ImGui.CalcTextSize(formattedText);
+                                }
+                                while (textSize.X + ellipsisWidth > text.TextWidth && formattedText.Length > 1);
+                                formattedText += text.UseEllipsis ? "... " : " ";
+                                textSize = ImGui.CalcTextSize(formattedText);
+                            }
+                            
+                            Vector2 textBoxSize = new(text.FixedTextWidth ? text.TextWidth : textSize.X, textSize.Y);
+                            Vector2 anchorPoint = Utils.GetAnchoredPosition(lookup[text.AnchorParent].Item1, -lookup[text.AnchorParent].Item2, text.AnchorPoint);
+                            Vector2 textBoxPos = Utils.GetTopLeft(anchorPoint, textBoxSize, text.AnchorParent == 0 ? text.AnchorPoint.Opposite() : text.AnchorPoint);
+                            
+                            textBoxPos += text.TextOffset;
+                            DrawAnchor alignment = text.FixedTextWidth ? text.TextAlignment : text.AnchorPoint;
+                            Vector2 textPos = Utils.GetTextPos(textBoxPos, textBoxSize, textSize, alignment);
+                            lookup.Add(j + 1, (textBoxPos, textBoxSize));
+
+                            if (text.ShowSeparator)
+                            {
+                                Vector2 separatorSize = new(text.SeparatorWidth, parentSize.Y * text.SeparatorHeight);
+                                Vector2 separatorPos = new Vector2(anchorPoint.X, anchorPoint.Y - separatorSize.Y / 2) + text.SeparatorOffset;
+                                drawList.AddRectFilled(separatorPos, separatorPos + separatorSize, text.SeparatorColor.Base);
+                            }
+
+                            if (text.Enabled)
+                            {
+                                DrawHelpers.DrawText(
+                                    drawList,
+                                    formattedText,
+                                    textPos,
+                                    text.TextJobColor ? jobColor.Base : text.TextColor.Base,
+                                    text.ShowOutline,
+                                    text.OutlineColor.Base);
+                            }
+                        }
+                    }
                 }
             }
         }

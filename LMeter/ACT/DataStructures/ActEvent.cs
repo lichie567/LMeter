@@ -1,11 +1,21 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using LMeter.Helpers;
 using Newtonsoft.Json;
 
 namespace LMeter.Act.DataStructures
 {
-    public class ActEvent
+    public class ActEvent : IActData<ActEvent>
     {
+        [JsonIgnore]
+        public static string[] TextTags { get; } = 
+            typeof(ActEvent).GetMembers().Where(x => Attribute.IsDefined(x, typeof(TextTagAttribute))).Select(x => $"[{x.Name.ToLower()}]").ToArray();
+
+        private static readonly Dictionary<string, MemberInfo> _textTagMembers = 
+            typeof(ActEvent).GetMembers().Where(x => Attribute.IsDefined(x, typeof(TextTagAttribute))).ToDictionary((x) => x.Name.ToLower());
+
         private bool _parsedActive;
         private bool _active;
 
@@ -23,6 +33,11 @@ namespace LMeter.Act.DataStructures
 
         [JsonProperty("Combatant")]
         public Dictionary<string, Combatant>? Combatants { get; set; }
+        
+        public string GetFormattedString(string format, string numberFormat)
+        {
+            return TextTagFormatter.TextTagRegex.Replace(format, new TextTagFormatter(this, numberFormat, _textTagMembers).Evaluate);
+        }
 
         public bool IsEncounterActive()
         {
@@ -31,8 +46,7 @@ namespace LMeter.Act.DataStructures
                 return _active;
             }
 
-            bool.TryParse(this.IsActive, out _active);
-            _parsedActive = true;
+            _parsedActive = bool.TryParse(this.IsActive, out _active);
             return _active;
         }
 
@@ -64,11 +78,34 @@ namespace LMeter.Act.DataStructures
 
         public static ActEvent GetTestData()
         {
-            return new ActEvent()
+            Dictionary<string, Combatant> mockCombatants = new()
+            {
+                { "1", GetCombatant("GNB", "DRK", "WAR", "PLD") },
+                { "2", GetCombatant("GNB", "DRK", "WAR", "PLD") },
+                { "3", GetCombatant("WHM", "AST", "SCH", "SGE") },
+                { "4", GetCombatant("WHM", "AST", "SCH", "SGE") },
+                { "5", GetCombatant("SAM", "DRG", "MNK", "NIN", "RPR", "VPR") },
+                { "6", GetCombatant("SAM", "DRG", "MNK", "NIN", "RPR", "VPR") },
+                { "7", GetCombatant("BLM", "SMN", "RDM", "PCT") },
+                { "8", GetCombatant("DNC", "MCH", "BRD") },
+                { "9", GetCombatant("SAM", "DRG", "MNK", "NIN", "RPR", "VPR") },
+                { "10", GetCombatant("SAM", "DRG", "MNK", "NIN", "RPR", "VPR") },
+                { "11", GetCombatant("BLM", "SMN", "RDM", "PCT") },
+                { "12", GetCombatant("DNC", "MCH", "BRD") }
+            };
+
+            return new()
             {
                 Encounter = Encounter.GetTestData(),
-                Combatants = Combatant.GetTestData()
+                Combatants = mockCombatants
             };
+        }
+
+        private static Combatant GetCombatant(params string[] jobs)
+        {
+            Combatant combatant = Combatant.GetTestData();
+            combatant.Job = Enum.Parse<Job>(jobs[IActData<ActEvent>.Random.Next(jobs.Length)]);
+            return combatant;
         }
     }
 }

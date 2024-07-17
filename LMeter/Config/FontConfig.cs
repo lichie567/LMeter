@@ -42,14 +42,14 @@ namespace LMeter.Config
             }
         }
 
-        public void DrawConfig(Vector2 size, float padX, float padY)
+        public void DrawConfig(Vector2 size, float padX, float padY, bool border = true)
         {
             if (_fonts.Length == 0)
             {
                 RefreshFontList();
             }
 
-            if (ImGui.BeginChild("##FontConfig", new Vector2(size.X, size.Y), true))
+            if (ImGui.BeginChild("##FontConfig", new Vector2(size.X, size.Y), border))
             {
                 if (_fontPath is not null)
                 {

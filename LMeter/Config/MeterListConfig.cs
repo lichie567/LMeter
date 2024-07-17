@@ -27,27 +27,39 @@ namespace LMeter.Config
 
         public IConfigPage GetDefault() => new MeterListConfig();
 
-        public void DrawConfig(Vector2 size, float padX, float padY)
+        public void DrawConfig(Vector2 size, float padX, float padY, bool border = true)
         {
             this.DrawCreateMenu(size, padX);
             this.DrawMeterTable(size.AddY(-padY), padX);
         }
 
-        public void ToggleMeter(int meterIndex, bool? toggle = null)
+        public void ToggleMeter(int? meterIndex)
         {
-            if (meterIndex >= 0 && meterIndex < this.Meters.Count)
+            if (meterIndex is null)
             {
-                this.Meters[meterIndex].VisibilityConfig.AlwaysHide = toggle.HasValue
-                    ? !toggle.Value
-                    : !this.Meters[meterIndex].VisibilityConfig.AlwaysHide;
+                foreach (MeterWindow meter in this.Meters)
+                {
+                    meter.VisibilityConfig.AlwaysHide ^= true;
+                }
+            }
+            else if (meterIndex >= 0 && meterIndex < this.Meters.Count)
+            {
+                this.Meters[meterIndex.Value].VisibilityConfig.AlwaysHide ^= true;
             }
         }
 
-        public void ToggleClickThrough(int meterIndex)
+        public void ToggleClickThrough(int? meterIndex)
         {
-            if (meterIndex >= 0 && meterIndex < this.Meters.Count)
+            if (meterIndex is null)
             {
-                this.Meters[meterIndex].GeneralConfig.ClickThrough ^= true;
+                foreach (MeterWindow meter in this.Meters)
+                {
+                    meter.GeneralConfig.ClickThrough ^= true;
+                }
+            }
+            else if (meterIndex >= 0 && meterIndex < this.Meters.Count)
+            {
+                this.Meters[meterIndex.Value].GeneralConfig.ClickThrough ^= true;
             }
         }
 

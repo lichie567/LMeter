@@ -28,6 +28,12 @@ namespace LMeter.Config
         Job
     }
 
+    public enum ZoneType
+    {
+        GoldSaucer,
+        PlayerHouse
+    }
+
     public class VisibilityCondition
     {
         [JsonIgnore] private string _customJobInput = string.Empty;
@@ -40,13 +46,15 @@ namespace LMeter.Config
         public string CustomJobString = string.Empty;
         public List<Job> CustomJobList = [];
 
+        public ZoneType Zone;
+
         public bool IsActive() => this.Inverted ^ this.ConditionType switch
         {
             VisibilityConditionType.AlwaysTrue => true,
             VisibilityConditionType.InCombat => CharacterState.IsInCombat(),
             VisibilityConditionType.InDuty => CharacterState.IsInDuty(),
             VisibilityConditionType.Performing => CharacterState.IsPerforming(),
-            VisibilityConditionType.Zone => false, // TODO
+            VisibilityConditionType.Zone => CharacterState.InZone(this.Zone),
             VisibilityConditionType.Job => CharacterState.IsJobType(CharacterState.GetCharacterJob(), this.ShowForJobTypes, this.CustomJobList),
             _ => true
         };
@@ -58,12 +66,13 @@ namespace LMeter.Config
             ImGui.RadioButton("In Duty", ref Unsafe.As<VisibilityConditionType, int>(ref this.ConditionType), (int)VisibilityConditionType.InDuty);
             ImGui.RadioButton("Performing", ref Unsafe.As<VisibilityConditionType, int>(ref this.ConditionType), (int)VisibilityConditionType.Performing);
 
-            ImGui.RadioButton("In Specific Zone", ref Unsafe.As<VisibilityConditionType, int>(ref this.ConditionType), (int)VisibilityConditionType.Zone);
+            ImGui.RadioButton("In Zone", ref Unsafe.As<VisibilityConditionType, int>(ref this.ConditionType), (int)VisibilityConditionType.Zone);
             if (this.ConditionType == VisibilityConditionType.Zone)
             {
-                // TODO implement zone options
                 DrawHelpers.DrawNestIndicator(1);
-                ImGui.Text("TODO");
+                ImGui.RadioButton("Gold Saucer", ref Unsafe.As<ZoneType, int>(ref this.Zone), (int)ZoneType.GoldSaucer);
+                DrawHelpers.DrawNestIndicator(1);
+                ImGui.RadioButton("Player House", ref Unsafe.As<ZoneType, int>(ref this.Zone), (int)ZoneType.PlayerHouse);
             }
 
             ImGui.RadioButton("Job", ref Unsafe.As<VisibilityConditionType, int>(ref this.ConditionType), (int)VisibilityConditionType.Job);
@@ -168,7 +177,7 @@ namespace LMeter.Config
             return active ^ this.ResultOption == 1;
         }
 
-        public void DrawConfig(Vector2 size, float padX, float padY)
+        public void DrawConfig(Vector2 size, float padX, float padY, bool border = true)
         {
             if (this.VisibilityConditions.Count == 0)
             {
@@ -182,7 +191,7 @@ namespace LMeter.Config
             ImGui.Checkbox("Always Hide When Not Connected to ACT", ref this.HideIfNotConnected);
             size = new(size.X, size.Y - (ImGui.GetCursorPosY() - posY));
 
-            if (ImGui.BeginChild("##VisibilityOptionConfig", new Vector2(size.X, size.Y), true))
+            if (ImGui.BeginChild("##VisibilityOptionConfig", new Vector2(size.X, size.Y), border))
             {
                 ImGui.Text("Visibility Conditions");
 
@@ -284,7 +293,7 @@ namespace LMeter.Config
 
             if (ImGui.TableSetColumnIndex(2))
             {
-                ImGui.Text($"{condition.ConditionType}");
+                ImGui.Text(condition.ConditionType == VisibilityConditionType.Zone ? $"Zone: {condition.Zone}" : $"{condition.ConditionType}");
             }
 
             if (ImGui.TableSetColumnIndex(3))

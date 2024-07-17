@@ -88,9 +88,9 @@ namespace LMeter.Config
             _       => this.UKNColor
         };
 
-        public void DrawConfig(Vector2 size, float padX, float padY)
+        public void DrawConfig(Vector2 size, float padX, float padY, bool border = true)
         {
-            if (ImGui.BeginChild($"##{this.Name}", new Vector2(size.X, size.Y), true))
+            if (ImGui.BeginChild($"##{this.Name}", new Vector2(size.X, size.Y), border))
             {
                 Vector4 vector = PLDColor.Vector;
                 ImGui.ColorEdit4("PLD", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);

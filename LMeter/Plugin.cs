@@ -86,6 +86,9 @@ namespace LMeter
             // Load config
             FontsManager.CopyPluginFontsToUserPath();
             LMeterConfig config = ConfigHelpers.LoadConfig(Plugin.ConfigFilePath);
+            
+            // Convert old configs
+            ConfigHelpers.ConvertOldConfig(config);
 
             // Refresh fonts
             config.FontConfig.RefreshFontList();

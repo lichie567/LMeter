@@ -37,9 +37,9 @@ namespace LMeter.Config
             this.ActSocketAddress = _defaultSocketAddress;
         }
 
-        public void DrawConfig(Vector2 size, float padX, float padY)
+        public void DrawConfig(Vector2 size, float padX, float padY, bool border = true)
         {
-            if (ImGui.BeginChild($"##{this.Name}", new Vector2(size.X, size.Y), true))
+            if (ImGui.BeginChild($"##{this.Name}", new Vector2(size.X, size.Y), border))
             {
                 int currentClientType = this.ClientType;
                 ImGui.Text("ACT Client Type:");

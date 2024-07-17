@@ -10,9 +10,9 @@ namespace LMeter.Config
 
         public IConfigPage GetDefault() => new AboutPage();
 
-        public void DrawConfig(Vector2 size, float padX, float padY)
+        public void DrawConfig(Vector2 size, float padX, float padY, bool border = true)
         {
-            if (ImGui.BeginChild("##AboutPage", new Vector2(size.X, size.Y), true))
+            if (ImGui.BeginChild("##AboutPage", new Vector2(size.X, size.Y), border))
             {
                 Vector2 headerSize = Vector2.Zero;
                 if (Plugin.IconTexture is not null)
