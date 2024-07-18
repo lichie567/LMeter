@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
@@ -204,6 +205,16 @@ namespace LMeter.Meter
                 ActEvent? actEvent = this.GeneralConfig.Preview ? _previewEvent : Singletons.Get<LogClient>().GetEvent(_eventIndex);
                 (localPos, size) = this.DrawHeader(drawList, localPos, size, actEvent?.Encounter);
                 drawList.AddRectFilled(localPos, localPos + size, this.GeneralConfig.BackgroundColor.Base);
+
+                if (this.BarConfig.ShowColumnHeader && actEvent is not null)
+                {
+                    List<Text> columnHeaderTexts = this.GetColumnHeaderTexts(this.BarTextConfig.Texts);
+                    Vector2 columnHeaderSize = new(size.X, this.BarConfig.ColumnHeaderHeight);
+                    drawList.AddRectFilled(localPos, localPos + columnHeaderSize, this.BarConfig.ColumnHeaderColor.Base);
+                    DrawBarTexts(drawList, columnHeaderTexts, localPos, columnHeaderSize, this.BarColorsConfig.GetColor(CharacterState.GetCharacterJob()), actEvent);
+                    (localPos, size) = (localPos.AddY(columnHeaderSize.Y), size.AddY(-columnHeaderSize.Y));
+                }
+
                 this.DrawBars(drawList, localPos, size, actEvent);
                 ImGui.PopClipRect();
             });
@@ -211,6 +222,19 @@ namespace LMeter.Meter
             _lastFrameWasUnlocked = _unlocked;
             _lastFrameWasPreview = this.GeneralConfig.Preview;
             _lastFrameWasCombat = combat;
+        }
+
+        private List<Text> GetColumnHeaderTexts(List<Text> texts)
+        {
+            List<Text> newTexts = [.. texts.Select(x => x.Clone())];
+            foreach (Text text in newTexts)
+            {
+                text.TextFormat = text.Name;
+                text.TextColor = this.BarConfig.ColumnHeaderTextColor;
+                text.ShowOutline = this.BarConfig.ColumnHeaderShowOutline;
+                text.OutlineColor = this.BarConfig.ColumnHeaderOutlineColor;
+            }
+            return newTexts;
         }
 
         private (Vector2, Vector2) DrawHeader(
@@ -344,13 +368,14 @@ namespace LMeter.Meter
             ConfigColor jobColor,
             IActData<T> actData)
         {
+            bool[] visited = new bool[texts.Count];
             Dictionary<int, (Vector2, Vector2)> lookup = new() { { 0, (parentPos, parentSize) } };
             for (int i = 0; i < texts.Count + 1; i++)
             {
                 for (int j = 0; j < texts.Count; j++)
                 {
                     Text text = texts[j];
-                    if (text.AnchorParent == i)
+                    if (lookup.ContainsKey(text.AnchorParent) && !visited[j])
                     {
                         using (FontsManager.PushFont(text.FontKey))
                         {
@@ -378,6 +403,9 @@ namespace LMeter.Meter
                             DrawAnchor alignment = text.FixedTextWidth ? text.TextAlignment : text.AnchorPoint;
                             Vector2 textPos = Utils.GetTextPos(textBoxPos, textBoxSize, textSize, alignment);
                             lookup.Add(j + 1, (textBoxPos, textBoxSize));
+                            visited[j] = true;
+                            
+                            // Singletons.Get<IPluginLog>().Info($"Name: {text.Name}, AnchorParent: {text.AnchorParent} i: {i}, j: {j}, lookup: {string.Join(",", lookup)}");
 
                             if (text.ShowSeparator)
                             {

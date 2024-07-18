@@ -47,7 +47,7 @@ namespace LMeter.Config
         public int BarNameFontId = 0;
         public bool UseCharacterName = false;
 
-        public string RightTextFormat = "[damagetotal:k.1]  ([encdps:k.1], [damagepct])";
+        public string RightTextFormat = "[damagetotal:k.1]  ([dps:k.1], [damagepct])";
         public Vector2 RightTextOffset = new(0, 0);
         public bool RightTextJobColor = false;
         public ConfigColor BarDataColor = new(1, 1, 1, 1);
@@ -55,6 +55,13 @@ namespace LMeter.Config
         public ConfigColor BarDataOutlineColor = new(0, 0, 0, 0.5f);
         public string BarDataFontKey = FontsManager.DalamudFontKey;
         public int BarDataFontId = 0;
+
+        public bool ShowColumnHeader;
+        public float ColumnHeaderHeight = 25;
+        public ConfigColor ColumnHeaderColor = new(0, 0, 0, 0.5f);
+        public ConfigColor ColumnHeaderTextColor = new(0, 0, 0, 0.5f);
+        public bool ColumnHeaderShowOutline = true;
+        public ConfigColor ColumnHeaderOutlineColor = new(0, 0, 0, 0.5f);
 
         public IConfigPage GetDefault()
         {
@@ -80,7 +87,6 @@ namespace LMeter.Config
             {
                 return;
             }
-
 
             if (ImGui.BeginChild($"##{this.Name}", new Vector2(size.X, size.Y), border))
             {
@@ -135,6 +141,34 @@ namespace LMeter.Config
 
                 ImGui.Checkbox("Use your name instead of 'YOU'", ref this.UseCharacterName);
                 ImGui.Checkbox("Always show your own bar", ref this.AlwaysShowSelf);
+
+                ImGui.NewLine();
+                ImGui.Checkbox("Show Column Header Bar", ref this.ShowColumnHeader);
+                if (this.ShowColumnHeader)
+                {
+                    DrawHelpers.DrawNestIndicator(1);
+                    ImGui.DragFloat("Column Header Height", ref this.ColumnHeaderHeight);
+
+                    DrawHelpers.DrawNestIndicator(1);
+                    Vector4 vector = this.ColumnHeaderColor.Vector;
+                    ImGui.ColorEdit4("Background Color", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
+                    this.ColumnHeaderColor.Vector = vector;
+
+                    DrawHelpers.DrawNestIndicator(1);
+                    vector = this.ColumnHeaderTextColor.Vector;
+                    ImGui.ColorEdit4("Text Color", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
+                    this.ColumnHeaderTextColor.Vector = vector;
+
+                    DrawHelpers.DrawNestIndicator(1);
+                    ImGui.Checkbox("Show Outline", ref this.ColumnHeaderShowOutline);
+                    if (this.ColumnHeaderShowOutline)
+                    {
+                        DrawHelpers.DrawNestIndicator(2);
+                        vector = this.ColumnHeaderOutlineColor.Vector;
+                        ImGui.ColorEdit4("Column Header Color", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
+                        this.ColumnHeaderOutlineColor.Vector = vector;
+                    }
+                }
             }
 
             ImGui.EndChild();

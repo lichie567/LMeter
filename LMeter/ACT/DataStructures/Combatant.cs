@@ -161,9 +161,9 @@ public class Combatant : IActData<Combatant>
             Hps = new LazyFloat((healing / 30).ToString()),
             DamagePct = IActData<Combatant>.Random.Next(100) + "%",
             HealingPct = "100%",
-            CritHitPct = "20%",
-            DirectHitPct = "25%",
-            CritDirectHitPct = "5%",
+            CritHitPct = $"{IActData<Combatant>.Random.Next(50)}%",
+            DirectHitPct = $"{IActData<Combatant>.Random.Next(50)}%",
+            CritDirectHitPct = $"{IActData<Combatant>.Random.Next(10)}%",
             DamageTaken = new LazyFloat((damage / 20).ToString()),
             Deaths = IActData<Combatant>.Random.Next(2).ToString(),
             MaxHit = "Full Thrust-42069"

@@ -272,6 +272,35 @@ namespace LMeter.Config
         public float SeparatorHeight = .75f;
         public Vector2 SeparatorOffset = new();
         public ConfigColor SeparatorColor = new(.0f, .0f, .0f, .5f);
+
+        public Text Clone()
+        {
+            return new()
+            {
+                Name = this.Name,
+                Enabled = this.Enabled,
+                TextFormat = this.TextFormat,
+                TextOffset = this.TextOffset,
+                AnchorParent = this.AnchorParent,
+                AnchorPoint = this.AnchorPoint,
+                TextAlignment = this.TextAlignment,
+                ThousandsSeparators = this.ThousandsSeparators,
+                TextJobColor = this.TextJobColor,
+                TextColor = this.TextColor,
+                ShowOutline = this.ShowOutline,
+                OutlineColor = this.OutlineColor,
+                FontKey = this.FontKey,
+                FontId = this.FontId,
+                FixedTextWidth = this.FixedTextWidth,
+                TextWidth = this.TextWidth,
+                UseEllipsis = this.UseEllipsis,
+                ShowSeparator = this.ShowSeparator,
+                SeparatorWidth = this.SeparatorWidth,
+                SeparatorHeight = this.SeparatorHeight,
+                SeparatorOffset = this.SeparatorOffset,
+                SeparatorColor = this.SeparatorColor
+            };
+        }
         
         public void DrawConfig<T>() where T : IActData<T>
         {
