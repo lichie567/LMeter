@@ -24,7 +24,7 @@ namespace LMeter.Config
         public DrawAnchor DurationAlign = DrawAnchor.Left;
         public Vector2 DurationOffset = new(0, 0);
         public int DurationFontId = 0;
-        public string DurationFontKey = FontsManager.DalamudFontKey;
+        public string DurationFontKey = FontsManager.DefaultSmallFontKey;
 
         public bool ShowEncounterName = true;
         public ConfigColor NameColor = new(1, 1, 1, 1);
@@ -33,7 +33,7 @@ namespace LMeter.Config
         public DrawAnchor NameAlign = DrawAnchor.Left;
         public Vector2 NameOffset = new(0, 0);
         public int NameFontId = 0;
-        public string NameFontKey = FontsManager.DalamudFontKey;
+        public string NameFontKey = FontsManager.DefaultSmallFontKey;
 
         public bool ShowRaidStats = true;
         public ConfigColor RaidStatsColor = new(0.5f, 0.5f, 0.5f, 1f);
@@ -42,9 +42,17 @@ namespace LMeter.Config
         public DrawAnchor StatsAlign = DrawAnchor.Right;
         public Vector2 StatsOffset = new(0, 0);
         public int StatsFontId = 0;
-        public string StatsFontKey = FontsManager.DalamudFontKey;
+        public string StatsFontKey = FontsManager.DefaultSmallFontKey;
         public string RaidStatsFormat = "[dps]rdps [hps]rhps Deaths: [deaths]";
         public bool ThousandsSeparators = true;
+
+        public bool ShowVersion = true;
+        public Vector2 VersionOffset = new(0, 0);
+        public int VersionFontId = 0;
+        public ConfigColor VersionColor = new(0f / 255f, 190f / 255f, 225f / 255f, 1f);
+        public bool VersionShowOutline = true;
+        public ConfigColor VersionOutlineColor = new(0, 0, 0, 0.5f);
+        public string VersionFontKey = FontsManager.DefaultSmallFontKey;
 
         public IConfigPage GetDefault()
         {
@@ -83,6 +91,45 @@ namespace LMeter.Config
                     Vector4 vector = this.BackgroundColor.Vector;
                     ImGui.ColorEdit4("Background Color", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
                     this.BackgroundColor.Vector = vector;
+
+                    DrawHelpers.DrawNestIndicator(1);
+                    ImGui.Checkbox("Show LMeter Version when Cleared", ref this.ShowVersion);
+                    if (this.ShowVersion)
+                    {
+                        DrawHelpers.DrawNestIndicator(2);
+                        ImGui.DragFloat2("Offset##Version", ref this.VersionOffset);
+
+                        if (!FontsManager.ValidateFont(fontOptions, this.VersionFontId, this.VersionFontKey))
+                        {
+                            this.VersionFontId = 0;
+                            for (int i = 0; i < fontOptions.Length; i++)
+                            {
+                                if (this.VersionFontKey.Equals(fontOptions[i]))
+                                {
+                                    this.VersionFontId = i;
+                                }
+                            }
+                        }
+
+                        DrawHelpers.DrawNestIndicator(2);
+                        ImGui.Combo("Font##Version", ref this.VersionFontId, fontOptions, fontOptions.Length);
+                        this.VersionFontKey = fontOptions[this.VersionFontId];
+
+                        DrawHelpers.DrawNestIndicator(2);
+                        vector = this.VersionColor.Vector;
+                        ImGui.ColorEdit4("Text Color##Version", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
+                        this.VersionColor.Vector = vector;
+
+                        DrawHelpers.DrawNestIndicator(2);
+                        ImGui.Checkbox("Show Outline##Version", ref this.VersionShowOutline);
+                        if (this.VersionShowOutline)
+                        {
+                            DrawHelpers.DrawNestIndicator(3);
+                            vector = this.VersionOutlineColor.Vector;
+                            ImGui.ColorEdit4("Outline Color##Version", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
+                            this.VersionOutlineColor.Vector = vector;
+                        }
+                    }
                 }
                 
                 ImGui.EndChild();

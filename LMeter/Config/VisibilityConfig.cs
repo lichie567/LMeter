@@ -11,35 +11,12 @@ using Newtonsoft.Json;
 
 namespace LMeter.Config
 {
-    public enum VisibilityOperator
-    {
-        And,
-        Or,
-        Xor
-    }
-
-    public enum VisibilityConditionType
-    {
-        AlwaysTrue,
-        InCombat,
-        InDuty,
-        Performing,
-        Zone,
-        Job
-    }
-
-    public enum ZoneType
-    {
-        GoldSaucer,
-        PlayerHouse
-    }
-
     public class VisibilityCondition
     {
         [JsonIgnore] private string _customJobInput = string.Empty;
 
         public bool Inverted = false;
-        public VisibilityOperator Operator = VisibilityOperator.And;
+        public BooleanOperator Operator = BooleanOperator.And;
         public VisibilityConditionType ConditionType = VisibilityConditionType.AlwaysTrue;
 
         public JobType ShowForJobTypes = JobType.All;
@@ -167,9 +144,9 @@ namespace LMeter.Config
 
                 active = option.Operator switch
                 {
-                    VisibilityOperator.And => active && currentActive,
-                    VisibilityOperator.Or => active || currentActive,
-                    VisibilityOperator.Xor => active ^ currentActive,
+                    BooleanOperator.And => active && currentActive,
+                    BooleanOperator.Or => active || currentActive,
+                    BooleanOperator.Xor => active ^ currentActive,
                     _ => false
                 };
             }
@@ -281,7 +258,7 @@ namespace LMeter.Config
                 else
                 {
                     ImGui.PushItemWidth(ImGui.GetColumnWidth());
-                    ImGui.Combo("##CondCombo", ref Unsafe.As<VisibilityOperator, int>(ref condition.Operator), OperatorOptions, OperatorOptions.Length);
+                    ImGui.Combo("##CondCombo", ref Unsafe.As<BooleanOperator, int>(ref condition.Operator), OperatorOptions, OperatorOptions.Length);
                     ImGui.PopItemWidth();
                 }
             }

@@ -12,22 +12,16 @@ using Newtonsoft.Json;
 
 namespace LMeter.Config
 {
-    public class TextListConfig<T> : IConfigPage where T : IActData<T>
+    public class TextListConfig<T>(string name = "Texts") : IConfigPage where T : IActData<T>
     {
         [JsonIgnore] private string _textInput = string.Empty;
         [JsonIgnore] private int _selectedIndex;
 
-        private string _name;
+        private string _name = name;
         public string Name => _name;
 
         public bool Initialized = false;
-        public List<Text> Texts { get; init; }
-
-        public TextListConfig(string name = "Texts")
-        {
-            _name = name;
-            this.Texts = [];
-        }
+        public List<Text> Texts { get; init; } = [];
 
         public IConfigPage GetDefault()
         {
@@ -44,7 +38,6 @@ namespace LMeter.Config
             if (ImGui.BeginChild($"##TextListConfig", size, border))
             {
                 ImGui.Text(this.Name);
-
                 ImGuiTableFlags tableFlags =
                     ImGuiTableFlags.RowBg |
                     ImGuiTableFlags.Borders |
@@ -75,7 +68,6 @@ namespace LMeter.Config
                         ImGui.TableNextRow(ImGuiTableRowFlags.None, 28);
 
                         Text text = this.Texts[i];
-
                         if (ImGui.TableSetColumnIndex(0))
                         {
                             ImGui.SetCursorPos(ImGui.GetCursorPos() + new Vector2(8f, 1f));
@@ -169,9 +161,7 @@ namespace LMeter.Config
                 ImGui.Text($"Edit {this.Texts[_selectedIndex].Name}");
                 if (ImGui.BeginChild($"##SelectedText_Edit", new(size.X - padX * 2, size.Y - ImGui.GetCursorPosY() - padY * 2), true))
                 {
-                    Text selectedText = this.Texts[_selectedIndex];
-                    selectedText.DrawConfig<T>();
-                    
+                    this.Texts[_selectedIndex].DrawConfig<T>();
                     ImGui.EndChild();
                 }
 
@@ -272,7 +262,7 @@ namespace LMeter.Config
         public ConfigColor TextColor = new(1, 1, 1, 1);
         public bool ShowOutline = true;
         public ConfigColor OutlineColor = new(0, 0, 0, 0.5f);
-        public string FontKey = FontsManager.DalamudFontKey;
+        public string FontKey = FontsManager.DefaultSmallFontKey;
         public int FontId = 0;
         public bool FixedTextWidth;
         public float TextWidth = 60;

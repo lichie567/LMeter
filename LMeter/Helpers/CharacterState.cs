@@ -5,7 +5,6 @@ using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
-using LMeter.Config;
 
 namespace LMeter.Helpers
 {
@@ -38,7 +37,6 @@ namespace LMeter.Helpers
         public static bool IsPerforming() => Singletons.Get<ICondition>()[ConditionFlag.Performing];
         public static bool IsEditingHouse() => Singletons.Get<ICondition>()[ConditionFlag.UsingHousingFunctions];
         public static bool IsInDeepDungeon() => Singletons.Get<ICondition>()[ConditionFlag.InDeepDungeon];
-
         public static bool InZone(ZoneType zone) => zone switch
         {
             ZoneType.GoldSaucer => _goldSaucerIds.Any(id => id == Singletons.Get<IClientState>().TerritoryType),

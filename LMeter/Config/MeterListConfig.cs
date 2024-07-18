@@ -12,12 +12,10 @@ namespace LMeter.Config
 {
     public class MeterListConfig : IConfigPage
     {
+        [JsonIgnore] private string _input = string.Empty;
         private const float MenuBarHeight = 40;
 
-        [JsonIgnore] private string _input = string.Empty;
-
         public string Name => "Profiles";
-
         public List<MeterWindow> Meters { get; set; }
 
         public MeterListConfig()

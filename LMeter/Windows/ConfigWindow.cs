@@ -51,16 +51,9 @@ namespace LMeter.Windows
         {
             if (_configStack.Count != 0)
             {
-                this.WindowName = this.GetWindowTitle();
+                this.WindowName = string.Join("  >  ", _configStack.Reverse().Select(c => c.Name));
                 ImGui.SetNextWindowSize(_windowSize);
             }
-        }
-
-        private string GetWindowTitle()
-        {
-            string title = string.Empty;
-            title = string.Join("  >  ", _configStack.Reverse().Select(c => c.Name));
-            return title;
         }
 
         public override void Draw()
@@ -114,8 +107,8 @@ namespace LMeter.Windows
             if (ImGui.BeginChild($"##{this.WindowName}_NavBar", new Vector2(size.X, NavBarHeight), true))
             {
                 DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.LongArrowAltLeft, () => _back = true, "Back", buttonsize);
-                ImGui.SameLine();
 
+                ImGui.SameLine();
                 if (_configStack.Count > 2)
                 {
                     DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Home, () => _home = true, "Home", buttonsize);
@@ -128,12 +121,11 @@ namespace LMeter.Windows
 
                 // calculate empty horizontal space based on size of buttons and text box
                 float offset = size.X - buttonsize.X * 5 - textInputWidth - padX * 7;
-
                 ImGui.SetCursorPosX(ImGui.GetCursorPosX() + offset);
 
                 DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.UndoAlt, () => Reset(openPage), $"Reset {openPage?.Name} to Defaults", buttonsize);
-                ImGui.SameLine();
 
+                ImGui.SameLine();
                 ImGui.PushItemWidth(textInputWidth);
                 if (ImGui.InputText("##Input", ref _name, 64, ImGuiInputTextFlags.EnterReturnsTrue))
                 {
@@ -146,11 +138,11 @@ namespace LMeter.Windows
                 }
 
                 ImGui.PopItemWidth();
-                ImGui.SameLine();
 
+                ImGui.SameLine();
                 DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Upload, () => Export(openPage), $"Export {openPage?.Name}", buttonsize);
-                ImGui.SameLine();
 
+                ImGui.SameLine();
                 DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Download, () => Import(), $"Import {openPage?.Name}", buttonsize);
             }
 

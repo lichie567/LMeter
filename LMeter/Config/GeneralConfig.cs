@@ -14,11 +14,8 @@ namespace LMeter.Config
 
         [JsonIgnore]
         public bool Preview = false;
-
+        
         public string Name => "General";
-
-        public IConfigPage GetDefault() => new GeneralConfig();
-
         public Vector2 Position = Vector2.Zero;
         public Vector2 Size = new(ImGui.GetMainViewport().Size.Y * 16 / 90, ImGui.GetMainViewport().Size.Y / 10);
         public bool Lock = false;
@@ -30,6 +27,8 @@ namespace LMeter.Config
         public int BorderThickness = 2;
         public MeterDataType DataType = MeterDataType.Damage;
         public bool ReturnToCurrent = true;
+
+        public IConfigPage GetDefault() => new GeneralConfig();
 
         public void DrawConfig(Vector2 size, float padX, float padY, bool border = true)
         {

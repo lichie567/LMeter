@@ -11,7 +11,7 @@ using Newtonsoft.Json;
 
 namespace LMeter.Meter
 {
-    public class MeterWindow : IConfigurable
+    public class MeterWindow(string name) : IConfigurable
     {
         [JsonIgnore] private bool _lastFrameWasUnlocked = false;
         [JsonIgnore] private bool _lastFrameWasDragging = false;
@@ -26,30 +26,17 @@ namespace LMeter.Meter
         [JsonIgnore] private int _scrollPosition = 0;
         [JsonIgnore] private DateTime? _lastSortedTimestamp = null;
         [JsonIgnore] private List<Combatant> _lastSortedCombatants = [];
-        [JsonIgnore] public string Id { get; init; }
+        [JsonIgnore] public string Id { get; init; } = $"LMeter_MeterWindow_{Guid.NewGuid()}";
 
-        public string Name { get; set; }
+        public string Name { get; set; } = name;
 
-        public GeneralConfig GeneralConfig { get; set; }
-        public HeaderConfig HeaderConfig { get; set; }
-        public TextListConfig<Encounter> HeaderTextConfig { get; set; }
-        public BarConfig BarConfig { get; set; }
-        public TextListConfig<Combatant> BarTextConfig { get; set; }
-        public BarColorsConfig BarColorsConfig { get; set; }
-        public VisibilityConfig VisibilityConfig { get; set; }
-
-        public MeterWindow(string name)
-        {
-            this.Name = name;
-            this.Id = $"LMeter_MeterWindow_{Guid.NewGuid()}";
-            this.GeneralConfig = new GeneralConfig();
-            this.HeaderConfig = new HeaderConfig();
-            this.HeaderTextConfig = new("Header Texts");
-            this.BarConfig = new BarConfig();
-            this.BarTextConfig = new("Bar Texts");
-            this.BarColorsConfig = new BarColorsConfig();
-            this.VisibilityConfig = new VisibilityConfig();
-        }
+        public GeneralConfig GeneralConfig { get; set; } = new GeneralConfig();
+        public HeaderConfig HeaderConfig { get; set; } = new HeaderConfig();
+        public TextListConfig<Encounter> HeaderTextConfig { get; set; } = new("Header Texts");
+        public BarConfig BarConfig { get; set; } = new BarConfig();
+        public TextListConfig<Combatant> BarTextConfig { get; set; } = new("Bar Texts");
+        public BarColorsConfig BarColorsConfig { get; set; } = new BarColorsConfig();
+        public VisibilityConfig VisibilityConfig { get; set; } = new VisibilityConfig();
 
         public IEnumerable<IConfigPage> GetConfigPages()
         {
@@ -242,18 +229,24 @@ namespace LMeter.Meter
             Vector2 headerSize = new(size.X, headerConfig.HeaderHeight);
             drawList.AddRectFilled(pos, pos + headerSize, headerConfig.BackgroundColor.Base);
 
-            if (encounter is null)
+            if (encounter is null && headerConfig.ShowVersion)
             {
-                using (FontsManager.PushFont(FontsManager.DefaultSmallFontKey))
+                using (FontsManager.PushFont(headerConfig.VersionFontKey))
                 {
                     string version = $" LMeter v{Plugin.Version} ";
                     Vector2 versionSize = ImGui.CalcTextSize(version);
                     Vector2 versionPos = Utils.GetAnchoredPosition(pos, -headerSize, DrawAnchor.Left);
                     versionPos = Utils.GetAnchoredPosition(versionPos, versionSize, DrawAnchor.Left);
-                    DrawHelpers.DrawText(drawList, version, versionPos, headerConfig.DurationColor.Base, headerConfig.DurationShowOutline, headerConfig.DurationOutlineColor.Base);
+                    DrawHelpers.DrawText(
+                        drawList,
+                        version,
+                        versionPos + headerConfig.VersionOffset,
+                        headerConfig.VersionColor.Base,
+                        headerConfig.VersionShowOutline,
+                        headerConfig.VersionOutlineColor.Base);
                 }
             }
-            else
+            else if (encounter is not null)
             {
                 DrawBarTexts(drawList, headerTextConfig.Texts, pos, headerSize, this.BarColorsConfig.GetColor(CharacterState.GetCharacterJob()), encounter);
             }

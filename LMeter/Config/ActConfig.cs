@@ -20,9 +20,6 @@ namespace LMeter.Config
         private DateTime? LastReconnectAttempt { get; set; }
 
         public string Name => "ACT";
-
-        public IConfigPage GetDefault() => new ActConfig();
-
         public string ActSocketAddress;
         public int EncounterHistorySize = 15;
         public bool AutoReconnect = false;
@@ -36,6 +33,8 @@ namespace LMeter.Config
         {
             this.ActSocketAddress = _defaultSocketAddress;
         }
+
+        public IConfigPage GetDefault() => new ActConfig();
 
         public void DrawConfig(Vector2 size, float padX, float padY, bool border = true)
         {

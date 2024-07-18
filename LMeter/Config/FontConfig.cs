@@ -13,8 +13,6 @@ namespace LMeter.Config
     {
         public string Name => "Fonts";
 
-        public IConfigPage GetDefault() => new FontConfig();
-
         [JsonIgnore] private static readonly string? _fontPath = FontsManager.GetUserFontPath();
         [JsonIgnore] private int _selectedFont = 0;
         [JsonIgnore] private int _selectedSize = 23;
@@ -41,6 +39,8 @@ namespace LMeter.Config
                 }
             }
         }
+
+        public IConfigPage GetDefault() => new FontConfig();
 
         public void DrawConfig(Vector2 size, float padX, float padY, bool border = true)
         {

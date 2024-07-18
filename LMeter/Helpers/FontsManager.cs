@@ -9,20 +9,12 @@ using ImGuiNET;
 
 namespace LMeter.Helpers
 {
-    public struct FontData
+    public struct FontData(string name, int size, bool chinese, bool korean)
     {
-        public string Name;
-        public int Size;
-        public bool Chinese;
-        public bool Korean;
-
-        public FontData(string name, int size, bool chinese, bool korean)
-        {
-            Name = name;
-            Size = size;
-            Chinese = chinese;
-            Korean = korean;
-        }
+        public string Name = name;
+        public int Size = size;
+        public bool Chinese = chinese;
+        public bool Korean = korean;
     }
 
     public class FontScope : IDisposable
