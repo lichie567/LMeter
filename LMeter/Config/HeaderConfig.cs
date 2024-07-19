@@ -119,7 +119,7 @@ namespace LMeter.Config
                     ImGui.DragInt("Height##Footer", ref this.FooterHeight, 1, 0, 100);
 
                     DrawHelpers.DrawNestIndicator(1);
-                    DrawHelpers.DrawColorSelector("Background Color##Footer", ref this.BackgroundColor);
+                    DrawHelpers.DrawColorSelector("Background Color##Footer", ref this.FooterBackgroundColor);
                 }
                 
                 ImGui.EndChild();

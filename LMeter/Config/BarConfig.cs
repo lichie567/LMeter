@@ -63,9 +63,9 @@ namespace LMeter.Config
 
         public bool ShowColumnHeader;
         public float ColumnHeaderHeight = 25;
-        public ConfigColor ColumnHeaderColor = new(1, 1, 1, 1f);
+        public ConfigColor ColumnHeaderColor = new(0, 0, 0, 0.5f);
         public bool UseColumnFont = true;
-        public ConfigColor ColumnHeaderTextColor = new(0, 0, 0, 0.5f);
+        public ConfigColor ColumnHeaderTextColor = new(1, 1, 1, 1);
         public bool ColumnHeaderShowOutline = true;
         public ConfigColor ColumnHeaderOutlineColor = new(0, 0, 0, 0.5f);
         public Vector2 ColumnHeaderOffset = new();
