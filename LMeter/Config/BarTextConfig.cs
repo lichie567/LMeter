@@ -14,11 +14,17 @@ namespace LMeter.Config
 {
     public class TextListConfig<T>(string name = "Texts") : IConfigPage where T : IActData<T>
     {
-        [JsonIgnore] private string _textInput = string.Empty;
-        [JsonIgnore] private int _selectedIndex;
+        [JsonIgnore]
+        private string _textInput = string.Empty;
+        
+        [JsonIgnore]
+        private int _selectedIndex;
 
-        private string _name = name;
-        public string Name => _name;
+        [JsonIgnore]
+        public bool Active { get; set; }
+
+        public string NameInternal = name;
+        public string Name => NameInternal;
 
         public bool Initialized = false;
         public List<Text> Texts { get; init; } = [];
@@ -271,7 +277,9 @@ namespace LMeter.Config
         public float SeparatorWidth = 2f;
         public float SeparatorHeight = .75f;
         public Vector2 SeparatorOffset = new();
-        public ConfigColor SeparatorColor = new(.0f, .0f, .0f, .5f);
+        public ConfigColor SeparatorColor = new(0f, 0f, 0f, 0.5f);
+        public bool UseBackground = false;
+        public ConfigColor BackgroundColor = new(0f, 0f, 0f, 0.5f);
 
         public Text Clone()
         {
@@ -304,13 +312,6 @@ namespace LMeter.Config
         
         public void DrawConfig<T>() where T : IActData<T>
         {
-            Vector4 vector = Vector4.Zero;
-            string[] fontOptions = FontsManager.GetFontList();
-            if (fontOptions.Length == 0)
-            {
-                return;
-            }
-
             ImGui.InputText("Text Name", ref this.Name, 512);
             ImGui.InputText("Text Format", ref this.TextFormat, 512);
 
@@ -325,22 +326,8 @@ namespace LMeter.Config
             {
                 this.TextFormat += selectedTag;
             }
-            
-            if (!FontsManager.ValidateFont(fontOptions, this.FontId, this.FontKey))
-            {
-                this.FontId = 0;
-                for (int i = 0; i < fontOptions.Length; i++)
-                {
-                    if (this.FontKey.Equals(fontOptions[i]))
-                    {
-                        this.FontId = i;
-                    }
-                }
-            }
 
-            ImGui.Combo("Font##Name", ref this.FontId, fontOptions, fontOptions.Length);
-            this.FontKey = fontOptions[this.FontId];
-
+            DrawHelpers.DrawFontSelector("Font##Name", ref this.FontKey, ref this.FontId);
             ImGui.DragFloat2("Text Offset", ref this.TextOffset);
             ImGui.Checkbox("Fixed Text Width", ref this.FixedTextWidth);
             if (this.FixedTextWidth)
@@ -353,6 +340,7 @@ namespace LMeter.Config
                 ImGui.Checkbox("Add ellipsis (...) to truncated text", ref this.UseEllipsis);
             }
 
+            ImGui.Checkbox("Use Thousands Separator for Numbers", ref this.ThousandsSeparators);
             if (this.AnchorParent != 0)
             {
                 ImGui.NewLine();
@@ -366,9 +354,7 @@ namespace LMeter.Config
                     DrawHelpers.DrawNestIndicator(1);
                     ImGui.DragFloat2("Offset", ref this.SeparatorOffset);
                     DrawHelpers.DrawNestIndicator(1);
-                    vector = this.SeparatorColor.Vector;
-                    ImGui.ColorEdit4("Color", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
-                    this.SeparatorColor.Vector = vector;
+                    DrawHelpers.DrawColorSelector("Color", ref this.SeparatorColor);
                 }
             }
 
@@ -377,21 +363,23 @@ namespace LMeter.Config
             if (!this.TextJobColor)
             {
                 DrawHelpers.DrawNestIndicator(1);
-                vector = this.TextColor.Vector;
-                ImGui.ColorEdit4("Text Color", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
-                this.TextColor.Vector = vector;
+                DrawHelpers.DrawColorSelector("Text Color", ref this.TextColor);
             }
 
             ImGui.Checkbox("Show Outline", ref this.ShowOutline);
             if (this.ShowOutline)
             {
                 DrawHelpers.DrawNestIndicator(1);
-                vector = this.OutlineColor.Vector;
-                ImGui.ColorEdit4("Outline Color", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
-                this.OutlineColor.Vector = vector;
+                DrawHelpers.DrawColorSelector("Outline Color", ref this.OutlineColor);
             }
 
-            ImGui.Checkbox("Use Thousands Separator for Numbers", ref this.ThousandsSeparators);
+            ImGui.NewLine();
+            ImGui.Checkbox("Use Custom Background Color", ref this.UseBackground);
+            if (this.UseBackground)
+            {
+                DrawHelpers.DrawNestIndicator(1);
+                DrawHelpers.DrawColorSelector("Background Color", ref this.BackgroundColor);
+            }
         }
     }
 }

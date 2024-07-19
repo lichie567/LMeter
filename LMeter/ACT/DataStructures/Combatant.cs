@@ -21,6 +21,14 @@ public class Combatant : IActData<Combatant>
 
     public string? NameOverwrite { get; set; } = null;
 
+// These have to be here because newtonsoft and overlayplugin suck
+#pragma warning disable 0169
+    [JsonProperty("ENCDPS")]
+    private readonly string? _encdps;
+    [JsonProperty("ENCHPS")]
+    private readonly string? _enchps;
+#pragma warning restore 0169
+
     [TextTag]
     [JsonIgnore]
     public string Name => NameOverwrite ?? OriginalName;
@@ -165,7 +173,7 @@ public class Combatant : IActData<Combatant>
             DirectHitPct = $"{IActData<Combatant>.Random.Next(50)}%",
             CritDirectHitPct = $"{IActData<Combatant>.Random.Next(10)}%",
             DamageTaken = new LazyFloat((damage / 20).ToString()),
-            Deaths = IActData<Combatant>.Random.Next(2).ToString(),
+            Deaths = IActData<Combatant>.Random.Next(4).ToString(),
             MaxHit = "Full Thrust-42069"
         };
     }

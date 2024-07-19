@@ -5,6 +5,7 @@ using Dalamud.Interface.ImGuiNotification;
 using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
+using LMeter.Config;
 
 namespace LMeter.Helpers
 {
@@ -81,7 +82,7 @@ namespace LMeter.Helpers
             Vector2 size,
             ImDrawListPtr drawList)
         {
-            IDalamudTextureWrap? tex = Singletons.Get<TextureCache>().GetTextureById(iconId);
+            IDalamudTextureWrap? tex = TextureCache.GetTextureById(iconId);
 
             if (tex is null)
             {
@@ -100,7 +101,7 @@ namespace LMeter.Helpers
             float opacity,
             ImDrawListPtr drawList)
         {
-            IDalamudTextureWrap? tex = Singletons.Get<TextureCache>().GetTextureById(iconId, (uint)stackCount, true);
+            IDalamudTextureWrap? tex = TextureCache.GetTextureById(iconId, (uint)stackCount, true);
 
             if (tex is null)
             {
@@ -111,6 +112,37 @@ namespace LMeter.Helpers
 
             uint alpha = (uint)(opacity * 255) << 24 | 0x00FFFFFF;
             drawList.AddImage(tex.ImGuiHandle, position, position + size, uv0, uv1, alpha);
+        }
+
+        public static void DrawFontSelector(string label, ref string fontKey, ref int fontId)
+        {
+            string[] fontOptions = FontsManager.GetFontList();
+            if (fontOptions.Length == 0)
+            {
+                return;
+            }
+
+            if (!FontsManager.ValidateFont(fontOptions, fontId, fontKey))
+            {
+                fontId = 0;
+                for (int i = 0; i < fontOptions.Length; i++)
+                {
+                    if (fontKey.Equals(fontOptions[i]))
+                    {
+                        fontId = i;
+                    }
+                }
+            }
+
+            ImGui.Combo(label, ref fontId, fontOptions, fontOptions.Length);
+            fontKey = fontOptions[fontId];
+        }
+
+        public static void DrawColorSelector(string label, ref ConfigColor color)
+        {
+            Vector4 vector = color.Vector;
+            ImGui.ColorEdit4(label, ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
+            color.Vector = vector;
         }
 
         public static (Vector2, Vector2) GetTexCoordinates(IDalamudTextureWrap texture, Vector2 size, bool cropIcon = true)

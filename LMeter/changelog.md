@@ -1,10 +1,17 @@
 # Version 0.4.0.0
-- Redesigned Bar Text options to allowed significantly more customization
+- Redesigned Text options to allow significantly more customization
     - Can now create as many separate bar texts as you would like
     - Bar Texts can now be configured with fixed width
     - Bar Texts can be anchored relative to other texts
+    - The above features allow creation of data columns
+    - Added option for a column header bar
+    - And a lot more...
+- Added option for a Footer bar
 - Overhauled Visibility settings (again)
 - Bar height can now be set to a specific value
+- Added option for thinner bars (similar to Kagerou)
+- Added option for job icon background color
+- OTF fonts can now be added to the font list
 
 # Version 0.3.1.0
 - Updated plugin for Dawntrail

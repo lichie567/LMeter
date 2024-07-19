@@ -81,7 +81,6 @@ namespace LMeter
             _config.ActConfig.TryReconnect();
             _config.ActConfig.TryEndEncounter();
 
-            // Singletons.Get<IPluginLog>().Info($"territory: {Singletons.Get<IClientState>().TerritoryType}");
             ImGuiHelpers.ForceNextWindowMainViewport();
             ImGui.SetNextWindowPos(Vector2.Zero);
             ImGui.SetNextWindowSize(ImGui.GetMainViewport().Size);

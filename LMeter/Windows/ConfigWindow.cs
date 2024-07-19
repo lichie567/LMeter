@@ -79,7 +79,8 @@ namespace LMeter.Windows
             {
                 foreach (IConfigPage page in configItem.GetConfigPages())
                 {
-                    if (ImGui.BeginTabItem($"{page.Name}##{this.WindowName}"))
+                    page.Active = ImGui.BeginTabItem($"{page.Name}##{this.WindowName}");
+                    if (page.Active)
                     {
                         openPage = page;
                         page.DrawConfig(size.AddY(-ImGui.GetCursorPosY()), spacing.X, spacing.Y);

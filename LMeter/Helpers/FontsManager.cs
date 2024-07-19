@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Dalamud.Interface;
 using Dalamud.Interface.ManagedFontAtlas;
 using Dalamud.Interface.Utility;
@@ -9,9 +10,15 @@ using ImGuiNET;
 
 namespace LMeter.Helpers
 {
-    public struct FontData(string name, int size, bool chinese, bool korean)
+    public struct FontData(
+        string name,
+        string path,
+        int size,
+        bool chinese,
+        bool korean)
     {
         public string Name = name;
+        public string Path = path;
         public int Size = size;
         public bool Chinese = chinese;
         public bool Korean = korean;
@@ -21,7 +28,7 @@ namespace LMeter.Helpers
     {
         private readonly IFontHandle? _handle;
 
-        public FontScope(IFontHandle? handle)
+        public FontScope(IFontHandle? handle = null)
         {
             _handle = handle;
             _handle?.Push();
@@ -65,8 +72,8 @@ namespace LMeter.Helpers
 
             foreach (FontData font in fontData)
             {
-                string fontPath = $"{fontDir}{font.Name}.ttf";
-                if (!File.Exists(fontPath))
+                string path = string.IsNullOrEmpty(font.Path) ? $"{fontDir}{font.Name}.ttf" : font.Path;
+                if (!File.Exists(path))
                 {
                     continue;
                 }
@@ -79,7 +86,7 @@ namespace LMeter.Helpers
                         (
                             tk => tk.AddFontFromFile
                             (
-                                fontPath,
+                                path,
                                 new SafeFontConfig
                                 {
                                     SizePx = font.Size,
@@ -93,12 +100,27 @@ namespace LMeter.Helpers
                 }
                 catch (Exception ex)
                 {
-                    Singletons.Get<IPluginLog>().Error($"Failed to load font from path [{fontPath}]!");
+                    Singletons.Get<IPluginLog>().Error($"Failed to load font from path [{path}]!");
                     Singletons.Get<IPluginLog>().Error(ex.ToString());
                 }
             }
 
             _fontList = [DalamudFontKey, .. _imGuiFonts.Keys];
+        }
+
+        public static FontData[] GetDefaultFontData()
+        {
+            FontData[] defaults = new FontData[DefaultFontKeys.Count];
+            for (int i = 0; i < DefaultFontKeys.Count; i++)
+            {
+                string[] splits = DefaultFontKeys[i].Split("_", StringSplitOptions.RemoveEmptyEntries);
+                if (splits.Length == 2 && int.TryParse(splits[1], out int size))
+                {
+                    defaults[i] = new(splits[0], $"{GetUserFontPath()}{splits[0]}.ttf", size, false, false);
+                }
+            }
+
+            return defaults;
         }
 
         public void UpdateFonts(IEnumerable<FontData> fonts)
@@ -171,7 +193,7 @@ namespace LMeter.Helpers
                 }
             }
 
-            return new FontScope(null);
+            return new FontScope();
         }
 
         public static string[] GetFontList()
@@ -214,7 +236,7 @@ namespace LMeter.Helpers
             string[] pluginFonts;
             try
             {
-                pluginFonts = Directory.GetFiles(pluginFontPath, "*.ttf");
+                pluginFonts = Directory.GetFiles(pluginFontPath).Where(x => x.EndsWith(".ttf") || x.EndsWith(".otf")).ToArray();
             }
             catch
             {
@@ -258,7 +280,14 @@ namespace LMeter.Helpers
             return Path.Join(Plugin.ConfigFileDir, "\\Fonts\\");
         }
 
-        public static string[] GetFontNamesFromPath(string? path)
+        public static string GetFontName(string? fontPath, string fontFile)
+        {
+            return fontFile.Replace(fontPath ?? string.Empty, string.Empty)
+                .Replace(".otf", string.Empty, StringComparison.OrdinalIgnoreCase)
+                .Replace(".ttf", string.Empty, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public static string[] GetFontPaths(string? path)
         {
             if (string.IsNullOrEmpty(path))
             {
@@ -268,18 +297,11 @@ namespace LMeter.Helpers
             string[] fonts;
             try
             {
-                fonts = Directory.GetFiles(path, "*.ttf");
+                fonts = Directory.GetFiles(path).Where(x => x.EndsWith(".ttf") || x.EndsWith(".otf")).ToArray();
             }
             catch
             {
                 fonts = [];
-            }
-
-            for (int i = 0; i < fonts.Length; i++)
-            {
-                fonts[i] = fonts[i]
-                    .Replace(path, string.Empty)
-                    .Replace(".ttf", string.Empty, StringComparison.OrdinalIgnoreCase);
             }
 
             return fonts;

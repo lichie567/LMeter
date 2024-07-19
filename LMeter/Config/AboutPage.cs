@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using System.Text.Json.Serialization;
 using ImGuiNET;
 using LMeter.Helpers;
 
@@ -6,6 +7,9 @@ namespace LMeter.Config
 {
     public class AboutPage : IConfigPage
     {
+        [JsonIgnore]
+        public bool Active { get; set; }
+
         public string Name => "Changelog";
 
         public IConfigPage GetDefault() => new AboutPage();

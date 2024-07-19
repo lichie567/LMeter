@@ -34,6 +34,7 @@ namespace LMeter.Meter
         public GeneralConfig GeneralConfig { get; set; } = new GeneralConfig();
         public HeaderConfig HeaderConfig { get; set; } = new HeaderConfig();
         public TextListConfig<Encounter> HeaderTextConfig { get; set; } = new("Header Texts");
+        public TextListConfig<Encounter> FooterTextConfig { get; set; } = new("Footer Texts");
         public BarConfig BarConfig { get; set; } = new BarConfig();
         public TextListConfig<Combatant> BarTextConfig { get; set; } = new("Bar Texts");
         public BarColorsConfig BarColorsConfig { get; set; } = new BarColorsConfig();
@@ -43,7 +44,17 @@ namespace LMeter.Meter
         {
             yield return this.GeneralConfig;
             yield return this.HeaderConfig;
-            yield return this.HeaderTextConfig;
+
+            if (this.HeaderConfig.ShowHeader)
+            {
+                yield return this.HeaderTextConfig;
+            }
+
+            if (this.HeaderConfig.ShowFooter)
+            {
+                yield return this.FooterTextConfig;
+            }
+
             yield return this.BarConfig;
             yield return this.BarTextConfig;
             yield return this.BarColorsConfig;
@@ -61,13 +72,22 @@ namespace LMeter.Meter
                     this.HeaderConfig = newPage;
                     break;
                 case TextListConfig<Encounter> newPage:
+                    if (this.HeaderTextConfig.Active)
+                    {
+                        newPage.NameInternal = "Header Texts";
                         this.HeaderTextConfig = newPage;
+                    }
+                    if (this.FooterTextConfig.Active)
+                    {
+                        newPage.NameInternal = "Footer Texts";
+                        this.FooterTextConfig = newPage;
+                    }
                     break;
                 case BarConfig newPage:
                     this.BarConfig = newPage;
                     break;
                 case TextListConfig<Combatant> newPage:
-                        this.BarTextConfig = newPage;
+                    this.BarTextConfig = newPage;
                     break;
                 case BarColorsConfig newPage:
                     this.BarColorsConfig = newPage;
@@ -174,6 +194,7 @@ namespace LMeter.Meter
                         this.GeneralConfig.Size = size;
                     }
                 }
+                
 
                 if (this.GeneralConfig.ShowBorder)
                 {
@@ -196,26 +217,66 @@ namespace LMeter.Meter
                     size -= Vector2.One * this.GeneralConfig.BorderThickness * 2;
                 }
 
-                ImGui.PushClipRect(localPos, localPos + size, false);
                 if (this.GeneralConfig.Preview && !_lastFrameWasPreview)
                 {
                     _previewEvent = ActEvent.GetTestData();
                 }
 
                 ActEvent? actEvent = this.GeneralConfig.Preview ? _previewEvent : Singletons.Get<LogClient>().GetEvent(_eventIndex);
-                (localPos, size) = this.DrawHeader(drawList, localPos, size, actEvent?.Encounter);
-                drawList.AddRectFilled(localPos, localPos + size, this.GeneralConfig.BackgroundColor.Base);
+                ConfigColor jobColor = this.BarColorsConfig.GetColor(CharacterState.GetCharacterJob());
 
+                ImGui.PushClipRect(localPos, localPos + size, false);
+
+                Vector2 footerPos = localPos.AddY(size.Y - this.HeaderConfig.FooterHeight);
+
+                if (this.HeaderConfig.ShowHeader)
+                {
+                    localPos = DrawHeader(
+                        drawList,
+                        this.HeaderConfig,
+                        this.HeaderTextConfig,
+                        localPos,
+                        size,
+                        jobColor,
+                        actEvent?.Encounter);
+                }
+                
+                drawList.AddRectFilled(localPos, localPos + size, this.GeneralConfig.BackgroundColor.Base);
                 if (this.BarConfig.ShowColumnHeader && actEvent is not null)
                 {
-                    List<Text> columnHeaderTexts = this.GetColumnHeaderTexts(this.BarTextConfig.Texts);
+                    List<Text> columnHeaderTexts = GetColumnHeaderTexts(this.BarTextConfig.Texts, this.BarConfig);
                     Vector2 columnHeaderSize = new(size.X, this.BarConfig.ColumnHeaderHeight);
                     drawList.AddRectFilled(localPos, localPos + columnHeaderSize, this.BarConfig.ColumnHeaderColor.Base);
-                    DrawBarTexts(drawList, columnHeaderTexts, localPos, columnHeaderSize, this.BarColorsConfig.GetColor(CharacterState.GetCharacterJob()), actEvent);
-                    (localPos, size) = (localPos.AddY(columnHeaderSize.Y), size.AddY(-columnHeaderSize.Y));
+                    DrawBarTexts(
+                        drawList,
+                        columnHeaderTexts,
+                        localPos + this.BarConfig.ColumnHeaderOffset,
+                        columnHeaderSize,
+                        jobColor,
+                        actEvent);
+                        
+                    localPos = localPos.AddY(columnHeaderSize.Y);
+                }
+            
+                if (this.HeaderConfig.ShowFooter)
+                {
+                    size = size.AddY(-this.HeaderConfig.FooterHeight);
                 }
 
-                this.DrawBars(drawList, localPos, size, actEvent);
+                localPos = this.DrawBars(drawList, localPos, size, actEvent);
+
+                if (this.HeaderConfig.ShowFooter)
+                {
+                    DrawFooter(
+                        drawList,
+                        this.HeaderConfig,
+                        this.FooterTextConfig,
+                        footerPos,
+                        size,
+                        jobColor,
+                        actEvent?.Encounter);
+                }
+
                 ImGui.PopClipRect();
             });
 
@@ -224,32 +285,31 @@ namespace LMeter.Meter
             _lastFrameWasCombat = combat;
         }
 
-        private List<Text> GetColumnHeaderTexts(List<Text> texts)
+        private static List<Text> GetColumnHeaderTexts(List<Text> texts, BarConfig config)
         {
             List<Text> newTexts = [.. texts.Select(x => x.Clone())];
             foreach (Text text in newTexts)
             {
                 text.TextFormat = text.Name;
-                text.TextColor = this.BarConfig.ColumnHeaderTextColor;
-                text.ShowOutline = this.BarConfig.ColumnHeaderShowOutline;
-                text.OutlineColor = this.BarConfig.ColumnHeaderOutlineColor;
+                text.TextColor = config.ColumnHeaderTextColor;
+                text.ShowOutline = config.ColumnHeaderShowOutline;
+                text.OutlineColor = config.ColumnHeaderOutlineColor;
+                text.FontKey = config.UseColumnFont ? text.FontKey : config.ColumnHeaderFontKey;
+                text.FontId = config.UseColumnFont ? text.FontId : config.ColumnHeaderFontId;
             }
+
             return newTexts;
         }
 
-        private (Vector2, Vector2) DrawHeader(
+        private static Vector2 DrawHeader(
             ImDrawListPtr drawList,
+            HeaderConfig headerConfig,
+            TextListConfig<Encounter> headerTextConfig,
             Vector2 pos,
             Vector2 size,
+            ConfigColor jobColor,
             Encounter? encounter)
         {
-            HeaderConfig headerConfig = this.HeaderConfig;
-            TextListConfig<Encounter> headerTextConfig = this.HeaderTextConfig;
-            if (!headerConfig.ShowHeader)
-            {
-                return (pos, size);
-            }
-
             Vector2 headerSize = new(size.X, headerConfig.HeaderHeight);
             drawList.AddRectFilled(pos, pos + headerSize, headerConfig.BackgroundColor.Base);
 
@@ -272,13 +332,31 @@ namespace LMeter.Meter
             }
             else if (encounter is not null)
             {
-                DrawBarTexts(drawList, headerTextConfig.Texts, pos, headerSize, this.BarColorsConfig.GetColor(CharacterState.GetCharacterJob()), encounter);
+                DrawBarTexts(drawList, headerTextConfig.Texts, pos, headerSize, jobColor, encounter);
             }
 
+            return pos.AddY(headerConfig.HeaderHeight);
+        }
+
+        private static (Vector2, Vector2) DrawFooter(
+            ImDrawListPtr drawList,
+            HeaderConfig headerConfig,
+            TextListConfig<Encounter> footerTextConfig,
+            Vector2 pos,
+            Vector2 size,
+            ConfigColor jobColor,
+            Encounter? encounter)
+        {
+            Vector2 footerSize = new(size.X, headerConfig.FooterHeight);
+            drawList.AddRectFilled(pos, pos + footerSize, headerConfig.FooterBackgroundColor.Base);
+
+            if (encounter is not null)
+                DrawBarTexts(drawList, footerTextConfig.Texts, pos, footerSize, jobColor, encounter);
+                
             return (pos.AddY(headerConfig.HeaderHeight), size.AddY(-headerConfig.HeaderHeight));
         }
 
-        private void DrawBars(ImDrawListPtr drawList, Vector2 localPos, Vector2 size, ActEvent? actEvent)
+        private Vector2 DrawBars(ImDrawListPtr drawList, Vector2 localPos, Vector2 size, ActEvent? actEvent)
         {
             if (actEvent?.Combatants is not null && actEvent.Combatants.Count != 0)
             {
@@ -328,6 +406,8 @@ namespace LMeter.Meter
                     localPos = this.DrawBar(drawList, localPos, size, combatant, jobColor, barColor, top, current);
                 }
             }
+
+            return localPos;
         }
 
         private Vector2 DrawBar(
@@ -345,15 +425,32 @@ namespace LMeter.Meter
                 ? (size.Y - (barConfig.BarCount - 1) * barConfig.BarGaps) / barConfig.BarCount
                 : barConfig.BarHeight;
 
+            Vector2 barPos = localPos;
             Vector2 barSize = new(size.X, barHeight);
-            Vector2 barFillSize = new(size.X * (current / top), barHeight);
-            drawList.AddRectFilled(localPos, localPos + barFillSize, barConfig.UseJobColor ? jobColor.Base : barColor.Base);
+            Vector2 barFillSize = new(size.X * (current / top), barHeight * barConfig.BarFillHeight);
+
+            if (barConfig.BarFillHeight != 1f)
+            {
+                barPos = barConfig.BarFillDirection == 0 ? barPos.AddY(barHeight - barFillSize.Y) : barPos;
+                Vector2 barBackgroundSize = new(size.X * (current / top), barHeight);
+                drawList.AddRectFilled(localPos, localPos + barBackgroundSize, barConfig.BarBackgroundColor.Base);
+            }
+
+            drawList.AddRectFilled(barPos, barPos + barFillSize, barConfig.UseJobColor ? jobColor.Base : barColor.Base);
 
             if (barConfig.ShowJobIcon && combatant.Job != Job.UKN)
             {
                 uint jobIconId = 62000u + (uint)combatant.Job + 100u * (uint)barConfig.JobIconStyle;
+                Vector2 jobIconPos = localPos + barConfig.JobIconOffset;
                 Vector2 jobIconSize = barConfig.JobIconSizeType == 0 ? Vector2.One * barHeight : barConfig.JobIconSize;
-                DrawHelpers.DrawIcon(jobIconId, localPos + barConfig.JobIconOffset, jobIconSize, drawList);
+                if (barConfig.JobIconBackgroundColor.Vector.W > 0f)
+                {
+                    Vector2 jobIconBackgroundPos = new(jobIconPos.X, localPos.Y);
+                    Vector2 jobIconBackgroundSize = new(jobIconSize.X, barSize.Y);
+                    drawList.AddRectFilled(jobIconBackgroundPos, jobIconBackgroundPos + jobIconBackgroundSize, barConfig.JobIconBackgroundColor.Base);
+                }
+
+                DrawHelpers.DrawIcon(jobIconId, jobIconPos, jobIconSize, drawList);
             }
 
             DrawBarTexts(drawList, this.BarTextConfig.Texts, localPos, barSize, jobColor, combatant);
@@ -370,12 +467,12 @@ namespace LMeter.Meter
         {
             bool[] visited = new bool[texts.Count];
             Dictionary<int, (Vector2, Vector2)> lookup = new() { { 0, (parentPos, parentSize) } };
-            for (int i = 0; i < texts.Count + 1; i++)
+            for (int anchorLayer = 0; anchorLayer < texts.Count + 1; anchorLayer++)
             {
-                for (int j = 0; j < texts.Count; j++)
+                for (int textIndex = 0; textIndex < texts.Count; textIndex++)
                 {
-                    Text text = texts[j];
-                    if (lookup.ContainsKey(text.AnchorParent) && !visited[j])
+                    Text text = texts[textIndex];
+                    if (!visited[textIndex] && lookup.TryGetValue(text.AnchorParent, out (Vector2, Vector2) parent))
                     {
                         using (FontsManager.PushFont(text.FontKey))
                         {
@@ -396,22 +493,27 @@ namespace LMeter.Meter
                             }
                             
                             Vector2 textBoxSize = new(text.FixedTextWidth ? text.TextWidth : textSize.X, textSize.Y);
-                            Vector2 anchorPoint = Utils.GetAnchoredPosition(lookup[text.AnchorParent].Item1, -lookup[text.AnchorParent].Item2, text.AnchorPoint);
+                            Vector2 anchorPoint = Utils.GetAnchoredPosition(parent.Item1, -parent.Item2, text.AnchorPoint);
                             Vector2 textBoxPos = Utils.GetTopLeft(anchorPoint, textBoxSize, text.AnchorParent == 0 ? text.AnchorPoint.Opposite() : text.AnchorPoint);
                             
                             textBoxPos += text.TextOffset;
                             DrawAnchor alignment = text.FixedTextWidth ? text.TextAlignment : text.AnchorPoint;
                             Vector2 textPos = Utils.GetTextPos(textBoxPos, textBoxSize, textSize, alignment);
-                            lookup.Add(j + 1, (textBoxPos, textBoxSize));
-                            visited[j] = true;
-                            
-                            // Singletons.Get<IPluginLog>().Info($"Name: {text.Name}, AnchorParent: {text.AnchorParent} i: {i}, j: {j}, lookup: {string.Join(",", lookup)}");
+                            lookup.Add(textIndex + 1, (textBoxPos, textBoxSize));
+                            visited[textIndex] = true;
 
                             if (text.ShowSeparator)
                             {
                                 Vector2 separatorSize = new(text.SeparatorWidth, parentSize.Y * text.SeparatorHeight);
                                 Vector2 separatorPos = new Vector2(anchorPoint.X, anchorPoint.Y - separatorSize.Y / 2) + text.SeparatorOffset;
                                 drawList.AddRectFilled(separatorPos, separatorPos + separatorSize, text.SeparatorColor.Base);
+                            }
+
+                            if (text.UseBackground)
+                            {
+                                Vector2 backgroundPos = new(textBoxPos.X, parentPos.Y);
+                                Vector2 backgroundSize = new(textBoxSize.X, parentSize.Y);
+                                drawList.AddRectFilled(backgroundPos, backgroundPos + backgroundSize, text.BackgroundColor.Base);
                             }
 
                             if (text.Enabled)
@@ -521,7 +623,6 @@ namespace LMeter.Meter
             }
 
             List<Combatant> sortedCombatants = [.. actEvent.Combatants.Values];
-
             sortedCombatants.Sort((x, y) =>
             {
                 float xFloat = dataType switch

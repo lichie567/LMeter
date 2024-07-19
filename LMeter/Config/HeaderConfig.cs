@@ -1,21 +1,24 @@
-using System;
 using System.Numerics;
+using System.Text.Json.Serialization;
 using ImGuiNET;
 using LMeter.Helpers;
-using Newtonsoft.Json;
 
 namespace LMeter.Config
 {
     public class HeaderConfig : IConfigPage
     {
         [JsonIgnore]
-        private static readonly string[] _anchorOptions = Enum.GetNames(typeof(DrawAnchor));
-
-        public string Name => "Header";
+        public bool Active { get; set; }
+        
+        public string Name => "Header/Footer";
 
         public bool ShowHeader = true;
         public int HeaderHeight = 25;
         public ConfigColor BackgroundColor = new(30f / 255f, 30f / 255f, 30f / 255f, 230 / 255f);
+
+        public bool ShowFooter = false;
+        public int FooterHeight = 25;
+        public ConfigColor FooterBackgroundColor = new(0, 0, 0, .5f);
 
         public bool ShowEncounterDuration = true;
         public ConfigColor DurationColor = new(0f / 255f, 190f / 255f, 225f / 255f, 1f);
@@ -73,24 +76,16 @@ namespace LMeter.Config
 
         public void DrawConfig(Vector2 size, float padX, float padY, bool border = true)
         {
-            string[] fontOptions = FontsManager.GetFontList();
-            if (fontOptions.Length == 0)
-            {
-                return;
-            }
-
             if (ImGui.BeginChild($"##{this.Name}", size, border))
             {
                 ImGui.Checkbox("Show Header", ref this.ShowHeader);
                 if (this.ShowHeader)
                 {
                     DrawHelpers.DrawNestIndicator(1);
-                    ImGui.DragInt("Header Height", ref this.HeaderHeight, 1, 0, 100);
+                    ImGui.DragInt("Height##Header", ref this.HeaderHeight, 1, 0, 100);
 
                     DrawHelpers.DrawNestIndicator(1);
-                    Vector4 vector = this.BackgroundColor.Vector;
-                    ImGui.ColorEdit4("Background Color", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
-                    this.BackgroundColor.Vector = vector;
+                    DrawHelpers.DrawColorSelector("Background Color##Header", ref this.BackgroundColor);
 
                     DrawHelpers.DrawNestIndicator(1);
                     ImGui.Checkbox("Show LMeter Version when Cleared", ref this.ShowVersion);
@@ -99,37 +94,32 @@ namespace LMeter.Config
                         DrawHelpers.DrawNestIndicator(2);
                         ImGui.DragFloat2("Offset##Version", ref this.VersionOffset);
 
-                        if (!FontsManager.ValidateFont(fontOptions, this.VersionFontId, this.VersionFontKey))
-                        {
-                            this.VersionFontId = 0;
-                            for (int i = 0; i < fontOptions.Length; i++)
-                            {
-                                if (this.VersionFontKey.Equals(fontOptions[i]))
-                                {
-                                    this.VersionFontId = i;
-                                }
-                            }
-                        }
+                        DrawHelpers.DrawNestIndicator(2);
+                        DrawHelpers.DrawFontSelector("Font##Version", ref this.VersionFontKey, ref this.VersionFontId);
 
                         DrawHelpers.DrawNestIndicator(2);
-                        ImGui.Combo("Font##Version", ref this.VersionFontId, fontOptions, fontOptions.Length);
-                        this.VersionFontKey = fontOptions[this.VersionFontId];
-
-                        DrawHelpers.DrawNestIndicator(2);
-                        vector = this.VersionColor.Vector;
-                        ImGui.ColorEdit4("Text Color##Version", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
-                        this.VersionColor.Vector = vector;
+                        DrawHelpers.DrawColorSelector("Text Color##Version", ref this.VersionColor);
 
                         DrawHelpers.DrawNestIndicator(2);
                         ImGui.Checkbox("Show Outline##Version", ref this.VersionShowOutline);
                         if (this.VersionShowOutline)
                         {
                             DrawHelpers.DrawNestIndicator(3);
-                            vector = this.VersionOutlineColor.Vector;
-                            ImGui.ColorEdit4("Outline Color##Version", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
-                            this.VersionOutlineColor.Vector = vector;
+                            DrawHelpers.DrawColorSelector("Outline Color##Version", ref this.VersionOutlineColor);
                         }
                     }
+
+                    ImGui.NewLine();
+                }
+
+                ImGui.Checkbox("Show Footer", ref this.ShowFooter);
+                if (this.ShowFooter)
+                {
+                    DrawHelpers.DrawNestIndicator(1);
+                    ImGui.DragInt("Height##Footer", ref this.FooterHeight, 1, 0, 100);
+
+                    DrawHelpers.DrawNestIndicator(1);
+                    DrawHelpers.DrawColorSelector("Background Color##Footer", ref this.BackgroundColor);
                 }
                 
                 ImGui.EndChild();

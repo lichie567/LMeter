@@ -19,6 +19,9 @@ namespace LMeter.Config
         [JsonIgnore]
         private DateTime? LastReconnectAttempt { get; set; }
 
+        [JsonIgnore]
+        public bool Active { get; set; }
+
         public string Name => "ACT";
         public string ActSocketAddress;
         public int EncounterHistorySize = 15;

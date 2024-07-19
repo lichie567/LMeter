@@ -11,89 +11,6 @@ using Newtonsoft.Json;
 
 namespace LMeter.Config
 {
-    public class VisibilityCondition
-    {
-        [JsonIgnore] private string _customJobInput = string.Empty;
-
-        public bool Inverted = false;
-        public BooleanOperator Operator = BooleanOperator.And;
-        public VisibilityConditionType ConditionType = VisibilityConditionType.AlwaysTrue;
-
-        public JobType ShowForJobTypes = JobType.All;
-        public string CustomJobString = string.Empty;
-        public List<Job> CustomJobList = [];
-
-        public ZoneType Zone;
-
-        public bool IsActive() => this.Inverted ^ this.ConditionType switch
-        {
-            VisibilityConditionType.AlwaysTrue => true,
-            VisibilityConditionType.InCombat => CharacterState.IsInCombat(),
-            VisibilityConditionType.InDuty => CharacterState.IsInDuty(),
-            VisibilityConditionType.Performing => CharacterState.IsPerforming(),
-            VisibilityConditionType.Zone => CharacterState.InZone(this.Zone),
-            VisibilityConditionType.Job => CharacterState.IsJobType(CharacterState.GetCharacterJob(), this.ShowForJobTypes, this.CustomJobList),
-            _ => true
-        };
-
-        public void DrawConfig(Vector2 size, float padX, float padY)
-        {
-            ImGui.RadioButton("Always True", ref Unsafe.As<VisibilityConditionType, int>(ref this.ConditionType), (int)VisibilityConditionType.AlwaysTrue);
-            ImGui.RadioButton("In Combat", ref Unsafe.As<VisibilityConditionType, int>(ref this.ConditionType), (int)VisibilityConditionType.InCombat);
-            ImGui.RadioButton("In Duty", ref Unsafe.As<VisibilityConditionType, int>(ref this.ConditionType), (int)VisibilityConditionType.InDuty);
-            ImGui.RadioButton("Performing", ref Unsafe.As<VisibilityConditionType, int>(ref this.ConditionType), (int)VisibilityConditionType.Performing);
-
-            ImGui.RadioButton("In Zone", ref Unsafe.As<VisibilityConditionType, int>(ref this.ConditionType), (int)VisibilityConditionType.Zone);
-            if (this.ConditionType == VisibilityConditionType.Zone)
-            {
-                DrawHelpers.DrawNestIndicator(1);
-                ImGui.RadioButton("Gold Saucer", ref Unsafe.As<ZoneType, int>(ref this.Zone), (int)ZoneType.GoldSaucer);
-                DrawHelpers.DrawNestIndicator(1);
-                ImGui.RadioButton("Player House", ref Unsafe.As<ZoneType, int>(ref this.Zone), (int)ZoneType.PlayerHouse);
-            }
-
-            ImGui.RadioButton("Job", ref Unsafe.As<VisibilityConditionType, int>(ref this.ConditionType), (int)VisibilityConditionType.Job);
-            if (this.ConditionType == VisibilityConditionType.Job)
-            {
-                DrawHelpers.DrawNestIndicator(1);
-                string[] jobTypeOptions = Enum.GetNames(typeof(JobType));
-                ImGui.Combo("Job Select", ref Unsafe.As<JobType, int>(ref this.ShowForJobTypes), jobTypeOptions, jobTypeOptions.Length);
-
-                if (this.ShowForJobTypes == JobType.Custom)
-                {
-                    if (string.IsNullOrEmpty(_customJobInput))
-                    {
-                        _customJobInput = this.CustomJobString.ToUpper();
-                    }
-
-                    DrawHelpers.DrawNestIndicator(1);
-                    if (ImGui.InputTextWithHint("Custom Job List", "Comma Separated List (ex: WAR, SAM, BLM)", ref _customJobInput, 100, ImGuiInputTextFlags.EnterReturnsTrue))
-                    {
-                        IEnumerable<string> jobStrings = _customJobInput.Split(',').Select(j => j.Trim());
-                        List<Job> jobList = [];
-                        foreach (string j in jobStrings)
-                        {
-                            if (Enum.TryParse(j, true, out Job parsed))
-                            {
-                                jobList.Add(parsed);
-                            }
-                            else
-                            {
-                                jobList.Clear();
-                                _customJobInput = string.Empty;
-                                break;
-                            }
-                        }
-
-                        _customJobInput = _customJobInput.ToUpper();
-                        this.CustomJobString = _customJobInput;
-                        this.CustomJobList = jobList;
-                    }
-                }
-            }
-        }
-    }
-
     public class VisibilityConfig : IConfigPage
     {
         [JsonIgnore] public static readonly string[] OperatorOptions = [ "AND", "OR", "XOR" ];
@@ -101,6 +18,9 @@ namespace LMeter.Config
         [JsonIgnore] private int _swapX = -1;
         [JsonIgnore] private int _swapY = -1;
         [JsonIgnore] private int _selectedIndex = 0;
+        
+        [JsonIgnore]
+        public bool Active { get; set; }
 
         public string Name => "Visibility";
 
@@ -343,6 +263,89 @@ namespace LMeter.Config
         {
             _swapX = x;
             _swapY = y;
+        }
+    }
+    
+    public class VisibilityCondition
+    {
+        [JsonIgnore] private string _customJobInput = string.Empty;
+
+        public bool Inverted = false;
+        public BooleanOperator Operator = BooleanOperator.And;
+        public VisibilityConditionType ConditionType = VisibilityConditionType.AlwaysTrue;
+
+        public JobType ShowForJobTypes = JobType.All;
+        public string CustomJobString = string.Empty;
+        public List<Job> CustomJobList = [];
+
+        public ZoneType Zone;
+
+        public bool IsActive() => this.Inverted ^ this.ConditionType switch
+        {
+            VisibilityConditionType.AlwaysTrue => true,
+            VisibilityConditionType.InCombat => CharacterState.IsInCombat(),
+            VisibilityConditionType.InDuty => CharacterState.IsInDuty(),
+            VisibilityConditionType.Performing => CharacterState.IsPerforming(),
+            VisibilityConditionType.Zone => CharacterState.InZone(this.Zone),
+            VisibilityConditionType.Job => CharacterState.IsJobType(CharacterState.GetCharacterJob(), this.ShowForJobTypes, this.CustomJobList),
+            _ => true
+        };
+
+        public void DrawConfig(Vector2 size, float padX, float padY)
+        {
+            ImGui.RadioButton("Always True", ref Unsafe.As<VisibilityConditionType, int>(ref this.ConditionType), (int)VisibilityConditionType.AlwaysTrue);
+            ImGui.RadioButton("In Combat", ref Unsafe.As<VisibilityConditionType, int>(ref this.ConditionType), (int)VisibilityConditionType.InCombat);
+            ImGui.RadioButton("In Duty", ref Unsafe.As<VisibilityConditionType, int>(ref this.ConditionType), (int)VisibilityConditionType.InDuty);
+            ImGui.RadioButton("Performing", ref Unsafe.As<VisibilityConditionType, int>(ref this.ConditionType), (int)VisibilityConditionType.Performing);
+
+            ImGui.RadioButton("In Zone", ref Unsafe.As<VisibilityConditionType, int>(ref this.ConditionType), (int)VisibilityConditionType.Zone);
+            if (this.ConditionType == VisibilityConditionType.Zone)
+            {
+                DrawHelpers.DrawNestIndicator(1);
+                ImGui.RadioButton("Gold Saucer", ref Unsafe.As<ZoneType, int>(ref this.Zone), (int)ZoneType.GoldSaucer);
+                DrawHelpers.DrawNestIndicator(1);
+                ImGui.RadioButton("Player House", ref Unsafe.As<ZoneType, int>(ref this.Zone), (int)ZoneType.PlayerHouse);
+            }
+
+            ImGui.RadioButton("Job", ref Unsafe.As<VisibilityConditionType, int>(ref this.ConditionType), (int)VisibilityConditionType.Job);
+            if (this.ConditionType == VisibilityConditionType.Job)
+            {
+                DrawHelpers.DrawNestIndicator(1);
+                string[] jobTypeOptions = Enum.GetNames(typeof(JobType));
+                ImGui.Combo("Job Select", ref Unsafe.As<JobType, int>(ref this.ShowForJobTypes), jobTypeOptions, jobTypeOptions.Length);
+
+                if (this.ShowForJobTypes == JobType.Custom)
+                {
+                    if (string.IsNullOrEmpty(_customJobInput))
+                    {
+                        _customJobInput = this.CustomJobString.ToUpper();
+                    }
+
+                    DrawHelpers.DrawNestIndicator(1);
+                    if (ImGui.InputTextWithHint("Custom Job List", "Comma Separated List (ex: WAR, SAM, BLM)", ref _customJobInput, 100, ImGuiInputTextFlags.EnterReturnsTrue))
+                    {
+                        IEnumerable<string> jobStrings = _customJobInput.Split(',').Select(j => j.Trim());
+                        List<Job> jobList = [];
+                        foreach (string j in jobStrings)
+                        {
+                            if (Enum.TryParse(j, true, out Job parsed))
+                            {
+                                jobList.Add(parsed);
+                            }
+                            else
+                            {
+                                jobList.Clear();
+                                _customJobInput = string.Empty;
+                                break;
+                            }
+                        }
+
+                        _customJobInput = _customJobInput.ToUpper();
+                        this.CustomJobString = _customJobInput;
+                        this.CustomJobList = jobList;
+                    }
+                }
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
 using System.Numerics;
+using System.Text.Json.Serialization;
 using ImGuiNET;
 using LMeter.Helpers;
 
@@ -6,6 +7,8 @@ namespace LMeter.Config
 {
     public class BarConfig : IConfigPage
     {
+        [JsonIgnore]
+        public bool Active { get; set; }
         public string Name => "Bars";
 
         private static readonly string[] _jobIconStyleOptions = ["Style 1", "Style 2"];
@@ -20,6 +23,8 @@ namespace LMeter.Config
         public Vector2 JobIconSize = new(25, 25);
         public int JobIconStyle = 0;
         public Vector2 JobIconOffset = new(0, 0);
+        public ConfigColor JobIconBackgroundColor = new(0, 0, 0, 0);
+
         public bool ThousandsSeparators = true;
 
         public bool UseJobColor = true;
@@ -58,10 +63,18 @@ namespace LMeter.Config
 
         public bool ShowColumnHeader;
         public float ColumnHeaderHeight = 25;
-        public ConfigColor ColumnHeaderColor = new(0, 0, 0, 0.5f);
+        public ConfigColor ColumnHeaderColor = new(1, 1, 1, 1f);
+        public bool UseColumnFont = true;
         public ConfigColor ColumnHeaderTextColor = new(0, 0, 0, 0.5f);
         public bool ColumnHeaderShowOutline = true;
         public ConfigColor ColumnHeaderOutlineColor = new(0, 0, 0, 0.5f);
+        public Vector2 ColumnHeaderOffset = new();
+        public string ColumnHeaderFontKey = FontsManager.DalamudFontKey;
+        public int ColumnHeaderFontId = 0;
+
+        public float BarFillHeight = 1f;
+        public ConfigColor BarBackgroundColor = new(.3f, .3f, .3f, 1f);
+        public int BarFillDirection = 0;
 
         public IConfigPage GetDefault()
         {
@@ -82,12 +95,6 @@ namespace LMeter.Config
 
         public void DrawConfig(Vector2 size, float padX, float padY, bool border = true)
         {
-            string[] fontOptions = FontsManager.GetFontList();
-            if (fontOptions.Length == 0)
-            {
-                return;
-            }
-
             if (ImGui.BeginChild($"##{this.Name}", new Vector2(size.X, size.Y), border))
             {
                 ImGui.Text("Bar Height Type");
@@ -103,9 +110,14 @@ namespace LMeter.Config
                 {
                     ImGui.DragFloat("Bar Height", ref this.BarHeight, .1f, 1, 100);
                 }
-                
+
                 ImGui.DragInt("Bar Gap Size", ref this.BarGaps, 1, 0, 20);
 
+                ImGui.NewLine();
+                ImGui.DragFloat("Bar Fill Height (% of Bar Height)", ref this.BarFillHeight, .1f, 0, 1f);
+                ImGui.Combo("Bar Fill Direction", ref this.BarFillDirection, ["Up", "Down"], 2);
+                DrawHelpers.DrawColorSelector("Bar Background Color", ref this.BarBackgroundColor);
+                
                 ImGui.NewLine();
                 ImGui.Checkbox("Show Job Icon", ref this.ShowJobIcon);
                 if (this.ShowJobIcon)
@@ -127,6 +139,8 @@ namespace LMeter.Config
 
                     DrawHelpers.DrawNestIndicator(1);
                     ImGui.Combo("Job Icon Style", ref this.JobIconStyle, _jobIconStyleOptions, _jobIconStyleOptions.Length);
+                    DrawHelpers.DrawNestIndicator(1);
+                    DrawHelpers.DrawColorSelector("Background Color##JobIcon", ref this.JobIconBackgroundColor);
                 }
 
                 ImGui.NewLine();
@@ -134,9 +148,7 @@ namespace LMeter.Config
                 if (!this.UseJobColor)
                 {
                     DrawHelpers.DrawNestIndicator(1);
-                    Vector4 vector = this.BarColor.Vector;
-                    ImGui.ColorEdit4("Bar Color", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
-                    this.BarColor.Vector = vector;
+                    DrawHelpers.DrawColorSelector("Bar Color", ref this.BarColor);
                 }
 
                 ImGui.Checkbox("Use your name instead of 'YOU'", ref this.UseCharacterName);
@@ -150,23 +162,28 @@ namespace LMeter.Config
                     ImGui.DragFloat("Column Header Height", ref this.ColumnHeaderHeight);
 
                     DrawHelpers.DrawNestIndicator(1);
-                    Vector4 vector = this.ColumnHeaderColor.Vector;
-                    ImGui.ColorEdit4("Background Color", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
-                    this.ColumnHeaderColor.Vector = vector;
+                    ImGui.DragFloat2("Text Offset", ref this.ColumnHeaderOffset);
 
                     DrawHelpers.DrawNestIndicator(1);
-                    vector = this.ColumnHeaderTextColor.Vector;
-                    ImGui.ColorEdit4("Text Color", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
-                    this.ColumnHeaderTextColor.Vector = vector;
+                    DrawHelpers.DrawColorSelector("Background Color", ref this.ColumnHeaderColor);
+
+                    DrawHelpers.DrawNestIndicator(1);
+                    DrawHelpers.DrawColorSelector("Text Color", ref this.ColumnHeaderTextColor);
+
+                    DrawHelpers.DrawNestIndicator(1);
+                    ImGui.Checkbox("Use Font from Column", ref this.UseColumnFont);
+                    if (!this.UseColumnFont)
+                    {
+                        DrawHelpers.DrawNestIndicator(2);
+                        DrawHelpers.DrawFontSelector("Font##Column", ref this.ColumnHeaderFontKey, ref this.ColumnHeaderFontId);
+                    }
 
                     DrawHelpers.DrawNestIndicator(1);
                     ImGui.Checkbox("Show Outline", ref this.ColumnHeaderShowOutline);
                     if (this.ColumnHeaderShowOutline)
                     {
                         DrawHelpers.DrawNestIndicator(2);
-                        vector = this.ColumnHeaderOutlineColor.Vector;
-                        ImGui.ColorEdit4("Column Header Color", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
-                        this.ColumnHeaderOutlineColor.Vector = vector;
+                        DrawHelpers.DrawColorSelector("Column Header Color", ref this.ColumnHeaderOutlineColor);
                     }
                 }
             }

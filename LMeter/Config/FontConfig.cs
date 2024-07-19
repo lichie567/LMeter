@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using Dalamud.Interface;
@@ -11,12 +10,15 @@ namespace LMeter.Config
 {
     public class FontConfig : IConfigPage
     {
+        [JsonIgnore]
+        public bool Active { get; set; }
+        
         public string Name => "Fonts";
 
         [JsonIgnore] private static readonly string? _fontPath = FontsManager.GetUserFontPath();
         [JsonIgnore] private int _selectedFont = 0;
         [JsonIgnore] private int _selectedSize = 23;
-        [JsonIgnore] private string[] _fonts = FontsManager.GetFontNamesFromPath(FontsManager.GetUserFontPath());
+        [JsonIgnore] private string[] _fontPaths = FontsManager.GetFontPaths(FontsManager.GetUserFontPath());
         [JsonIgnore] private readonly string[] _sizes = Enumerable.Range(1, 40).Select(i => i.ToString()).ToArray();
         [JsonIgnore] private bool _chinese = false;
         [JsonIgnore] private bool _korean = false;
@@ -28,15 +30,9 @@ namespace LMeter.Config
             RefreshFontList();
             this.Fonts = [];
 
-            foreach (string fontKey in FontsManager.DefaultFontKeys)
+            foreach (FontData font in FontsManager.GetDefaultFontData())
             {
-                string[] splits = fontKey.Split("_", StringSplitOptions.RemoveEmptyEntries);
-                if (splits.Length == 2 && int.TryParse(splits[1], out int size))
-                {
-                    FontData newFont = new(splits[0], size, false, false);
-                    string key = FontsManager.GetFontKey(newFont);
-                    this.Fonts.Add(key, newFont);
-                }
+                this.Fonts.Add(FontsManager.GetFontKey(font), font);
             }
         }
 
@@ -44,7 +40,7 @@ namespace LMeter.Config
 
         public void DrawConfig(Vector2 size, float padX, float padY, bool border = true)
         {
-            if (_fonts.Length == 0)
+            if (_fontPaths.Length == 0)
             {
                 RefreshFontList();
             }
@@ -62,7 +58,8 @@ namespace LMeter.Config
                     ImGui.SetCursorPosY(cursorY);
                     DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Copy, () => ImGui.SetClipboardText(_fontPath), null, buttonSize);
 
-                    ImGui.Combo("Font", ref _selectedFont, _fonts, _fonts.Length);
+                    string[] fontNames = _fontPaths.Select(x => FontsManager.GetFontName(_fontPath, x)).ToArray();
+                    ImGui.Combo("Font", ref _selectedFont, fontNames, fontNames.Length);
                     ImGui.SameLine();
                     DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Sync, () => RefreshFontList(), "Reload Font List", buttonSize);
 
@@ -149,17 +146,16 @@ namespace LMeter.Config
 
         public void RefreshFontList()
         {
-            _fonts = FontsManager.GetFontNamesFromPath(FontsManager.GetUserFontPath());
+            _fontPaths = FontsManager.GetFontPaths(FontsManager.GetUserFontPath());
         }
 
         private void AddFont(int fontIndex, int size)
         {
-            FontData newFont = new(_fonts[fontIndex], size + 1, _chinese, _korean);
+            FontData newFont = new(FontsManager.GetFontName(_fontPath, _fontPaths[fontIndex]), _fontPaths[fontIndex], size + 1, _chinese, _korean);
             string key = FontsManager.GetFontKey(newFont);
 
-            if (!this.Fonts.ContainsKey(key))
+            if (this.Fonts.TryAdd(key, newFont))
             {
-                this.Fonts.Add(key, newFont);
                 Singletons.Get<FontsManager>().UpdateFonts(this.Fonts.Values);
             }
         }

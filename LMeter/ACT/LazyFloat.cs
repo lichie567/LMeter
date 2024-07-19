@@ -31,7 +31,7 @@ namespace LMeter.Act
                     }
                     else if (_getStringInput is not null)
                     {
-                        this._input = _getStringInput.Invoke();
+                        _input = _getStringInput.Invoke();
                     }
                 }
 
