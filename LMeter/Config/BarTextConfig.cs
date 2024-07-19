@@ -31,15 +31,11 @@ namespace LMeter.Config
 
         public IConfigPage GetDefault()
         {
-            return new TextListConfig<T>();
+            return new TextListConfig<T>() { NameInternal = this.NameInternal };
         }
 
         public void DrawConfig(Vector2 size, float padX, float padY, bool border = true)
         {
-            if (this.Texts.Count == 0)
-            {
-                return;
-            }
 
             if (ImGui.BeginChild($"##TextListConfig", size, border))
             {
@@ -163,12 +159,14 @@ namespace LMeter.Config
                     ImGui.EndTable();
                 }
 
-                
-                ImGui.Text($"Edit {this.Texts[_selectedIndex].Name}");
-                if (ImGui.BeginChild($"##SelectedText_Edit", new(size.X - padX * 2, size.Y - ImGui.GetCursorPosY() - padY * 2), true))
+                if (this.Texts.Count != 0)
                 {
-                    this.Texts[_selectedIndex].DrawConfig<T>();
-                    ImGui.EndChild();
+                    ImGui.Text($"Edit {this.Texts[_selectedIndex].Name}");
+                    if (ImGui.BeginChild($"##SelectedText_Edit", new(size.X - padX * 2, size.Y - ImGui.GetCursorPosY() - padY * 2), true))
+                    {
+                        this.Texts[_selectedIndex].DrawConfig<T>();
+                        ImGui.EndChild();
+                    }
                 }
 
                 ImGui.EndChild();

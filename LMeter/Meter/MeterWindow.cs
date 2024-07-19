@@ -102,7 +102,7 @@ namespace LMeter.Meter
             }
         }
 
-        public static MeterWindow GetDefaultMeter(string name)
+        public static MeterWindow GetDefaultMeter(string name = "Profile 1")
         {
             MeterWindow newMeter = ConfigHelpers.GetFromImportString<MeterWindow>(_defaultProfile) ?? new MeterWindow(name);
             newMeter.Name = name;
