@@ -237,7 +237,6 @@ namespace LMeter.Meter
                 ConfigColor jobColor = this.BarColorsConfig.GetColor(CharacterState.GetCharacterJob());
 
                 Vector2 footerPos = localPos.AddY(size.Y - this.HeaderConfig.FooterHeight);
-
                 if (this.HeaderConfig.ShowHeader)
                 {
                     (localPos, size) = DrawHeader(
@@ -250,7 +249,8 @@ namespace LMeter.Meter
                         actEvent?.Encounter);
                 }
                 
-                drawList.AddRectFilled(localPos, localPos + size, this.GeneralConfig.BackgroundColor.Base);
+                Vector2 backgroundSize = this.HeaderConfig.ShowFooter ? size.AddY(-this.HeaderConfig.FooterHeight) : size;
+                drawList.AddRectFilled(localPos, localPos + backgroundSize, this.GeneralConfig.BackgroundColor.Base);
                 if (this.BarConfig.ShowColumnHeader && actEvent is not null)
                 {
                     List<Text> columnHeaderTexts = GetColumnHeaderTexts(this.BarTextConfig.Texts, this.BarConfig);
