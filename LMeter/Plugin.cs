@@ -77,9 +77,6 @@ namespace LMeter
             // Init TexturesCache
             Singletons.Register(new TextureCache());
 
-            // Load Icon Texure
-            Plugin.IconTexture = LoadIconTexture(textureProvider);
-
             // Load changelog
             Plugin.Changelog = LoadChangelog();
 

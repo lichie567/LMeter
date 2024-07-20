@@ -19,26 +19,27 @@ namespace LMeter.Config
             if (ImGui.BeginChild("##AboutPage", new Vector2(size.X, size.Y), border))
             {
                 Vector2 headerSize = Vector2.Zero;
-                if (Plugin.IconTexture is not null)
-                {
-                    Vector2 iconSize = new(Plugin.IconTexture.Width, Plugin.IconTexture.Height);
-                    string versionText = $"LMeter v{Plugin.Version}";
-                    Vector2 textSize = ImGui.CalcTextSize(versionText);
-                    headerSize = new Vector2(size.X, iconSize.Y + textSize.Y);
+                // if (Plugin.IconTexture is not null)
+                // {
+                //     Vector2 iconSize = new(Plugin.IconTexture.Width, Plugin.IconTexture.Height);
+                //     string versionText = $"LMeter v{Plugin.Version}";
+                //     Vector2 textSize = ImGui.CalcTextSize(versionText);
+                //     headerSize = new Vector2(size.X, iconSize.Y + textSize.Y);
 
-                    if (ImGui.BeginChild("##Icon", headerSize, false))
-                    {
-                        ImDrawListPtr drawList = ImGui.GetWindowDrawList();
-                        Vector2 pos = ImGui.GetWindowPos().AddX(size.X / 2 - iconSize.X / 2);
-                        drawList.AddImage(Plugin.IconTexture.ImGuiHandle, pos, pos + iconSize);
-                        Vector2 textPos = ImGui.GetWindowPos().AddX(size.X / 2 - textSize.X / 2).AddY(iconSize.Y);
-                        drawList.AddText(textPos, 0xFFFFFFFF, versionText);
-                        ImGui.End();
-                    }
-                }
+                //     if (ImGui.BeginChild("##Icon", headerSize, false))
+                //     {
+                //         ImDrawListPtr drawList = ImGui.GetWindowDrawList();
+                //         Vector2 pos = ImGui.GetWindowPos().AddX(size.X / 2 - iconSize.X / 2);
+                //         drawList.AddImage(Plugin.IconTexture.ImGuiHandle, pos, pos + iconSize);
+                //         Vector2 textPos = ImGui.GetWindowPos().AddX(size.X / 2 - textSize.X / 2).AddY(iconSize.Y);
+                //         drawList.AddText(textPos, 0xFFFFFFFF, versionText);
+                //         ImGui.End();
+                //     }
+                // }
 
-                ImGui.SetCursorPosY(ImGui.GetCursorPosY() + headerSize.Y);
-                DrawHelpers.DrawSpacing(1);
+                // ImGui.SetCursorPosY(ImGui.GetCursorPosY() + headerSize.Y);
+                // DrawHelpers.DrawSpacing(1);
+                
                 ImGui.Text("Changelog");
                 Vector2 changeLogSize = new(size.X - padX * 2, size.Y - ImGui.GetCursorPosY() - padY - 30);
 
@@ -62,9 +63,9 @@ namespace LMeter.Config
                 }
 
                 ImGui.SameLine();
-                if (ImGui.Button("Discord", buttonSize))
+                if (ImGui.Button("Ko-fi", buttonSize))
                 {
-                    Utils.OpenUrl("https://discord.gg/delvui");
+                    Utils.OpenUrl("https://ko-fi.com/lichie");
                 }
 
                 ImGui.PopStyleVar();
