@@ -375,7 +375,6 @@ namespace LMeter.Meter
 
                 int currentIndex = 0;
                 string playerName = Singletons.Get<IClientState>().LocalPlayer?.Name.ToString() ?? "YOU";
-
                 if (sortedCombatants.Count > this.BarConfig.BarCount)
                 {
                     currentIndex = Math.Clamp(_scrollPosition, 0, sortedCombatants.Count - this.BarConfig.BarCount);
@@ -501,18 +500,18 @@ namespace LMeter.Meter
                             lookup.Add(textIndex + 1, (textBoxPos, textBoxSize));
                             visited[textIndex] = true;
 
-                            if (text.ShowSeparator)
-                            {
-                                Vector2 separatorSize = new(text.SeparatorWidth, parentSize.Y * text.SeparatorHeight);
-                                Vector2 separatorPos = new Vector2(anchorPoint.X, anchorPoint.Y - separatorSize.Y / 2) + text.SeparatorOffset;
-                                drawList.AddRectFilled(separatorPos, separatorPos + separatorSize, text.SeparatorColor.Base);
-                            }
-
                             if (text.UseBackground)
                             {
                                 Vector2 backgroundPos = new(textBoxPos.X, parentPos.Y);
                                 Vector2 backgroundSize = new(textBoxSize.X, parentSize.Y);
                                 drawList.AddRectFilled(backgroundPos, backgroundPos + backgroundSize, text.BackgroundColor.Base);
+                            }
+
+                            if (text.ShowSeparator)
+                            {
+                                Vector2 separatorSize = new(text.SeparatorWidth, parentSize.Y * text.SeparatorHeight);
+                                Vector2 separatorPos = new Vector2(anchorPoint.X, anchorPoint.Y - separatorSize.Y / 2) + text.SeparatorOffset;
+                                drawList.AddRectFilled(separatorPos, separatorPos + separatorSize, text.SeparatorColor.Base);
                             }
 
                             if (text.Enabled)

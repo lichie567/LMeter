@@ -281,6 +281,7 @@ namespace LMeter.Config
 
         public Text Clone()
         {
+            // hot path so don't clone via serialization
             return new()
             {
                 Name = this.Name,
@@ -304,7 +305,9 @@ namespace LMeter.Config
                 SeparatorWidth = this.SeparatorWidth,
                 SeparatorHeight = this.SeparatorHeight,
                 SeparatorOffset = this.SeparatorOffset,
-                SeparatorColor = this.SeparatorColor
+                SeparatorColor = this.SeparatorColor,
+                UseBackground = this.UseBackground,
+                BackgroundColor = this.BackgroundColor
             };
         }
         
@@ -315,7 +318,7 @@ namespace LMeter.Config
 
             if (ImGui.IsItemHovered())
             {
-                ImGui.SetTooltip(Utils.GetTagsTooltip(Combatant.TextTags));
+                ImGui.SetTooltip(Utils.GetTagsTooltip());
             }
 
             ImGui.SameLine();
