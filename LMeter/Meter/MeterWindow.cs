@@ -27,6 +27,7 @@ namespace LMeter.Meter
         [JsonIgnore] private int _eventIndex = -1;
         [JsonIgnore] private ActEvent? _previewEvent = null;
         [JsonIgnore] private int _scrollPosition = 0;
+        [JsonIgnore] private float _scrollShift = 0;
         [JsonIgnore] private DateTime? _lastSortedTimestamp = null;
         [JsonIgnore] private List<Combatant> _lastSortedCombatants = [];
         [JsonIgnore] public string Id { get; init; } = $"LMeter_MeterWindow_{Guid.NewGuid()}";
@@ -227,7 +228,6 @@ namespace LMeter.Meter
                 ActEvent? actEvent = this.GeneralConfig.Preview ? _previewEvent : Singletons.Get<LogClient>().GetEvent(_eventIndex);
                 ConfigColor jobColor = this.BarColorsConfig.GetColor(CharacterState.GetCharacterJob());
 
-                ImGui.PushClipRect(localPos, localPos + size, false);
                 Vector2 footerPos = localPos.AddY(size.Y - this.HeaderConfig.FooterHeight);
 
                 if (this.HeaderConfig.ShowHeader)
@@ -264,7 +264,9 @@ namespace LMeter.Meter
                     size = size.AddY(-this.HeaderConfig.FooterHeight);
                 }
 
+                ImGui.PushClipRect(localPos, localPos + size, false);
                 this.DrawBars(drawList, localPos, size, actEvent);
+                ImGui.PopClipRect();
 
                 if (this.HeaderConfig.ShowFooter)
                 {
@@ -277,8 +279,6 @@ namespace LMeter.Meter
                         jobColor,
                         actEvent?.Encounter);
                 }
-
-                ImGui.PopClipRect();
             });
 
             _lastFrameWasUnlocked = _unlocked;
@@ -372,13 +372,39 @@ namespace LMeter.Meter
                     MeterDataType.DamageTaken => sortedCombatants[0].DamageTaken?.Value ?? 0,
                     _ => 0
                 };
+                
+                int barCount = this.BarConfig.BarCount;
+                float margin = 0;
+                if (this.BarConfig.BarHeightType == 1)
+                {
+                    float total = 0;
+                    barCount = 0;
+                    do
+                    {
+                        barCount++;
+                        total += this.BarConfig.BarHeight + this.BarConfig.BarGaps;
+                    } 
+                    while (total <= size.Y);
+                    margin = total - size.Y - this.BarConfig.BarGaps;
+                }
 
                 int currentIndex = 0;
                 string playerName = Singletons.Get<IClientState>().LocalPlayer?.Name.ToString() ?? "YOU";
                 if (sortedCombatants.Count > this.BarConfig.BarCount)
                 {
+                    int unclampedScroll = _scrollPosition;
                     currentIndex = Math.Clamp(_scrollPosition, 0, sortedCombatants.Count - this.BarConfig.BarCount);
                     _scrollPosition = currentIndex;
+
+                    if (margin > 0 && _scrollPosition < unclampedScroll)
+                    {
+                        _scrollShift = margin;
+                    }
+                    
+                    if (_scrollPosition == 0)
+                    {
+                        _scrollShift = 0;
+                    }
 
                     if (this.BarConfig.AlwaysShowSelf)
                     {
@@ -386,7 +412,8 @@ namespace LMeter.Meter
                     }
                 }
 
-                int maxIndex = Math.Min(currentIndex + this.BarConfig.BarCount, sortedCombatants.Count);
+                localPos = localPos.AddY(-_scrollShift);
+                int maxIndex = Math.Min(currentIndex + barCount, sortedCombatants.Count);
                 for (; currentIndex < maxIndex; currentIndex++)
                 {
                     Combatant combatant = sortedCombatants[currentIndex];
