@@ -54,7 +54,7 @@ namespace LMeter.Config
                     float actionsWidth = buttonSize.X * 3 + ImGui.GetStyle().ItemSpacing.X * 2;
                     float anchorComboWidth = 100f;
 
-                    ImGui.TableSetupColumn("Enable", ImGuiTableColumnFlags.WidthFixed, 39, 0);
+                    ImGui.TableSetupColumn("Enabled", ImGuiTableColumnFlags.WidthFixed, 46, 0);
                     ImGui.TableSetupColumn("Text Name", ImGuiTableColumnFlags.WidthStretch, 0, 1);
                     ImGui.TableSetupColumn("Anchored To", ImGuiTableColumnFlags.WidthFixed, anchorComboWidth, 2);
                     ImGui.TableSetupColumn("Anchor Point", ImGuiTableColumnFlags.WidthFixed, anchorComboWidth, 3);
@@ -72,7 +72,7 @@ namespace LMeter.Config
                         Text text = this.Texts[i];
                         if (ImGui.TableSetColumnIndex(0))
                         {
-                            ImGui.SetCursorPos(ImGui.GetCursorPos() + new Vector2(8f, 1f));
+                            ImGui.SetCursorPos(ImGui.GetCursorPos() + new Vector2(11f, 1f));
                             ImGui.Checkbox($"##Text_{i}_EnabledCheckbox", ref text.Enabled);
                         }
 

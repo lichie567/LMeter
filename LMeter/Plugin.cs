@@ -112,7 +112,11 @@ namespace LMeter
             // Create profile on first load
             if (config.FirstLoad && config.MeterList.Meters.Count == 0)
             {
-                config.MeterList.Meters.Add(MeterWindow.GetDefaultMeter("Profile 1"));
+                config.MeterList.Meters.Add(MeterWindow.GetDefaultMeter(MeterDataType.Damage, "Dps Meter"));
+
+                MeterWindow hps = MeterWindow.GetDefaultMeter(MeterDataType.Healing, "Hps Meter");
+                hps.VisibilityConfig.AlwaysHide = true;
+                config.MeterList.Meters.Add(hps);
             }
             
             config.FirstLoad = false;

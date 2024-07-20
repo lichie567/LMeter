@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using Dalamud.Interface;
 using Dalamud.Interface.ImGuiNotification;
 using ImGuiNET;
@@ -14,6 +15,9 @@ namespace LMeter.Config
     {
         [JsonIgnore]
         private string _input = string.Empty;
+
+        [JsonIgnore]
+        private MeterDataType _meterDataType = MeterDataType.Damage;
         
         private const float MenuBarHeight = 40;
 
@@ -70,7 +74,8 @@ namespace LMeter.Config
         private void DrawCreateMenu(Vector2 size, float padX)
         {
             Vector2 buttonSize = new(40, 0);
-            float textInputWidth = size.X - buttonSize.X * 2 - padX * 4;
+            float meterTypeWidth = 100f;
+            float textInputWidth = size.X - meterTypeWidth - buttonSize.X * 2 - padX * 5;
 
             if (ImGui.BeginChild("##Buttons", new Vector2(size.X, MenuBarHeight), true))
             {
@@ -78,8 +83,13 @@ namespace LMeter.Config
                 ImGui.InputTextWithHint("##Input", "Profile Name/Import String", ref _input, 10000);
                 ImGui.PopItemWidth();
 
+                ImGui.PushItemWidth(meterTypeWidth);
                 ImGui.SameLine();
-                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Plus, () => CreateMeter(_input), "Create new Meter", buttonSize);
+                ImGui.Combo("", ref Unsafe.As<MeterDataType, int>(ref _meterDataType), ["Damage", "Healing"], 2);
+                ImGui.PopItemWidth();
+
+                ImGui.SameLine();
+                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Plus, () => CreateMeter(_input, _meterDataType), "Create new Meter", buttonSize);
 
                 ImGui.SameLine();
                 DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Download, () => ImportMeter(_input), "Import new Meter", buttonSize);
@@ -104,7 +114,7 @@ namespace LMeter.Config
                 Vector2 buttonsize = new(30, 0);
                 float actionsWidth = buttonsize.X * 3 + padX * 2;
 
-                ImGui.TableSetupColumn("   #", ImGuiTableColumnFlags.WidthFixed, 18, 0);
+                ImGui.TableSetupColumn("Enabled", ImGuiTableColumnFlags.WidthFixed, 46, 0);
                 ImGui.TableSetupColumn("Profile Name", ImGuiTableColumnFlags.WidthStretch, 0, 1);
                 ImGui.TableSetupColumn("Actions", ImGuiTableColumnFlags.WidthFixed, actionsWidth, 2);
 
@@ -125,13 +135,11 @@ namespace LMeter.Config
                     ImGui.TableNextRow(ImGuiTableRowFlags.None, 28);
 
                     if (ImGui.TableSetColumnIndex(0))
-                    {
-                        string num = $"  {i + 1}.";
-                        float columnWidth = ImGui.GetColumnWidth();
-                        Vector2 cursorPos = ImGui.GetCursorPos();
-                        Vector2 textSize = ImGui.CalcTextSize(num);
-                        ImGui.SetCursorPos(new Vector2(cursorPos.X + columnWidth - textSize.X, cursorPos.Y + 3f));
-                        ImGui.Text(num);
+                    {                        
+                        ImGui.SetCursorPos(ImGui.GetCursorPos() + new Vector2(11f, 1f));
+                        bool enabled = !meter.VisibilityConfig.AlwaysHide;
+                        ImGui.Checkbox($"##Text_{i}_EnabledCheckbox", ref enabled);
+                        meter.VisibilityConfig.AlwaysHide = !enabled;
                     }
 
                     if (ImGui.TableSetColumnIndex(1))
@@ -157,11 +165,11 @@ namespace LMeter.Config
             }
         }
 
-        private void CreateMeter(string name)
+        private void CreateMeter(string name, MeterDataType dataType)
         {
             if (!string.IsNullOrEmpty(name))
             {
-                this.Meters.Add(MeterWindow.GetDefaultMeter(name));
+                this.Meters.Add(MeterWindow.GetDefaultMeter(dataType, name));
             }
 
             _input = string.Empty;

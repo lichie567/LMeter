@@ -13,9 +13,7 @@ using Newtonsoft.Json;
 namespace LMeter.Meter
 {
     public class MeterWindow(string name) : IConfigurable
-    {
-        [JsonIgnore] private const string _defaultProfile = "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";
-        
+    {        
         [JsonIgnore] private bool _lastFrameWasUnlocked = false;
         [JsonIgnore] private bool _lastFrameWasDragging = false;
         [JsonIgnore] private bool _lastFrameWasPreview = false;
@@ -103,11 +101,21 @@ namespace LMeter.Meter
             }
         }
 
-        public static MeterWindow GetDefaultMeter(string name = "Profile 1")
+        public static MeterWindow GetDefaultMeter(MeterDataType type, string name = "Default")
         {
-            MeterWindow newMeter = ConfigHelpers.GetFromImportString<MeterWindow>(_defaultProfile) ?? new MeterWindow(name);
-            newMeter.Name = name;
-            return newMeter;
+            MeterWindow? newMeter = type switch
+            {
+                MeterDataType.Damage => ConfigHelpers.GetFromImportString<MeterWindow>(DefaultProfiles.DefaultDpsMeter),
+                MeterDataType.Healing => ConfigHelpers.GetFromImportString<MeterWindow>(DefaultProfiles.DefaultHpsMeter),
+                _ => ConfigHelpers.GetFromImportString<MeterWindow>(DefaultProfiles.DefaultDpsMeter)
+            };
+
+            if (newMeter is not null)
+            {
+                newMeter.Name = name;
+            }
+
+            return newMeter ?? new MeterWindow(name);
         }
 
         public void Clear()
