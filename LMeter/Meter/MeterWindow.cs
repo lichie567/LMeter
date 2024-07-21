@@ -166,6 +166,10 @@ namespace LMeter.Meter
 
             Vector2 localPos = pos + this.GeneralConfig.Position;
             Vector2 size = this.GeneralConfig.Size;
+            if (!this.ShouldDraw(localPos, size))
+            {
+                return;
+            }
 
             if (ImGui.IsMouseHoveringRect(localPos, localPos + size))
             {
@@ -177,19 +181,13 @@ namespace LMeter.Meter
                 }
             }
 
-            bool shouldDraw = this.ShouldDraw(localPos, size);
-            bool contextMenuOpen = this.DrawContextMenu($"{this.Id}_ContextMenu", out bool selected, out int index) && shouldDraw;
+            bool contextMenuOpen = this.DrawContextMenu($"{this.Id}_ContextMenu", out bool selected, out int index);
             if (contextMenuOpen && selected)
             {
                 _eventIndex = index;
                 _lastSortedTimestamp = null;
                 _lastSortedCombatants = [];
                 _scrollPosition = 0;
-            }
-            
-            if (!shouldDraw)
-            {
-                return;
             }
 
             bool combat = CharacterState.IsInCombat();
