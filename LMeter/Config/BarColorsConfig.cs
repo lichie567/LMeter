@@ -100,27 +100,27 @@ namespace LMeter.Config
                 DrawHelpers.DrawColorSelector("WAR", ref this.WARColor);
                 DrawHelpers.DrawColorSelector("DRK", ref this.DRKColor);
                 DrawHelpers.DrawColorSelector("GNB", ref this.GNBColor);
+
                 ImGui.NewLine();
-                
                 DrawHelpers.DrawColorSelector("SCH", ref this.SCHColor);
                 DrawHelpers.DrawColorSelector("WHM", ref this.WHMColor);
                 DrawHelpers.DrawColorSelector("AST", ref this.ASTColor);
                 DrawHelpers.DrawColorSelector("SGE", ref this.SGEColor);
-                ImGui.NewLine();
 
+                ImGui.NewLine();
                 DrawHelpers.DrawColorSelector("MNK", ref this.MNKColor);
                 DrawHelpers.DrawColorSelector("NIN", ref this.NINColor);
                 DrawHelpers.DrawColorSelector("DRG", ref this.DRGColor);
                 DrawHelpers.DrawColorSelector("SAM", ref this.SAMColor);
                 DrawHelpers.DrawColorSelector("RPR", ref this.RPRColor);
                 DrawHelpers.DrawColorSelector("VPR", ref this.VPRColor);
-                ImGui.NewLine();
 
+                ImGui.NewLine();
                 DrawHelpers.DrawColorSelector("BRD", ref this.BRDColor);
                 DrawHelpers.DrawColorSelector("MCH", ref this.MCHColor);
                 DrawHelpers.DrawColorSelector("DNC", ref this.DNCColor);
-                ImGui.NewLine();
 
+                ImGui.NewLine();
                 DrawHelpers.DrawColorSelector("BLM", ref this.BLMColor);
                 DrawHelpers.DrawColorSelector("SMN", ref this.SMNColor);
                 DrawHelpers.DrawColorSelector("RDM", ref this.RDMColor);
@@ -128,7 +128,6 @@ namespace LMeter.Config
                 DrawHelpers.DrawColorSelector("BLU", ref this.BLUColor);
 
                 ImGui.NewLine();
-                
                 DrawHelpers.DrawColorSelector("GLA", ref this.GLAColor);
                 DrawHelpers.DrawColorSelector("MRD", ref this.MRDColor);
                 DrawHelpers.DrawColorSelector("CNJ", ref this.CNJColor);
@@ -138,6 +137,9 @@ namespace LMeter.Config
                 DrawHelpers.DrawColorSelector("ARC", ref this.ARCColor);
                 DrawHelpers.DrawColorSelector("THM", ref this.THMColor);
                 DrawHelpers.DrawColorSelector("ACN", ref this.ACNColor);
+
+                ImGui.NewLine();
+                DrawHelpers.DrawColorSelector("Limit Break", ref this.UKNColor);
             }
 
             ImGui.EndChild();
