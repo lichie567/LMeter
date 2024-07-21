@@ -112,7 +112,7 @@ namespace LMeter
                 config.MeterList.Meters.Add(MeterWindow.GetDefaultMeter(MeterDataType.Damage, "Dps Meter"));
 
                 MeterWindow hps = MeterWindow.GetDefaultMeter(MeterDataType.Healing, "Hps Meter");
-                hps.VisibilityConfig.AlwaysHide = true;
+                hps.Enabled = false;
                 config.MeterList.Meters.Add(hps);
             }
             

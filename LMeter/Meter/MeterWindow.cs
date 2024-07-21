@@ -32,6 +32,7 @@ namespace LMeter.Meter
 
         public string Name { get; set; } = name;
 
+        public bool Enabled = true;
         public GeneralConfig GeneralConfig { get; set; } = new GeneralConfig();
         public HeaderConfig HeaderConfig { get; set; } = new HeaderConfig();
         public TextListConfig<Encounter> HeaderTextConfig { get; set; } = new("Header Texts");
@@ -158,6 +159,11 @@ namespace LMeter.Meter
 
         public void Draw(Vector2 pos)
         {
+            if (!this.Enabled)
+            {
+                return;
+            }
+
             Vector2 localPos = pos + this.GeneralConfig.Position;
             Vector2 size = this.GeneralConfig.Size;
 

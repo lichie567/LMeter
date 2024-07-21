@@ -137,9 +137,7 @@ namespace LMeter.Config
                     if (ImGui.TableSetColumnIndex(0))
                     {                        
                         ImGui.SetCursorPos(ImGui.GetCursorPos() + new Vector2(11f, 1f));
-                        bool enabled = !meter.VisibilityConfig.AlwaysHide;
-                        ImGui.Checkbox($"##Text_{i}_EnabledCheckbox", ref enabled);
-                        meter.VisibilityConfig.AlwaysHide = !enabled;
+                        ImGui.Checkbox($"##Text_{i}_EnabledCheckbox", ref meter.Enabled);
                     }
 
                     if (ImGui.TableSetColumnIndex(1))
