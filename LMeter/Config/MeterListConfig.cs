@@ -135,7 +135,7 @@ namespace LMeter.Config
                     ImGui.TableNextRow(ImGuiTableRowFlags.None, 28);
 
                     if (ImGui.TableSetColumnIndex(0))
-                    {                        
+                    {
                         ImGui.SetCursorPos(ImGui.GetCursorPos() + new Vector2(11f, 1f));
                         ImGui.Checkbox($"##Text_{i}_EnabledCheckbox", ref meter.Enabled);
                     }

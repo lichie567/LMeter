@@ -185,6 +185,7 @@ namespace LMeter.Config
 
             if (ImGui.TableSetColumnIndex(1))
             {
+                ImGui.SetCursorPos(ImGui.GetCursorPos() + new Vector2(6f, 1f));
                 ImGui.Checkbox(string.Empty, ref condition.Inverted);
             }
 
