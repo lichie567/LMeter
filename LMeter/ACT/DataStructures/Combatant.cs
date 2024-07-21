@@ -122,6 +122,9 @@ public class Combatant : IActData<Combatant>
     [JsonProperty("maxhit")]
     public string MaxHit { get; set; } = string.Empty;
 
+    [JsonProperty("MAXHIT")]
+    private string _maxHit { get; set; } = string.Empty;
+
     [TextTag]
     public LazyString<string?> MaxHitName { get; set; }
 

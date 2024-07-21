@@ -1,3 +1,7 @@
+# Version 0.4.0.2
+- Fix issue with maxhitname text tag
+- Added bar color selector for Limit Break
+
 # Version 0.4.0.1
 - Fix bug causing many numbers to show 0
 
