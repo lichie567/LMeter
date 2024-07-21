@@ -28,7 +28,7 @@ namespace LMeter.Act
 
             return reader.TokenType switch
             {
-                JsonToken.Float or JsonToken.Integer => serializer.Deserialize<float>(reader),
+                JsonToken.Float or JsonToken.Integer => new LazyFloat(serializer.Deserialize<float>(reader)),
                 JsonToken.String => new LazyFloat(serializer.Deserialize<string?>(reader)),
                 _ => new LazyFloat(0f)
             };
