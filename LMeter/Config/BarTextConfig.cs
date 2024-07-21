@@ -344,8 +344,7 @@ namespace LMeter.Config
             ImGui.Checkbox("Use Thousands Separator for Numbers", ref this.ThousandsSeparators);
             if (this.AnchorParent != 0)
             {
-                ImGui.NewLine();
-                ImGui.Checkbox("Show Separator", ref this.ShowSeparator);
+                ImGui.Checkbox("Show Anchor Separator", ref this.ShowSeparator);
                 if (this.ShowSeparator)
                 {
                     DrawHelpers.DrawNestIndicator(1);
