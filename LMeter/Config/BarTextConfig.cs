@@ -270,7 +270,7 @@ namespace LMeter.Config
         public int FontId = 0;
         public bool FixedTextWidth;
         public float TextWidth = 60;
-        public bool UseEllipsis = false;
+        public bool UseEllipsis = true;
         public bool ShowSeparator = false;
         public float SeparatorWidth = 2f;
         public float SeparatorHeight = .75f;

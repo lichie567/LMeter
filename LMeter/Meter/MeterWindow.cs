@@ -177,7 +177,8 @@ namespace LMeter.Meter
                 }
             }
 
-            bool contextMenuOpen = this.DrawContextMenu($"{this.Id}_ContextMenu", out bool selected, out int index);
+            bool shouldDraw = this.ShouldDraw(localPos, size);
+            bool contextMenuOpen = this.DrawContextMenu($"{this.Id}_ContextMenu", out bool selected, out int index) && shouldDraw;
             if (contextMenuOpen && selected)
             {
                 _eventIndex = index;
@@ -186,7 +187,7 @@ namespace LMeter.Meter
                 _scrollPosition = 0;
             }
             
-            if (!contextMenuOpen && !this.ShouldDraw(localPos, size))
+            if (!shouldDraw)
             {
                 return;
             }
