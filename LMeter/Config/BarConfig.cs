@@ -152,7 +152,10 @@ namespace LMeter.Config
                 }
 
                 ImGui.Checkbox("Use your name instead of 'YOU'", ref this.UseCharacterName);
-                ImGui.Checkbox("Always show your own bar", ref this.AlwaysShowSelf);
+                if (this.BarHeight == 0)
+                {
+                    ImGui.Checkbox("Always show your own bar", ref this.AlwaysShowSelf);
+                }
 
                 ImGui.NewLine();
                 ImGui.Checkbox("Show Column Header Bar", ref this.ShowColumnHeader);

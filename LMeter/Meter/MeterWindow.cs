@@ -365,7 +365,9 @@ namespace LMeter.Meter
             drawList.AddRectFilled(pos, pos + footerSize, headerConfig.FooterBackgroundColor.Base);
 
             if (encounter is not null)
+            {
                 DrawBarTexts(drawList, footerTextConfig.Texts, pos, footerSize, jobColor, encounter);
+            }
                 
             return (pos.AddY(headerConfig.HeaderHeight), size.AddY(-headerConfig.HeaderHeight));
         }
@@ -419,7 +421,7 @@ namespace LMeter.Meter
                         _scrollShift = 0;
                     }
 
-                    if (this.BarConfig.AlwaysShowSelf)
+                    if (this.BarConfig.AlwaysShowSelf && this.BarConfig.BarHeightType == 0)
                     {
                         MovePlayerIntoViewableRange(sortedCombatants, _scrollPosition, playerName);
                     }
