@@ -409,7 +409,7 @@ namespace LMeter.Meter
                         _scrollShift = margin;
                     }
                     
-                    if (_scrollPosition == 0)
+                    if (unclampedScroll < 0)
                     {
                         _scrollShift = 0;
                     }
