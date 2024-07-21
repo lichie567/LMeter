@@ -8,24 +8,20 @@ namespace LMeter.Config
     [JsonObject]
     public class LMeterConfig : IConfigurable, IPluginDisposable
     {
-        public string Name
-        {
+        public bool FirstLoad = true;
+        public string Version => Plugin.Version;
+        public string Name 
+        { 
             get => "LMeter";
             set {}
         }
 
-        public string Version => Plugin.Version;
-
-        public bool FirstLoad = true;
-
-        public MeterListConfig MeterList { get; init; }
-
-        public ActConfig ActConfig { get; init; }
-
-        public FontConfig FontConfig { get; init; }
-
         [JsonIgnore]
         private AboutPage AboutPage { get; } = new AboutPage();
+
+        public MeterListConfig MeterList { get; init; }
+        public ActConfig ActConfig { get; init; }
+        public FontConfig FontConfig { get; init; }
 
         public LMeterConfig()
         {

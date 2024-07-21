@@ -5,6 +5,7 @@ using Dalamud.Interface.ImGuiNotification;
 using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
+using LMeter.Config;
 
 namespace LMeter.Helpers
 {
@@ -47,7 +48,8 @@ namespace LMeter.Helpers
                 Title = title,
                 Content = message,
                 Type = type,
-                InitialDuration = TimeSpan.FromMilliseconds(durationInMs)
+                InitialDuration = TimeSpan.FromMilliseconds(durationInMs),
+                Minimized = false
             };
 
             Singletons.Get<INotificationManager>().AddNotification(notification);
@@ -59,11 +61,11 @@ namespace LMeter.Helpers
             // Shift cursor to the right to pad for children with depth more than 1.
             // 26 is an arbitrary value I found to be around half the width of a checkbox
             Vector2 oldCursor = ImGui.GetCursorPos();
-            Vector2 offset = new(26 * Math.Max((depth - 1), 0), 2);
+            Vector2 offset = new(26 * Math.Max(depth - 1, 0), 0);
             ImGui.SetCursorPos(oldCursor + offset);
             ImGui.TextColored(new Vector4(229f / 255f, 57f / 255f, 57f / 255f, 1f), "\u2002\u2514");
-            ImGui.SameLine();
             ImGui.SetCursorPosY(oldCursor.Y);
+            ImGui.SameLine();
         }
 
         public static void DrawSpacing(int spacingSize)
@@ -80,7 +82,7 @@ namespace LMeter.Helpers
             Vector2 size,
             ImDrawListPtr drawList)
         {
-            IDalamudTextureWrap? tex = Singletons.Get<TexturesCache>().GetTextureFromIconId(iconId, 0, true);
+            IDalamudTextureWrap? tex = TextureCache.GetTextureById(iconId);
 
             if (tex is null)
             {
@@ -96,11 +98,10 @@ namespace LMeter.Helpers
             Vector2 size,
             bool cropIcon,
             int stackCount,
-            bool desaturate,
             float opacity,
             ImDrawListPtr drawList)
         {
-            IDalamudTextureWrap? tex = Singletons.Get<TexturesCache>().GetTextureFromIconId(iconId, (uint)stackCount, true, desaturate);
+            IDalamudTextureWrap? tex = TextureCache.GetTextureById(iconId, (uint)stackCount, true);
 
             if (tex is null)
             {
@@ -111,6 +112,37 @@ namespace LMeter.Helpers
 
             uint alpha = (uint)(opacity * 255) << 24 | 0x00FFFFFF;
             drawList.AddImage(tex.ImGuiHandle, position, position + size, uv0, uv1, alpha);
+        }
+
+        public static void DrawFontSelector(string label, ref string fontKey, ref int fontId)
+        {
+            string[] fontOptions = FontsManager.GetFontList();
+            if (fontOptions.Length == 0)
+            {
+                return;
+            }
+
+            if (!FontsManager.ValidateFont(fontOptions, fontId, fontKey))
+            {
+                fontId = 0;
+                for (int i = 0; i < fontOptions.Length; i++)
+                {
+                    if (fontKey.Equals(fontOptions[i]))
+                    {
+                        fontId = i;
+                    }
+                }
+            }
+
+            ImGui.Combo(label, ref fontId, fontOptions, fontOptions.Length);
+            fontKey = fontOptions[fontId];
+        }
+
+        public static void DrawColorSelector(string label, ref ConfigColor color)
+        {
+            Vector4 vector = color.Vector;
+            ImGui.ColorEdit4(label, ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
+            color.Vector = vector;
         }
 
         public static (Vector2, Vector2) GetTexCoordinates(IDalamudTextureWrap texture, Vector2 size, bool cropIcon = true)
@@ -202,7 +234,6 @@ namespace LMeter.Helpers
             uint outlineColor = 0xFF000000,
             int thickness = 1)
         {
-            // outline
             if (outline)
             {
                 for (int i = 1; i < thickness + 1; i++)
@@ -218,8 +249,38 @@ namespace LMeter.Helpers
                 }
             }
 
-            // text
             drawList.AddText(new Vector2(pos.X, pos.Y), color, text);
+        }
+
+        public static string? DrawTextTagsList(string[] tags)
+        {
+            string? selectedTag = null;
+
+            if (ImGui.Button("Tags"))
+            {
+                ImGui.OpenPopup("LMeter_TextTagsPopup");
+            }
+
+            ImGui.SetNextWindowSize(new(210, 300));
+            if (ImGui.BeginPopup("LMeter_TextTagsPopup", ImGuiWindowFlags.NoMove))
+            {
+                if (ImGui.BeginChild("##LMeter_TextTags_List", new Vector2(195, 284), true))
+                {
+                    foreach (string tag in tags)
+                    {
+                        if (ImGui.Selectable(tag))
+                        {
+                            selectedTag = tag;
+                        }
+                    }
+
+                    ImGui.EndChild();
+                }
+
+                ImGui.EndPopup();
+            }
+
+            return selectedTag;
         }
     }
 }

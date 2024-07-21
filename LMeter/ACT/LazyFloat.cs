@@ -8,35 +8,34 @@ namespace LMeter.Act
         private readonly Func<string>? _getStringInput;
         private readonly Func<float>? _getFloatInput;
         private float _value = 0;
+        private string? _input;
 
-        public string? Input { get; private set; }
-
-        public bool WasGenerated { get; private set; }
+        public bool Generated { get; private set; }
 
         public float Value
         {
             get
             {
-                if (this.WasGenerated)
+                if (this.Generated)
                 {
                     return _value;
                 }
 
-                if (this.Input is null)
+                if (_input is null)
                 {
                     if (_getFloatInput is not null)
                     {
                         _value = _getFloatInput.Invoke();
-                        this.WasGenerated = true;
+                        this.Generated = true;
                         return _value;
                     }
                     else if (_getStringInput is not null)
                     {
-                        this.Input = _getStringInput.Invoke();
+                        _input = _getStringInput.Invoke();
                     }
                 }
 
-                if (float.TryParse(this.Input, NumberStyles.Float, CultureInfo.InvariantCulture, out float parsed) &&
+                if (float.TryParse(_input, NumberStyles.Float, CultureInfo.InvariantCulture, out float parsed) &&
                     !float.IsNaN(parsed))
                 {
                     _value = parsed;
@@ -46,20 +45,20 @@ namespace LMeter.Act
                     _value = 0;
                 }
 
-                this.WasGenerated = true;
+                this.Generated = true;
                 return _value;
             }
         }
 
         public LazyFloat(string? input)
         {
-            this.Input = input;
+            _input = input;
         }
 
         public LazyFloat(float value)
         {
             _value = value;
-            this.WasGenerated = true;
+            this.Generated = true;
         }
 
         public LazyFloat(Func<float> input)
@@ -77,11 +76,9 @@ namespace LMeter.Act
             return this.Value.ToString();
         }
 
-        public string? ToString(string format, bool kilo) => kilo switch
-        {
-            true => KiloFormat(this.Value, format),
-            false => this.Value.ToString(format, CultureInfo.InvariantCulture)
-        };
+        public string? ToString(string format, bool kilo) => kilo 
+            ? KiloFormat(this.Value, format)
+            : this.Value.ToString(format, CultureInfo.InvariantCulture);
 
         private static string KiloFormat(float num, string format) => num switch
         {

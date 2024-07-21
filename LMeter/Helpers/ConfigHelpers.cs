@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Numerics;
 using System.Text;
 using Dalamud.Interface.ImGuiNotification;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
+using LMeter.Act.DataStructures;
 using LMeter.Config;
-using LMeter.Meter;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
@@ -25,7 +26,7 @@ namespace LMeter.Helpers
 
         public static void ExportToClipboard<T>(T toExport)
         {
-            string? exportString = ConfigHelpers.GetExportString(toExport);
+            string? exportString = GetExportString(toExport);
 
             if (exportString is not null)
             {
@@ -147,15 +148,110 @@ namespace LMeter.Helpers
             }
         }
 
-        public static void ConvertOldConfigs(LMeterConfig config)
+        public static void ConvertOldConfig(LMeterConfig config)
         {
-            // Convert old visibility configs to new ones
-            foreach (MeterWindow meter in config.MeterList.Meters)
-            {
-                if (!meter.VisibilityConfig2.Initialized &&
-                    meter.VisibilityConfig2.VisibilityOptions.Count == 0)
+            foreach (var meter in config.MeterList.Meters)
+            {   
+                Vector2 size = meter.GeneralConfig.Size;
+                size -= Vector2.One * meter.GeneralConfig.BorderThickness * 2;
+                size.AddY(-meter.HeaderConfig.HeaderHeight);
+                float barHeight = (size.Y - (meter.BarConfig.BarCount - 1) * meter.BarConfig.BarGaps) / meter.BarConfig.BarCount;
+                float rankTextOffset = meter.BarConfig.ShowRankText ? ImGui.CalcTextSize("00.").X : 0;
+                BarConfig barConfig = meter.BarConfig;
+                TextListConfig<Combatant> barTextConfig = meter.BarTextConfig;
+
+                if (!barTextConfig.Initialized &&
+                    barTextConfig.Texts.Count == 0)
                 {
-                    meter.VisibilityConfig2.SetOldConfig(meter.VisibilityConfig);
+                    barTextConfig.AddText(new Text("Name")
+                    {
+                        Enabled = true,
+                        TextFormat = barConfig.LeftTextFormat.Replace("[encdps", "[dps"),
+                        TextOffset = barConfig.LeftTextOffset.AddX(rankTextOffset + barHeight - 5f),
+                        TextAlignment = DrawAnchor.Left,
+                        AnchorPoint = DrawAnchor.Left,
+                        TextJobColor = barConfig.LeftTextJobColor,
+                        TextColor = barConfig.BarNameColor,
+                        ShowOutline = barConfig.BarNameShowOutline,
+                        OutlineColor = barConfig.BarNameOutlineColor,
+                        FontKey = barConfig.BarNameFontKey,
+                        FontId = barConfig.BarNameFontId,
+                        ThousandsSeparators = barConfig.ThousandsSeparators
+                    });
+
+                    barTextConfig.AddText(new Text("Data")
+                    {
+                        Enabled = true,
+                        TextFormat = barConfig.RightTextFormat.Replace("[encdps", "[dps"),
+                        TextOffset = barConfig.RightTextOffset,
+                        TextAlignment = DrawAnchor.Right,
+                        AnchorPoint = DrawAnchor.Right,
+                        TextJobColor = barConfig.RightTextJobColor,
+                        TextColor = barConfig.BarDataColor,
+                        ShowOutline = barConfig.BarDataShowOutline,
+                        OutlineColor = barConfig.BarDataOutlineColor,
+                        FontKey = barConfig.BarDataFontKey,
+                        FontId = barConfig.BarDataFontId,
+                        ThousandsSeparators = barConfig.ThousandsSeparators
+                    });
+                }
+
+                
+                HeaderConfig headerConfig = meter.HeaderConfig;
+                TextListConfig<Encounter> headerTextConfig = meter.HeaderTextConfig;
+                if (!headerTextConfig.Initialized &&
+                    headerTextConfig.Texts.Count == 0)
+                {
+                    headerTextConfig.AddText(new Text("Encounter Duration")
+                    {
+                        Enabled = true,
+                        TextFormat = "[duration]",
+                        AnchorParent = 0,
+                        TextOffset = headerConfig.DurationOffset,
+                        TextAlignment = DrawAnchor.Left,
+                        AnchorPoint = DrawAnchor.Left,
+                        TextJobColor = false,
+                        TextColor = headerConfig.DurationColor,
+                        ShowOutline = headerConfig.DurationShowOutline,
+                        OutlineColor = headerConfig.DurationOutlineColor,
+                        FontKey = headerConfig.DurationFontKey,
+                        FontId = headerConfig.DurationFontId,
+                        ThousandsSeparators = false
+                    });
+
+                    headerTextConfig.AddText(new Text("Encounter Name")
+                    {
+                        Enabled = true,
+                        TextFormat = "[title]",
+                        AnchorParent = 1,
+                        TextOffset = headerConfig.DurationOffset - headerConfig.NameOffset,
+                        TextAlignment = DrawAnchor.Left,
+                        AnchorPoint = DrawAnchor.Right,
+                        TextJobColor = false,
+                        TextColor = headerConfig.NameColor,
+                        ShowOutline = headerConfig.NameShowOutline,
+                        OutlineColor = headerConfig.NameOutlineColor,
+                        FontKey = headerConfig.NameFontKey,
+                        FontId = headerConfig.NameFontId,
+                        ThousandsSeparators = false
+                    });
+
+                    headerTextConfig.AddText(new Text("Raid Stats")
+                    {
+                        Enabled = true,
+                        TextFormat = headerConfig.RaidStatsFormat,
+                        AnchorParent = 0,
+                        TextOffset = headerConfig.StatsOffset,
+                        TextAlignment = DrawAnchor.Right,
+                        AnchorPoint = DrawAnchor.Right,
+                        TextJobColor = false,
+                        TextColor = headerConfig.RaidStatsColor,
+                        ShowOutline = headerConfig.StatsShowOutline,
+                        OutlineColor = headerConfig.StatsOutlineColor,
+                        FontKey = headerConfig.StatsFontKey,
+                        FontId = headerConfig.StatsFontId,
+                        ThousandsSeparators = false
+                    });
                 }
             }
         }
@@ -167,13 +263,18 @@ namespace LMeter.Helpers
     /// </summary>
     public class LMeterSerializationBinder : ISerializationBinder
     {
-        // TODO: Make this automatic somehow?
-        private static List<Type> _configTypes = [
+        private static readonly List<Type> _configTypes =
+        [
             typeof(ActConfig)
         ];
 
-        private readonly Dictionary<Type, string> typeToName = [];
-        private readonly Dictionary<string, Type> nameToType = [];
+        private static readonly Dictionary<string, string> _typeNameConversions = new()
+        {
+            { "VisibilityConfig2", "VisibilityConfig" }
+        };
+
+        private readonly Dictionary<Type, string> _typeToName = [];
+        private readonly Dictionary<string, Type> _nameToType = [];
 
         public LMeterSerializationBinder()
         {
@@ -181,15 +282,15 @@ namespace LMeter.Helpers
             {
                 if (type.FullName is not null)
                 {
-                    this.typeToName.Add(type, type.FullName.ToLower());
-                    this.nameToType.Add(type.FullName.ToLower(), type);
+                    _typeToName.Add(type, type.FullName.ToLower());
+                    _nameToType.Add(type.FullName.ToLower(), type);
                 }
             }
         }
 
         public void BindToName(Type serializedType, out string? assemblyName, out string? typeName)
         {
-            if (this.typeToName.TryGetValue(serializedType, out string? name))
+            if (_typeToName.TryGetValue(serializedType, out string? name))
             {
                 assemblyName = null;
                 typeName = name;
@@ -203,10 +304,26 @@ namespace LMeter.Helpers
 
         public Type BindToType(string? assemblyName, string? typeName)
         {
-            if (typeName is not null &&
-                this.nameToType.TryGetValue(typeName.ToLower(), out Type? type))
+            if (typeName is null)
+            {
+                throw new TypeLoadException("Type name was null.");
+            }
+
+            if (_nameToType.TryGetValue(typeName.ToLower(), out Type? type))
             {
                 return type;
+            }
+
+            Type? loadedType = Type.GetType($"{typeName}, {assemblyName}", false);
+            if (loadedType is null)
+            {
+                foreach (var entry in _typeNameConversions)
+                {
+                    if (typeName.Contains(entry.Key))
+                    {
+                        typeName = typeName.Replace(entry.Key, entry.Value);
+                    }
+                }
             }
 
             return Type.GetType($"{typeName}, {assemblyName}", true) ??

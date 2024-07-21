@@ -17,16 +17,11 @@ namespace LMeter
     {
         public const string ConfigFileName = "LMeter.json";
 
-        public static string Version { get; private set; } = "0.3.1.0";
-
+        public static string Version { get; private set; } = "0.4.0.0";
         public static string ConfigFileDir { get; private set; } = "";
-
         public static string ConfigFilePath { get; private set; } = "";
-
         public static string AssemblyFileDir { get; private set; } = "";
-
         public static IDalamudTextureWrap? IconTexture { get; private set; } = null;
-
         public static string Changelog { get; private set; } = string.Empty;
 
         public string Name => "LMeter";
@@ -80,10 +75,7 @@ namespace LMeter
             Singletons.Register(new ClipRectsHelper());
 
             // Init TexturesCache
-            Singletons.Register(new TexturesCache());
-
-            // Load Icon Texure
-            Plugin.IconTexture = LoadIconTexture(textureProvider);
+            Singletons.Register(new TextureCache());
 
             // Load changelog
             Plugin.Changelog = LoadChangelog();
@@ -91,9 +83,9 @@ namespace LMeter
             // Load config
             FontsManager.CopyPluginFontsToUserPath();
             LMeterConfig config = ConfigHelpers.LoadConfig(Plugin.ConfigFilePath);
-
-            // Check if any old configs need to be converted
-            ConfigHelpers.ConvertOldConfigs(config);
+            
+            // Convert old configs
+            ConfigHelpers.ConvertOldConfig(config);
 
             // Refresh fonts
             config.FontConfig.RefreshFontList();
@@ -117,8 +109,13 @@ namespace LMeter
             // Create profile on first load
             if (config.FirstLoad && config.MeterList.Meters.Count == 0)
             {
-                config.MeterList.Meters.Add(MeterWindow.GetDefaultMeter("Profile 1"));
+                config.MeterList.Meters.Add(MeterWindow.GetDefaultMeter(MeterDataType.Damage, "Dps Meter"));
+
+                MeterWindow hps = MeterWindow.GetDefaultMeter(MeterDataType.Healing, "Hps Meter");
+                hps.Enabled = false;
+                config.MeterList.Meters.Add(hps);
             }
+            
             config.FirstLoad = false;
 
             // Start the plugin

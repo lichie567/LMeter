@@ -11,24 +11,17 @@ using Newtonsoft.Json.Linq;
 
 namespace LMeter.Act
 {
-    public abstract class LogClient : IPluginDisposable
+    public abstract class LogClient(ActConfig config) : IPluginDisposable
     {
         protected const string SubscriptionMessage = "{\"call\":\"subscribe\",\"events\":[\"CombatData\"]}";
 
-        protected ActConfig Config { get; set; }
+        protected ActConfig Config { get; set; } = config;
 
-        public ConnectionStatus Status { get; protected set; }
-        public List<ActEvent> PastEvents { get; protected init; }
+        public ConnectionStatus Status { get; protected set; } = ConnectionStatus.NotConnected;
+        public List<ActEvent> PastEvents { get; protected init; } = [];
 
         private ActEvent? _lastEvent;
         private ActEvent? _currentEvent;
-
-        public LogClient(ActConfig config)
-        {
-            this.Config = config;
-            this.Status = ConnectionStatus.NotConnected;
-            this.PastEvents = [];
-        }
 
         public abstract void Start();
         public abstract void Shutdown();

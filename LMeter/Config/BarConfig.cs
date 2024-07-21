@@ -1,28 +1,29 @@
-using System;
 using System.Numerics;
-using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
 using ImGuiNET;
-using LMeter.Act.DataStructures;
 using LMeter.Helpers;
-using Newtonsoft.Json;
 
 namespace LMeter.Config
 {
     public class BarConfig : IConfigPage
     {
         [JsonIgnore]
-        private static readonly string[] _anchorOptions = Enum.GetNames(typeof(DrawAnchor));
-
+        public bool Active { get; set; }
         public string Name => "Bars";
 
         private static readonly string[] _jobIconStyleOptions = ["Style 1", "Style 2"];
 
+        public int BarHeightType = 0;
         public int BarCount = 8;
         public int BarGaps = 1;
+        public float BarHeight = 25;
 
         public bool ShowJobIcon = true;
+        public int JobIconSizeType = 0;
+        public Vector2 JobIconSize = new(25, 25);
         public int JobIconStyle = 0;
         public Vector2 JobIconOffset = new(0, 0);
+        public ConfigColor JobIconBackgroundColor = new(0, 0, 0, 0);
 
         public bool ThousandsSeparators = true;
 
@@ -51,7 +52,7 @@ namespace LMeter.Config
         public int BarNameFontId = 0;
         public bool UseCharacterName = false;
 
-        public string RightTextFormat = "[damagetotal:k.1]  ([encdps:k.1], [damagepct])";
+        public string RightTextFormat = "[damagetotal:k.1]  ([dps:k.1], [damagepct])";
         public Vector2 RightTextOffset = new(0, 0);
         public bool RightTextJobColor = false;
         public ConfigColor BarDataColor = new(1, 1, 1, 1);
@@ -59,6 +60,21 @@ namespace LMeter.Config
         public ConfigColor BarDataOutlineColor = new(0, 0, 0, 0.5f);
         public string BarDataFontKey = FontsManager.DalamudFontKey;
         public int BarDataFontId = 0;
+
+        public bool ShowColumnHeader;
+        public float ColumnHeaderHeight = 25;
+        public ConfigColor ColumnHeaderColor = new(0, 0, 0, 0.5f);
+        public bool UseColumnFont = true;
+        public ConfigColor ColumnHeaderTextColor = new(1, 1, 1, 1);
+        public bool ColumnHeaderShowOutline = true;
+        public ConfigColor ColumnHeaderOutlineColor = new(0, 0, 0, 0.5f);
+        public Vector2 ColumnHeaderOffset = new();
+        public string ColumnHeaderFontKey = FontsManager.DalamudFontKey;
+        public int ColumnHeaderFontId = 0;
+
+        public float BarFillHeight = 1f;
+        public ConfigColor BarBackgroundColor = new(.3f, .3f, .3f, 1f);
+        public int BarFillDirection = 0;
 
         public IConfigPage GetDefault()
         {
@@ -77,258 +93,101 @@ namespace LMeter.Config
             return defaultConfig;
         }
 
-        public Vector2 DrawBar(
-            ImDrawListPtr drawList,
-            Vector2 localPos,
-            Vector2 size,
-            Combatant combatant,
-            ConfigColor jobColor,
-            ConfigColor barColor,
-            float top,
-            float current)
+        public void DrawConfig(Vector2 size, float padX, float padY, bool border = true)
         {
-            float barHeight = (size.Y - (this.BarCount - 1) * this.BarGaps) / this.BarCount;
-            Vector2 barSize = new(size.X, barHeight);
-            Vector2 barFillSize = new(size.X * (current / top), barHeight);
-            drawList.AddRectFilled(localPos, localPos + barFillSize, this.UseJobColor ? jobColor.Base : barColor.Base);
-
-            float textOffset = 5f;
-            if (this.ShowJobIcon && combatant.Job != Job.UKN)
+            if (ImGui.BeginChild($"##{this.Name}", new Vector2(size.X, size.Y), border))
             {
-                uint jobIconId = 62000u + (uint)combatant.Job + 100u * (uint)this.JobIconStyle;
-                Vector2 jobIconSize = Vector2.One * barHeight;
-                DrawHelpers.DrawIcon(jobIconId, localPos + this.JobIconOffset, jobIconSize, drawList);
-                textOffset = barHeight;
-            }
+                ImGui.Text("Bar Height Type");
+                ImGui.RadioButton("Constant Bar Number", ref this.BarHeightType, 0);
+                ImGui.SameLine();
+                ImGui.RadioButton("Constant Bar Height", ref this.BarHeightType, 1);
 
-            if (this.ShowRankText)
-            {
-                string rankText = combatant.GetFormattedString($"{this.RankTextFormat}", this.ThousandsSeparators ? "N" : "F");
-                using (FontsManager.PushFont(this.RankTextFontKey))
+                if (this.BarHeightType == 0)
                 {
-                    textOffset += ImGui.CalcTextSize("00.").X;
-                    Vector2 rankTextSize = ImGui.CalcTextSize(rankText);
-                    Vector2 rankTextPos = Utils.GetAnchoredPosition(localPos, -barSize, DrawAnchor.Left);
-                    rankTextPos = Utils.GetAnchoredPosition(rankTextPos, rankTextSize, this.RankTextAlign) + this.RankTextOffset;
-                    DrawHelpers.DrawText(
-                        drawList,
-                        rankText,
-                        rankTextPos.AddX(textOffset),
-                        this.RankTextJobColor ? jobColor.Base : this.RankTextColor.Base,
-                        this.RankTextShowOutline,
-                        this.RankTextOutlineColor.Base);
+                    ImGui.DragInt("Num Bars to Display", ref this.BarCount, 1, 1, 48);
                 }
-            }
+                else if (this.BarHeightType == 1)
+                {
+                    ImGui.DragFloat("Bar Height", ref this.BarHeight, .1f, 1, 100);
+                }
 
-            using (FontsManager.PushFont(this.BarNameFontKey))
-            {
-                string leftText = combatant.GetFormattedString($" {this.LeftTextFormat} ", this.ThousandsSeparators ? "N" : "F");
-                Vector2 nameTextSize = ImGui.CalcTextSize(leftText);
-                Vector2 namePos = Utils.GetAnchoredPosition(localPos, -barSize, DrawAnchor.Left);
-                namePos = Utils.GetAnchoredPosition(namePos, nameTextSize, DrawAnchor.Left) + this.LeftTextOffset;
-                DrawHelpers.DrawText(
-                    drawList,
-                    leftText,
-                    namePos.AddX(textOffset),
-                    this.LeftTextJobColor ? jobColor.Base : this.BarNameColor.Base,
-                    this.BarNameShowOutline,
-                    this.BarNameOutlineColor.Base);
-            }
-
-            using (FontsManager.PushFont(this.BarDataFontKey))
-            {
-                string rightText = combatant.GetFormattedString($" {this.RightTextFormat} ", this.ThousandsSeparators ? "N" : "F");
-                Vector2 dataTextSize = ImGui.CalcTextSize(rightText);
-                Vector2 dataPos = Utils.GetAnchoredPosition(localPos, -barSize, DrawAnchor.Right);
-                dataPos = Utils.GetAnchoredPosition(dataPos, dataTextSize, DrawAnchor.Right) + this.RightTextOffset;
-                DrawHelpers.DrawText(
-                    drawList,
-                    rightText,
-                    dataPos,
-                    this.RightTextJobColor ? jobColor.Base : this.BarDataColor.Base,
-                    this.BarDataShowOutline,
-                    this.BarDataOutlineColor.Base);
-            }
-
-            return localPos.AddY(barHeight + this.BarGaps);
-        }
-
-        public void DrawConfig(Vector2 size, float padX, float padY)
-        {
-            string[] fontOptions = FontsManager.GetFontList();
-            if (fontOptions.Length == 0)
-            {
-                return;
-            }
-
-            if (ImGui.BeginChild($"##{this.Name}", new Vector2(size.X, size.Y), true))
-            {
-                ImGui.DragInt("Num Bars to Display", ref this.BarCount, 1, 1, 48);
                 ImGui.DragInt("Bar Gap Size", ref this.BarGaps, 1, 0, 20);
 
+                ImGui.NewLine();
+                ImGui.DragFloat("Bar Fill Height (% of Bar Height)", ref this.BarFillHeight, .1f, 0, 1f);
+                ImGui.Combo("Bar Fill Direction", ref this.BarFillDirection, ["Up", "Down"], 2);
+                DrawHelpers.DrawColorSelector("Bar Background Color", ref this.BarBackgroundColor);
+                
+                ImGui.NewLine();
                 ImGui.Checkbox("Show Job Icon", ref this.ShowJobIcon);
                 if (this.ShowJobIcon)
                 {
+                    DrawHelpers.DrawNestIndicator(1);
+                    ImGui.SameLine();
+                    ImGui.RadioButton("Automatic Size", ref this.JobIconSizeType, 0);
+                    ImGui.SameLine();
+                    ImGui.RadioButton("Manual Size", ref this.JobIconSizeType, 1);
+
+                    if (this.JobIconSizeType == 1)
+                    {
+                        DrawHelpers.DrawNestIndicator(1);
+                        ImGui.DragFloat2("Size##JobIconSize", ref this.JobIconSize);
+                    }
+
                     DrawHelpers.DrawNestIndicator(1);
                     ImGui.DragFloat2("Job Icon Offset", ref this.JobIconOffset);
 
                     DrawHelpers.DrawNestIndicator(1);
                     ImGui.Combo("Job Icon Style", ref this.JobIconStyle, _jobIconStyleOptions, _jobIconStyleOptions.Length);
+                    DrawHelpers.DrawNestIndicator(1);
+                    DrawHelpers.DrawColorSelector("Background Color##JobIcon", ref this.JobIconBackgroundColor);
                 }
 
+                ImGui.NewLine();
                 ImGui.Checkbox("Use Job Colors for Bars", ref this.UseJobColor);
-                Vector4 vector = Vector4.Zero;
                 if (!this.UseJobColor)
                 {
                     DrawHelpers.DrawNestIndicator(1);
-                    vector = this.BarColor.Vector;
-                    ImGui.ColorEdit4("Bar Color", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
-                    this.BarColor.Vector = vector;
+                    DrawHelpers.DrawColorSelector("Bar Color", ref this.BarColor);
                 }
 
-                ImGui.Checkbox("Use Thousands Separators for Numbers", ref this.ThousandsSeparators);
-
-                ImGui.NewLine();
-                ImGui.Checkbox("Show Rank Text", ref this.ShowRankText);
-                if (this.ShowRankText)
-                {
-                    DrawHelpers.DrawNestIndicator(1);
-                    ImGui.InputText("Rank Text Format", ref this.RankTextFormat, 128);
-
-                    if (ImGui.IsItemHovered())
-                    {
-                        ImGui.SetTooltip(Utils.GetTagsTooltip(Combatant.TextTags));
-                    }
-
-                    DrawHelpers.DrawNestIndicator(1);
-                    ImGui.Combo("Rank Text Align", ref Unsafe.As<DrawAnchor, int>(ref this.RankTextAlign), _anchorOptions, _anchorOptions.Length);
-
-                    DrawHelpers.DrawNestIndicator(1);
-                    ImGui.DragFloat2("Rank Text Offset", ref this.RankTextOffset);
-
-                    if (!FontsManager.ValidateFont(fontOptions, this.RankTextFontId, this.RankTextFontKey))
-                    {
-                        this.RankTextFontId = 0;
-                        for (int i = 0; i < fontOptions.Length; i++)
-                        {
-                            if (this.RankTextFontKey.Equals(fontOptions[i]))
-                            {
-                                this.RankTextFontId = i;
-                            }
-                        }
-                    }
-
-                    DrawHelpers.DrawNestIndicator(1);
-                    ImGui.Combo("Font##Rank", ref this.RankTextFontId, fontOptions, fontOptions.Length);
-                    this.RankTextFontKey = fontOptions[this.RankTextFontId];
-
-                    DrawHelpers.DrawNestIndicator(1);
-                    ImGui.Checkbox("Use Job Color##RankTextJobColor", ref this.RankTextJobColor);
-                    if (!this.RankTextJobColor)
-                    {
-                        DrawHelpers.DrawNestIndicator(2);
-                        vector = this.RankTextColor.Vector;
-                        ImGui.ColorEdit4("Text Color##Rank", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
-                        this.RankTextColor.Vector = vector;
-                    }
-
-                    DrawHelpers.DrawNestIndicator(1);
-                    ImGui.Checkbox("Show Outline##Rank", ref this.RankTextShowOutline);
-                    if (this.RankTextShowOutline)
-                    {
-                        DrawHelpers.DrawNestIndicator(2);
-                        vector = this.RankTextOutlineColor.Vector;
-                        ImGui.ColorEdit4("Outline Color##Rank", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
-                        this.RankTextOutlineColor.Vector = vector;
-                    }
-                }
-
-                ImGui.NewLine();
                 ImGui.Checkbox("Use your name instead of 'YOU'", ref this.UseCharacterName);
-                ImGui.Checkbox("Always show your own bar", ref this.AlwaysShowSelf);
-                ImGui.InputText("Left Text Format", ref this.LeftTextFormat, 128);
-
-                if (ImGui.IsItemHovered())
+                if (this.BarHeight == 0)
                 {
-                    ImGui.SetTooltip(Utils.GetTagsTooltip(Combatant.TextTags));
-                }
-
-                ImGui.DragFloat2("Left Text Offset", ref this.LeftTextOffset);
-
-                if (!FontsManager.ValidateFont(fontOptions, this.BarNameFontId, this.BarNameFontKey))
-                {
-                    this.BarNameFontId = 0;
-                    for (int i = 0; i < fontOptions.Length; i++)
-                    {
-                        if (this.BarNameFontKey.Equals(fontOptions[i]))
-                        {
-                            this.BarNameFontId = i;
-                        }
-                    }
-                }
-
-                ImGui.Combo("Font##Name", ref this.BarNameFontId, fontOptions, fontOptions.Length);
-                this.BarNameFontKey = fontOptions[this.BarNameFontId];
-
-                ImGui.Checkbox("Use Job Color##LeftTextJobColor", ref this.LeftTextJobColor);
-                if (!this.LeftTextJobColor)
-                {
-                    DrawHelpers.DrawNestIndicator(1);
-                    vector = this.BarNameColor.Vector;
-                    ImGui.ColorEdit4("Text Color##Name", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
-                    this.BarNameColor.Vector = vector;
-                }
-
-                ImGui.Checkbox("Show Outline##Name", ref this.BarNameShowOutline);
-                if (this.BarNameShowOutline)
-                {
-                    DrawHelpers.DrawNestIndicator(1);
-                    vector = this.BarNameOutlineColor.Vector;
-                    ImGui.ColorEdit4("Outline Color##Name", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
-                    this.BarNameOutlineColor.Vector = vector;
+                    ImGui.Checkbox("Always show your own bar", ref this.AlwaysShowSelf);
                 }
 
                 ImGui.NewLine();
-                ImGui.InputText("Right Text Format", ref this.RightTextFormat, 128);
-
-                if (ImGui.IsItemHovered())
+                ImGui.Checkbox("Show Column Header Bar", ref this.ShowColumnHeader);
+                if (this.ShowColumnHeader)
                 {
-                    ImGui.SetTooltip(Utils.GetTagsTooltip(Combatant.TextTags));
-                }
+                    DrawHelpers.DrawNestIndicator(1);
+                    ImGui.DragFloat("Column Header Height", ref this.ColumnHeaderHeight);
 
-                ImGui.DragFloat2("Right Text Offset", ref this.RightTextOffset);
+                    DrawHelpers.DrawNestIndicator(1);
+                    ImGui.DragFloat2("Text Offset", ref this.ColumnHeaderOffset);
 
-                if (!FontsManager.ValidateFont(fontOptions, this.BarDataFontId, this.BarDataFontKey))
-                {
-                    this.BarDataFontId = 0;
-                    for (int i = 0; i < fontOptions.Length; i++)
+                    DrawHelpers.DrawNestIndicator(1);
+                    DrawHelpers.DrawColorSelector("Background Color", ref this.ColumnHeaderColor);
+
+                    DrawHelpers.DrawNestIndicator(1);
+                    DrawHelpers.DrawColorSelector("Text Color", ref this.ColumnHeaderTextColor);
+
+                    DrawHelpers.DrawNestIndicator(1);
+                    ImGui.Checkbox("Use Font from Column", ref this.UseColumnFont);
+                    if (!this.UseColumnFont)
                     {
-                        if (this.BarDataFontKey.Equals(fontOptions[i]))
-                        {
-                            this.BarDataFontId = i;
-                        }
+                        DrawHelpers.DrawNestIndicator(2);
+                        DrawHelpers.DrawFontSelector("Font##Column", ref this.ColumnHeaderFontKey, ref this.ColumnHeaderFontId);
                     }
-                }
 
-                ImGui.Combo("Font##Data", ref this.BarDataFontId, fontOptions, fontOptions.Length);
-                this.BarDataFontKey = fontOptions[this.BarDataFontId];
-
-                ImGui.Checkbox("Use Job Color##RightTextJobColor", ref this.RightTextJobColor);
-                if (!this.RightTextJobColor)
-                {
                     DrawHelpers.DrawNestIndicator(1);
-                    vector = this.BarDataColor.Vector;
-                    ImGui.ColorEdit4("Text Color##Data", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
-                    this.BarDataColor.Vector = vector;
-                }
-
-                ImGui.Checkbox("Show Outline##Data", ref this.BarDataShowOutline);
-                if (this.BarDataShowOutline)
-                {
-                    DrawHelpers.DrawNestIndicator(1);
-                    vector = this.BarDataOutlineColor.Vector;
-                    ImGui.ColorEdit4("Outline Color##Data", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
-                    this.BarDataOutlineColor.Vector = vector;
+                    ImGui.Checkbox("Show Outline", ref this.ColumnHeaderShowOutline);
+                    if (this.ColumnHeaderShowOutline)
+                    {
+                        DrawHelpers.DrawNestIndicator(2);
+                        DrawHelpers.DrawColorSelector("Column Header Color", ref this.ColumnHeaderOutlineColor);
+                    }
                 }
             }
 

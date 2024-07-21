@@ -16,7 +16,7 @@ namespace LMeter
 {
     public class PluginManager : IPluginDisposable
     {
-        private readonly Vector2 _configSize = new(550, 550);
+        private readonly Vector2 _configSize = new(650, 750);
 
         private readonly IClientState _clientState;
         private readonly IDalamudPluginInterface _pluginInterface;
@@ -154,19 +154,20 @@ namespace LMeter
 
         private void PluginCommand(string command, string arguments)
         {
-            switch (arguments)
+            string[] argArray = arguments.Split(" ");
+            switch (argArray)
             {
-                case "end":
+                case {} args when args[0].Equals("end"):
                     Singletons.Get<LogClient>().EndEncounter();
                     break;
-                case "clear":
+                case {} args when args[0].Equals("clear"):
                     this.Clear();
                     break;
-                case { } argument when argument.StartsWith("toggle"):
-                    _config.MeterList.ToggleMeter(GetIntArg(argument) - 1, GetBoolArg(argument, 2));
+                case { } args when args[0].Equals("toggle"):
+                    _config.MeterList.ToggleMeter(args.Length > 1 ? GetIntArg(args[1]) - 1 : null);
                     break;
-                case { } argument when argument.StartsWith("ct"):
-                    _config.MeterList.ToggleClickThrough(GetIntArg(argument) - 1);
+                case { } args when args[0].Equals("ct"):
+                    _config.MeterList.ToggleClickThrough(args.Length > 1 ? GetIntArg(args[1]) - 1 : null);
                     break;
                 default:
                     this.ToggleWindow();
@@ -176,20 +177,7 @@ namespace LMeter
 
         private static int GetIntArg(string argument)
         {
-            string[] args = argument.Split(" ");
-            return args.Length > 1 && int.TryParse(args[1], out int num) ? num : 0;
-        }
-
-        private static bool? GetBoolArg(string argument, int index = 1)
-        {
-            string[] args = argument.Split(" ");
-            if (args.Length > index)
-            {
-                string arg = args[index].ToLower();
-                return arg.Equals("on") ? true : (arg.Equals("off") ? false : null);
-            }
-
-            return null;
+            return !string.IsNullOrEmpty(argument) && int.TryParse(argument, out int num) ? num : 0;
         }
 
         private void ToggleWindow()

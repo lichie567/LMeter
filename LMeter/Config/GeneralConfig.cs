@@ -14,11 +14,12 @@ namespace LMeter.Config
 
         [JsonIgnore]
         public bool Preview = false;
-
+        
+        [JsonIgnore]
+        public bool Active { get; set; }
+        
         public string Name => "General";
-
-        public IConfigPage GetDefault() => new GeneralConfig();
-
+        
         public Vector2 Position = Vector2.Zero;
         public Vector2 Size = new(ImGui.GetMainViewport().Size.Y * 16 / 90, ImGui.GetMainViewport().Size.Y / 10);
         public bool Lock = false;
@@ -31,9 +32,11 @@ namespace LMeter.Config
         public MeterDataType DataType = MeterDataType.Damage;
         public bool ReturnToCurrent = true;
 
-        public void DrawConfig(Vector2 size, float padX, float padY)
+        public IConfigPage GetDefault() => new GeneralConfig();
+
+        public void DrawConfig(Vector2 size, float padX, float padY, bool border = true)
         {
-            if (ImGui.BeginChild($"##{this.Name}", new Vector2(size.X, size.Y), true))
+            if (ImGui.BeginChild($"##{this.Name}", new Vector2(size.X, size.Y), border))
             {
                 Vector2 screenSize = ImGui.GetMainViewport().Size;
                 ImGui.DragFloat2("Position", ref this.Position, 1, -screenSize.X / 2, screenSize.X / 2);
@@ -43,9 +46,7 @@ namespace LMeter.Config
                 ImGui.Checkbox("Preview", ref this.Preview);
                 ImGui.NewLine();
 
-                Vector4 vector = this.BackgroundColor.Vector;
-                ImGui.ColorEdit4("Background Color", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
-                this.BackgroundColor.Vector = vector;
+                DrawHelpers.DrawColorSelector("Background Color", ref this.BackgroundColor);
 
                 ImGui.Checkbox("Show Border", ref this.ShowBorder);
                 if (this.ShowBorder)
@@ -54,9 +55,7 @@ namespace LMeter.Config
                     ImGui.DragInt("Border Thickness", ref this.BorderThickness, 1, 1, 20);
 
                     DrawHelpers.DrawNestIndicator(1);
-                    vector = this.BorderColor.Vector;
-                    ImGui.ColorEdit4("Border Color", ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
-                    this.BorderColor.Vector = vector;
+                    DrawHelpers.DrawColorSelector("Border Color", ref this.BorderColor);
 
                     DrawHelpers.DrawNestIndicator(1);
                     ImGui.Checkbox("Hide border around Header", ref this.BorderAroundBars);

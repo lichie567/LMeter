@@ -19,10 +19,10 @@ namespace LMeter.Config
         [JsonIgnore]
         private DateTime? LastReconnectAttempt { get; set; }
 
+        [JsonIgnore]
+        public bool Active { get; set; }
+
         public string Name => "ACT";
-
-        public IConfigPage GetDefault() => new ActConfig();
-
         public string ActSocketAddress;
         public int EncounterHistorySize = 15;
         public bool AutoReconnect = false;
@@ -37,9 +37,11 @@ namespace LMeter.Config
             this.ActSocketAddress = _defaultSocketAddress;
         }
 
-        public void DrawConfig(Vector2 size, float padX, float padY)
+        public IConfigPage GetDefault() => new ActConfig();
+
+        public void DrawConfig(Vector2 size, float padX, float padY, bool border = true)
         {
-            if (ImGui.BeginChild($"##{this.Name}", new Vector2(size.X, size.Y), true))
+            if (ImGui.BeginChild($"##{this.Name}", new Vector2(size.X, size.Y), border))
             {
                 int currentClientType = this.ClientType;
                 ImGui.Text("ACT Client Type:");

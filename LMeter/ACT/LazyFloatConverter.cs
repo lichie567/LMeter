@@ -26,12 +26,12 @@ namespace LMeter.Act
                 return serializer.Deserialize(reader, objectType);
             }
 
-            if (reader.TokenType != JsonToken.String)
+            return reader.TokenType switch
             {
-                return new LazyFloat(0f);
-            }
-
-            return new LazyFloat(serializer.Deserialize(reader, typeof(string))?.ToString());
+                JsonToken.Float or JsonToken.Integer => serializer.Deserialize<float>(reader),
+                JsonToken.String => new LazyFloat(serializer.Deserialize<string?>(reader)),
+                _ => new LazyFloat(0f)
+            };
         }
     }
 }

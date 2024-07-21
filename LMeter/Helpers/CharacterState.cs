@@ -10,7 +10,15 @@ namespace LMeter.Helpers
 {
     public static class CharacterState
     {
-        private static readonly uint[] _goldenSaucerIDs = [144, 388, 389, 390, 391, 579, 792, 899, 941];
+        private static readonly uint[] _goldSaucerIds = [144, 388, 389, 390, 391, 579, 792, 899, 941];
+        private static readonly ushort[] _houseIds = [
+            // Small, Medium, Large, Chamber, Apartment
+            282, 283, 284, 384, 608, // Mist
+            342, 343, 344, 385, 609, // Lavender Beds
+            345, 346, 347, 386, 610, // Goblet
+            649, 650, 651, 652, 655, // Shirogane
+            980, 981, 982, 983, 999, // Empyreum 
+        ];
 
         public static bool IsCharacterBusy()
         {
@@ -24,28 +32,17 @@ namespace LMeter.Helpers
                 condition[ConditionFlag.OccupiedSummoningBell];
         }
 
-        public static bool IsInCombat()
+        public static bool IsInCombat() => Singletons.Get<ICondition>()[ConditionFlag.InCombat];
+        public static bool IsInDuty() => Singletons.Get<ICondition>()[ConditionFlag.BoundByDuty];
+        public static bool IsPerforming() => Singletons.Get<ICondition>()[ConditionFlag.Performing];
+        public static bool IsEditingHouse() => Singletons.Get<ICondition>()[ConditionFlag.UsingHousingFunctions];
+        public static bool IsInDeepDungeon() => Singletons.Get<ICondition>()[ConditionFlag.InDeepDungeon];
+        public static bool InZone(ZoneType zone) => zone switch
         {
-            ICondition condition = Singletons.Get<ICondition>();
-            return condition[ConditionFlag.InCombat];
-        }
-
-        public static bool IsInDuty()
-        {
-            ICondition condition = Singletons.Get<ICondition>();
-            return condition[ConditionFlag.BoundByDuty];
-        }
-
-        public static bool IsPerforming()
-        {
-            ICondition condition = Singletons.Get<ICondition>();
-            return condition[ConditionFlag.Performing];
-        }
-
-        public static bool IsInGoldenSaucer()
-        {
-            return _goldenSaucerIDs.Any(id => id == Singletons.Get<IClientState>().TerritoryType);
-        }
+            ZoneType.GoldSaucer => _goldSaucerIds.Any(id => id == Singletons.Get<IClientState>().TerritoryType),
+            ZoneType.PlayerHouse => _houseIds.Any(id => id == Singletons.Get<IClientState>().TerritoryType),
+            _ => false
+        };
 
         public static Job GetCharacterJob()
         {

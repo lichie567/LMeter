@@ -1,5 +1,28 @@
 namespace LMeter.Helpers
 {
+    public enum BooleanOperator
+    {
+        And,
+        Or,
+        Xor
+    }
+
+    public enum VisibilityConditionType
+    {
+        AlwaysTrue,
+        InCombat,
+        InDuty,
+        Performing,
+        Zone,
+        Job
+    }
+
+    public enum ZoneType
+    {
+        GoldSaucer,
+        PlayerHouse
+    }
+    
     public enum MeterDataType
     {
         Damage,

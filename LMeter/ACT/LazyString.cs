@@ -3,11 +3,11 @@ using LMeter.Helpers;
 
 namespace LMeter.Act
 {
-    public class LazyString<T>
+    public class LazyString<T>(Func<T> getInput, Func<T, string> converter)
     {
         private string _value = string.Empty;
-        private readonly Func<T, string> _converter;
-        private readonly Func<T> _getInput;
+        private readonly Func<T, string> _converter = converter;
+        private readonly Func<T> _getInput = getInput;
 
         public bool WasGenerated { get; private set; }
 
@@ -24,12 +24,6 @@ namespace LMeter.Act
                 this.WasGenerated = true;
                 return _value;
             }
-        }
-
-        public LazyString(Func<T> getInput, Func<T, string> converter)
-        {
-            _getInput = getInput;
-            _converter = converter;
         }
 
         public override string? ToString()
@@ -148,6 +142,7 @@ namespace LMeter.Act
             Job.NIN => "Ninja",
             Job.SAM => "Samurai",
             Job.RPR => "Reaper",
+            Job.VPR => "Viper",
 
             Job.ARC => "Archer",
             Job.BRD => "Bard",
@@ -159,6 +154,7 @@ namespace LMeter.Act
             Job.BLM => "Black Mage",
             Job.SMN => "Summoner",
             Job.RDM => "Red Mage",
+            Job.PCT => "Pictomancer",
             Job.BLU => "Blue Mage",
 
             Job.CRP => "Carpenter",

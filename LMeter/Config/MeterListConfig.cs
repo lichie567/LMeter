@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using Dalamud.Interface;
 using Dalamud.Interface.ImGuiNotification;
 using ImGuiNET;
@@ -12,12 +13,19 @@ namespace LMeter.Config
 {
     public class MeterListConfig : IConfigPage
     {
+        [JsonIgnore]
+        private string _input = string.Empty;
+
+        [JsonIgnore]
+        private MeterDataType _meterDataType = MeterDataType.Damage;
+        
         private const float MenuBarHeight = 40;
 
-        [JsonIgnore] private string _input = string.Empty;
+        [JsonIgnore]
+        public bool Active { get; set; }
 
         public string Name => "Profiles";
-
+        
         public List<MeterWindow> Meters { get; set; }
 
         public MeterListConfig()
@@ -27,34 +35,47 @@ namespace LMeter.Config
 
         public IConfigPage GetDefault() => new MeterListConfig();
 
-        public void DrawConfig(Vector2 size, float padX, float padY)
+        public void DrawConfig(Vector2 size, float padX, float padY, bool border = true)
         {
             this.DrawCreateMenu(size, padX);
             this.DrawMeterTable(size.AddY(-padY), padX);
         }
 
-        public void ToggleMeter(int meterIndex, bool? toggle = null)
+        public void ToggleMeter(int? meterIndex)
         {
-            if (meterIndex >= 0 && meterIndex < this.Meters.Count)
+            if (meterIndex is null)
             {
-                this.Meters[meterIndex].VisibilityConfig.AlwaysHide = toggle.HasValue
-                    ? !toggle.Value
-                    : !this.Meters[meterIndex].VisibilityConfig.AlwaysHide;
+                foreach (MeterWindow meter in this.Meters)
+                {
+                    meter.VisibilityConfig.AlwaysHide ^= true;
+                }
+            }
+            else if (meterIndex >= 0 && meterIndex < this.Meters.Count)
+            {
+                this.Meters[meterIndex.Value].VisibilityConfig.AlwaysHide ^= true;
             }
         }
 
-        public void ToggleClickThrough(int meterIndex)
+        public void ToggleClickThrough(int? meterIndex)
         {
-            if (meterIndex >= 0 && meterIndex < this.Meters.Count)
+            if (meterIndex is null)
             {
-                this.Meters[meterIndex].GeneralConfig.ClickThrough ^= true;
+                foreach (MeterWindow meter in this.Meters)
+                {
+                    meter.GeneralConfig.ClickThrough ^= true;
+                }
+            }
+            else if (meterIndex >= 0 && meterIndex < this.Meters.Count)
+            {
+                this.Meters[meterIndex.Value].GeneralConfig.ClickThrough ^= true;
             }
         }
 
         private void DrawCreateMenu(Vector2 size, float padX)
         {
             Vector2 buttonSize = new(40, 0);
-            float textInputWidth = size.X - buttonSize.X * 2 - padX * 4;
+            float meterTypeWidth = 100f;
+            float textInputWidth = size.X - meterTypeWidth - buttonSize.X * 2 - padX * 5;
 
             if (ImGui.BeginChild("##Buttons", new Vector2(size.X, MenuBarHeight), true))
             {
@@ -62,8 +83,13 @@ namespace LMeter.Config
                 ImGui.InputTextWithHint("##Input", "Profile Name/Import String", ref _input, 10000);
                 ImGui.PopItemWidth();
 
+                ImGui.PushItemWidth(meterTypeWidth);
                 ImGui.SameLine();
-                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Plus, () => CreateMeter(_input), "Create new Meter", buttonSize);
+                ImGui.Combo("", ref Unsafe.As<MeterDataType, int>(ref _meterDataType), ["Damage", "Healing"], 2);
+                ImGui.PopItemWidth();
+
+                ImGui.SameLine();
+                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Plus, () => CreateMeter(_input, _meterDataType), "Create new Meter", buttonSize);
 
                 ImGui.SameLine();
                 DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Download, () => ImportMeter(_input), "Import new Meter", buttonSize);
@@ -88,7 +114,7 @@ namespace LMeter.Config
                 Vector2 buttonsize = new(30, 0);
                 float actionsWidth = buttonsize.X * 3 + padX * 2;
 
-                ImGui.TableSetupColumn("   #", ImGuiTableColumnFlags.WidthFixed, 18, 0);
+                ImGui.TableSetupColumn("Enabled", ImGuiTableColumnFlags.WidthFixed, 46, 0);
                 ImGui.TableSetupColumn("Profile Name", ImGuiTableColumnFlags.WidthStretch, 0, 1);
                 ImGui.TableSetupColumn("Actions", ImGuiTableColumnFlags.WidthFixed, actionsWidth, 2);
 
@@ -110,12 +136,8 @@ namespace LMeter.Config
 
                     if (ImGui.TableSetColumnIndex(0))
                     {
-                        string num = $"  {i + 1}.";
-                        float columnWidth = ImGui.GetColumnWidth();
-                        Vector2 cursorPos = ImGui.GetCursorPos();
-                        Vector2 textSize = ImGui.CalcTextSize(num);
-                        ImGui.SetCursorPos(new Vector2(cursorPos.X + columnWidth - textSize.X, cursorPos.Y + 3f));
-                        ImGui.Text(num);
+                        ImGui.SetCursorPos(ImGui.GetCursorPos() + new Vector2(11f, 1f));
+                        ImGui.Checkbox($"##Text_{i}_EnabledCheckbox", ref meter.Enabled);
                     }
 
                     if (ImGui.TableSetColumnIndex(1))
@@ -141,11 +163,11 @@ namespace LMeter.Config
             }
         }
 
-        private void CreateMeter(string name)
+        private void CreateMeter(string name, MeterDataType dataType)
         {
             if (!string.IsNullOrEmpty(name))
             {
-                this.Meters.Add(MeterWindow.GetDefaultMeter(name));
+                this.Meters.Add(MeterWindow.GetDefaultMeter(dataType, name));
             }
 
             _input = string.Empty;
