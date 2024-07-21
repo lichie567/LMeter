@@ -20,15 +20,6 @@ public class Encounter : IActData<Encounter>
         return TextTagFormatter.TextTagRegex.Replace(format, new TextTagFormatter(this, numberFormat, _textTagMembers).Evaluate);
     }
 
-    
-// These have to be here because newtonsoft and overlayplugin suck
-#pragma warning disable 0169
-    [JsonProperty("ENCDPS")]
-    private readonly string? _encdps;
-    [JsonProperty("ENCHPS")]
-    private readonly string? _enchps;
-#pragma warning restore 0169
-
     [TextTag]
     [JsonProperty("title")]
     public string Title { get; set; } = string.Empty;

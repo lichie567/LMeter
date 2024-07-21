@@ -1,3 +1,6 @@
+# Version 0.4.0.1
+- Fix bug causing many numbers to show 0
+
 # Version 0.4.0.0
 - Redesigned Text options to allow significantly more customization
     - Can now create as many separate bar texts as you would like
