@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Net.Http;
 using System.Numerics;
+using System.Text.RegularExpressions;
 using Dalamud.Game.Command;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
@@ -11,6 +13,7 @@ using LMeter.Config;
 using LMeter.Helpers;
 using LMeter.Meter;
 using LMeter.Windows;
+using Microsoft.ClearScript.V8;
 
 namespace LMeter
 {
@@ -154,6 +157,44 @@ namespace LMeter
 
         private void PluginCommand(string command, string arguments)
         {
+            try
+            {
+                // string regex = @"https://assets.rpglogs.com/js/log-parsers/parser-ff\.[a-f0-9]+\.js";
+                // Regex parseRegex = new Regex(regex);
+                // HttpClient httpClient = new();
+                // httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("LMeter/0.4.0.2 (+https://github.com/lichie567/LMeter)");
+                // var response = httpClient.GetAsync("https://www.fflogs.com/desktop-client/parser").GetAwaiter().GetResult();
+                // string result = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                // var match = parseRegex.Match(result);
+                // string? parser_url = null;
+
+                // if (match.Success)
+                // {
+                //     parser_url = match.Groups[0].ToString();
+                //     response = httpClient.GetAsync(parser_url).GetAwaiter().GetResult();
+                //     string script = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                //     Singletons.Get<IPluginLog>().Info($"parser_url: {parser_url}");
+                //     Singletons.Get<IPluginLog>().Info($"script: {script}");
+
+                //     if (!string.IsNullOrEmpty(script))
+                //     {
+                //         var engine = new V8ScriptEngine();
+                //         // engine.Compile(script);
+                //         var scriptResult = engine.Evaluate($"var window = {{}}; var parserObject = {script}");
+                //         Singletons.Get<IPluginLog>().Info($"{result}");
+                //     }
+                // }
+
+                // FFLogsClient client = new();
+                // client.CollectMeters();
+
+            }
+            catch (Exception ex)
+            {
+                Singletons.Get<IPluginLog>().Error($"exception: {ex}");
+            }
+
+
             string[] argArray = arguments.Split(" ");
             switch (argArray)
             {

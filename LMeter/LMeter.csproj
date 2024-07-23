@@ -98,6 +98,7 @@
     <!-- NuGet Packages -->
     <ItemGroup>
         <PackageReference Include="DalamudPackager" Version="2.1.13" />
+        <PackageReference Include="Microsoft.ClearScript" Version="7.4.5" />
     </ItemGroup>
 
     <!-- Dalamud Packager Task-->

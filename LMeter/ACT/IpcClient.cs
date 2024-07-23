@@ -103,7 +103,7 @@ namespace LMeter.Act
         {
             try
             {
-                this.ParseLogData(data);
+                this.ParseCombatData(data);
                 return true;
             }
             catch (Exception ex)

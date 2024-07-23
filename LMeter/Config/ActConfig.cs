@@ -31,6 +31,7 @@ namespace LMeter.Config
         public bool AutoEnd = false;
         public int AutoEndDelay = 3;
         public int ClientType = 0;
+        public bool UseFFLogs = false;
 
         public ActConfig()
         {
@@ -75,6 +76,9 @@ namespace LMeter.Config
                 ImGui.SameLine();
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() - 1f);
                 ImGui.Text("Retry ACT Connection");
+
+                ImGui.NewLine();
+                ImGui.Checkbox("Enable FFLogs RDPS calculation", ref this.UseFFLogs);
 
                 ImGui.NewLine();
                 ImGui.PushItemWidth(30);

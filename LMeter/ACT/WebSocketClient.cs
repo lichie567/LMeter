@@ -90,7 +90,7 @@ namespace LMeter.Act
                             try
                             {
                                 string data = await reader.ReadToEndAsync();
-                                this.ParseLogData(data);
+                                this.ParseCombatData(data);
                             }
                             catch (Exception ex)
                             {

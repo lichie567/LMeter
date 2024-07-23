@@ -20,6 +20,7 @@ namespace LMeter.Act
         public ConnectionStatus Status { get; protected set; } = ConnectionStatus.NotConnected;
         public List<ActEvent> PastEvents { get; protected init; } = [];
 
+        private FFLogsClient? _fflogsClient = config.UseFFLogs ? new FFLogsClient() : null;
         private ActEvent? _lastEvent;
         private ActEvent? _currentEvent;
 
@@ -37,14 +38,33 @@ namespace LMeter.Act
             return _currentEvent;
         }
 
-        protected void ParseLogData(string data)
+        protected void ParseCombatData(string data)
         {
-            this.HandleNewEvent(JsonConvert.DeserializeObject<ActEvent>(data));
+            // this.HandleNewEvent(JsonConvert.DeserializeObject<ActEvent>(data));
+            // Singletons.Get<IPluginLog>().Info(data);
         }
 
-        protected void ParseLogData(JObject data)
+        protected void ParseCombatData(JObject data)
         {
-            this.HandleNewEvent(data.ToObject<ActEvent>());
+            // this.HandleNewEvent(data.ToObject<ActEvent>());
+            if (data.ContainsKey("type"))
+            {
+                string? type = data.GetValue("type")?.ToString();
+                if (!string.IsNullOrEmpty(type) && type.Equals("LogLine"))
+                {
+                    Singletons.Get<IPluginLog>().Info(data.ToString());
+                }
+            }
+        }
+
+        protected void ParseLogLine(string data)
+        {
+            _fflogsClient?.ParseLine(data);
+        }
+
+        protected void ParseLogLine(JObject data)
+        {
+            _fflogsClient?.ParseLine(data.ToString());
         }
 
         private void HandleNewEvent(ActEvent? newEvent)
@@ -118,6 +138,7 @@ namespace LMeter.Act
             if (disposing)
             {
                 this.Shutdown();
+                this._fflogsClient?.Dispose();
             }
         }
     }
