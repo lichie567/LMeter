@@ -18,6 +18,7 @@ namespace LMeter.Meter
         [JsonIgnore] private bool _lastFrameWasDragging = false;
         [JsonIgnore] private bool _lastFrameWasPreview = false;
         [JsonIgnore] private bool _lastFrameWasCombat = false;
+        [JsonIgnore] private bool _contextMenuWasOpen = false;
         [JsonIgnore] private bool _unlocked = false;
         [JsonIgnore] private bool _hovered = false;
         [JsonIgnore] private bool _dragging = false;
@@ -166,7 +167,7 @@ namespace LMeter.Meter
 
             Vector2 localPos = pos + this.GeneralConfig.Position;
             Vector2 size = this.GeneralConfig.Size;
-            if (!this.ShouldDraw(localPos, size))
+            if (!this.ShouldDraw(localPos, size) && !_contextMenuWasOpen)
             {
                 return;
             }
@@ -181,8 +182,8 @@ namespace LMeter.Meter
                 }
             }
 
-            bool contextMenuOpen = this.DrawContextMenu($"{this.Id}_ContextMenu", out bool selected, out int index);
-            if (contextMenuOpen && selected)
+            _contextMenuWasOpen = this.DrawContextMenu($"{this.Id}_ContextMenu", out bool selected, out int index);
+            if (_contextMenuWasOpen && selected)
             {
                 _eventIndex = index;
                 _lastSortedTimestamp = null;
