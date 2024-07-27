@@ -17,6 +17,18 @@ namespace LMeter.Helpers
             throw new Exception($"Singleton not initialized '{typeof(T).FullName}'.");
         }
 
+        public static bool TryGet<T>(out T? obj)
+        {
+            obj = default;
+            if (ActiveInstances.TryGetValue(typeof(T), out object? o) && o is not null)
+            {
+                obj = (T)o;
+                return true;
+            }
+
+            return false;
+        }
+
         public static bool IsRegistered<T>()
         {
             return ActiveInstances.ContainsKey(typeof(T));

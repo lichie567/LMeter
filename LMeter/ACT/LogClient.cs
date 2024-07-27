@@ -6,21 +6,20 @@ using Dalamud.Plugin.Services;
 using LMeter.Act.DataStructures;
 using LMeter.Config;
 using LMeter.Helpers;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace LMeter.Act
 {
     public abstract class LogClient(ActConfig config) : IPluginDisposable
     {
-        protected const string SubscriptionMessage = "{\"call\":\"subscribe\",\"events\":[\"CombatData\"]}";
+        protected const string SubscriptionMessage = "{\"call\":\"subscribe\",\"events\":[\"CombatData\",\"LogLine\"]}";
 
         protected ActConfig Config { get; set; } = config;
 
         public ConnectionStatus Status { get; protected set; } = ConnectionStatus.NotConnected;
         public List<ActEvent> PastEvents { get; protected init; } = [];
 
-        private FFLogsClient? _fflogsClient = config.UseFFLogs ? new FFLogsClient() : null;
+        public FFLogsClient? _fflogsClient = config.UseFFLogs ? new FFLogsClient() : null;
         private ActEvent? _lastEvent;
         private ActEvent? _currentEvent;
 
@@ -36,35 +35,35 @@ namespace LMeter.Act
             }
 
             return _currentEvent;
-        }
+        } 
 
-        protected void ParseCombatData(string data)
+        protected void ParseLogData(string data)
         {
-            // this.HandleNewEvent(JsonConvert.DeserializeObject<ActEvent>(data));
-            // Singletons.Get<IPluginLog>().Info(data);
-        }
-
-        protected void ParseCombatData(JObject data)
-        {
-            // this.HandleNewEvent(data.ToObject<ActEvent>());
-            if (data.ContainsKey("type"))
+            JObject json = JObject.Parse(data);
+            if (json.ContainsKey("type"))
             {
-                string? type = data.GetValue("type")?.ToString();
-                if (!string.IsNullOrEmpty(type) && type.Equals("LogLine"))
+                string? value = json.GetValue("type")?.ToString();
+                if (!string.IsNullOrEmpty(value))
                 {
-                    Singletons.Get<IPluginLog>().Info(data.ToString());
+                    if (this.Config.UseFFLogs && value.Equals("LogLine"))
+                    {
+                        string? logLine = json.GetValue("rawLine")?.ToString();
+                        if (!string.IsNullOrEmpty(logLine))
+                        {
+                            _fflogsClient?.ParseLine(logLine);
+                        }
+                    }
+                    else if (value.Equals("CombatData"))
+                    {
+                        this.ParseLogData(json);
+                    }
                 }
             }
         }
 
-        protected void ParseLogLine(string data)
+        protected void ParseLogData(JObject data)
         {
-            _fflogsClient?.ParseLine(data);
-        }
-
-        protected void ParseLogLine(JObject data)
-        {
-            _fflogsClient?.ParseLine(data.ToString());
+            this.HandleNewEvent(data.ToObject<ActEvent>());
         }
 
         private void HandleNewEvent(ActEvent? newEvent)
@@ -82,6 +81,11 @@ namespace LMeter.Act
                     {
                         this.PastEvents.RemoveAt(0);
                     }
+                }
+
+                if (this.Config.UseFFLogs)
+                {
+                    newEvent.InjectFFLogsData(_fflogsClient?.CollectMeters());
                 }
 
                 _lastEvent = newEvent;
@@ -105,6 +109,7 @@ namespace LMeter.Act
         {
             _currentEvent = null;
             this.PastEvents.Clear();
+            _fflogsClient?.Reset();
             if (Config.ClearAct)
             {
                 IChatGui chat = Singletons.Get<IChatGui>();

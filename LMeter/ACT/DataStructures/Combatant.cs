@@ -131,6 +131,24 @@ public class Combatant : IActData<Combatant>
     [TextTag]
     public LazyFloat? MaxHitValue { get; set; }
 
+    [TextTag]
+    public LazyFloat? Rdps { get; set; }
+
+    [TextTag]
+    public LazyFloat? Adps { get; set; }
+
+    [TextTag]
+    public LazyFloat? Ndps { get; set; }
+
+    [TextTag]
+    public LazyFloat? Cdps { get; set; }
+
+    [JsonIgnore]
+    public FFLogsActor? FFLogsActor { get; set; }
+
+    [JsonIgnore]
+    public TimeSpan? FFLogsDuration { get; set; }
+
     public Combatant()
     {
         this.Duration = new LazyString<string?>(() => this.DurationRaw, LazyStringConverters.Duration);
@@ -140,6 +158,58 @@ public class Combatant : IActData<Combatant>
         this.EffectiveHealing = new LazyFloat(() => (this.HealingTotal?.Value ?? 0) - (this.OverHeal?.Value ?? 0));
         this.MaxHitName = new LazyString<string?>(() => this.MaxHit, LazyStringConverters.MaxHitName);
         this.MaxHitValue = new LazyFloat(() => LazyStringConverters.MaxHitValue(this.MaxHit));
+        this.Rdps = new LazyFloat(this.GenerateRdps);
+        this.Adps = new LazyFloat(this.GenerateAdps);
+        this.Ndps = new LazyFloat(this.GenerateNdps);
+        this.Cdps = new LazyFloat(this.GenerateCdps);
+    }
+
+    public float GenerateRdps()
+    {
+        if (this.FFLogsActor is not null && this.FFLogsDuration.HasValue)
+        {
+            float rdps = this.FFLogsActor.Amount + this.FFLogsActor.AmountGiven - this.FFLogsActor.AmountTaken;
+            rdps = (float)(rdps / this.FFLogsDuration.Value.TotalSeconds);
+            return rdps;
+        }
+
+        return 0;
+    }
+
+    public float GenerateAdps()
+    {
+        if (this.FFLogsActor is not null && this.FFLogsDuration.HasValue)
+        {
+            float adps = this.FFLogsActor.Amount - this.FFLogsActor.SingleTargetAmountTaken;
+            adps = (float)(adps / this.FFLogsDuration.Value.TotalSeconds);
+            return adps;
+        }
+
+        return 0;
+    }
+
+    public float GenerateNdps()
+    {
+        if (this.FFLogsActor is not null && this.FFLogsDuration.HasValue)
+        {
+            float ndps = this.FFLogsActor.Amount - this.FFLogsActor.AmountTaken;
+            ndps = (float)(ndps / this.FFLogsDuration.Value.TotalSeconds);
+            return ndps;
+        }
+
+        return 0;
+    }
+
+    public float GenerateCdps()
+    {
+        if (this.FFLogsActor is not null && this.FFLogsDuration.HasValue)
+        {
+            float cdps = this.FFLogsActor.Amount - this.FFLogsActor.SingleTargetAmountTaken + this.FFLogsActor.AmountGiven;
+            cdps = (float)(cdps / this.FFLogsDuration.Value.TotalSeconds);
+            return cdps;
+        }
+
+        return 0;
     }
 
     public string GetFormattedString(string format, string numberFormat)

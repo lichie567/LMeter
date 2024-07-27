@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Dalamud.Plugin.Services;
 using LMeter.Helpers;
 using Newtonsoft.Json;
 
@@ -74,6 +75,36 @@ namespace LMeter.Act.DataStructures
             }
 
             return true;
+        }
+
+        public void InjectFFLogsData(FFLogsMeter? meter)
+        {
+            string? playerName = Singletons.Get<IClientState>().LocalPlayer?.Name.ToString();
+            if (meter?.Actors is null ||
+                this.Combatants is null ||
+                string.IsNullOrEmpty(playerName))
+            {
+                return;
+            }
+
+            TimeSpan duration = TimeSpan.FromMilliseconds(meter.EncounterEnd - meter.EncounterStart);
+            foreach (Combatant combatant in this.Combatants.Values)
+            {
+                string name = combatant.OriginalName;
+                if (name.Equals("YOU"))
+                {
+                    name = playerName;
+                }
+
+                foreach (FFLogsActor actor in meter.Actors.Values)
+                {
+                    if (actor.Name.Equals(name))
+                    {
+                        combatant.FFLogsActor = actor;
+                        combatant.FFLogsDuration = duration;
+                    }
+                }
+            }
         }
 
         public static ActEvent GetTestData()
