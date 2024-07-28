@@ -25,9 +25,9 @@ namespace LMeter.Act
 
         public FFLogsClient()
         {
-            this.Engine = new V8ScriptEngine();
-            this.ParserScript = string.Empty;
             this.Initialized = false;
+            this.ParserScript = string.Empty;
+            this.Engine = new V8ScriptEngine();
 
             try
             {
@@ -41,22 +41,30 @@ namespace LMeter.Act
                     string parser_url = match.Groups[0].ToString();
                     response = httpClient.GetAsync(parser_url).GetAwaiter().GetResult();
                     this.ParserScript = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                    this.InitializeEngine();
                 }
             }
             catch (Exception ex)
             {
                 Singletons.Get<IPluginLog>().Error(ex.ToString());
             }
+            
+            this.InitializeEngine();
         }
 
         private void InitializeEngine()
         {
             if (!string.IsNullOrEmpty(this.ParserScript))
             {
-                string func = @"function myCollectMeters() {var meters = myParser.collectMeters(); if(meters && meters.length > 0) {return JSON.stringify(meters[meters.length-1])} else {return """"}}";
-                this.Engine.Evaluate($"var window = {{}}; {this.ParserScript}; var myParser = new window.LogParser(0, false, [], false, true); {func}");
-                this.Initialized = true;
+                try
+                {
+                    string func = @"function myCollectMeters() {var meters = myParser.collectMeters(); if(meters && meters.length > 0) {return JSON.stringify(meters[meters.length-1])} else {return """"}}";
+                    this.Engine.Evaluate($"var window = {{}}; {this.ParserScript}; var myParser = new window.LogParser(0, false, [], false, true); {func}");
+                    this.Initialized = true;
+                }
+                catch (Exception ex)
+                {
+                    Singletons.Get<IPluginLog>().Error(ex.ToString());
+                }
             }
         }
 
@@ -82,7 +90,6 @@ namespace LMeter.Act
                 try
                 {
                     string? result = this.Engine.Script.myCollectMeters() as string;
-                    // Singletons.Get<IPluginLog>().Info($"{result}");
                     if (!string.IsNullOrEmpty(result))
                     {
                         return JsonConvert.DeserializeObject<FFLogsMeter>(result);
@@ -124,19 +131,40 @@ namespace LMeter.Act
     public class FFLogsMeter
     {
         [JsonProperty("startTime")]
-        public long EncounterStart;
+        public long EncounterStart { get; set; }
 
         [JsonProperty("endTime")]
-        public long EncounterEnd;
+        public long EncounterEnd { get; set; }
 
         [JsonProperty("downtime")]
-        public int Downtime;
+        public int Downtime { get; set; }
+
+        [JsonProperty("encounter")]
+        public FFLogsEncounter? Encounter { get; set; }
+
+        [JsonProperty("state")]
+        public string State { get; set; } = string.Empty;
 
         [JsonProperty("friendlyDamage")]
         private FFLogsActors? _actors = null;
 
         [JsonIgnore]
         public Dictionary<string, FFLogsActor>? Actors => _actors?.Actors;
+
+        [JsonIgnore]
+        public bool IsEncounterActive => this.State.Equals("inProgress");
+    }
+
+    public class FFLogsEncounter
+    {
+        [JsonProperty("id")]
+        public int Id { get; set; }
+
+        [JsonProperty("type")]
+        public string Type { get; set; } = string.Empty;
+
+        [JsonProperty("name")]
+        public string Name { get; set; } = string.Empty;
     }
 
     public class FFLogsActors
@@ -163,14 +191,14 @@ namespace LMeter.Act
         public float SingleTargetAmountTaken { get; set; }
 
         [JsonProperty("over")]
-        public float Over { get; set; }
+        public float Overkill { get; set; }
 
         [JsonProperty("abilities")]
         public Dictionary<string, FFLogsActor>? Abilities { get; set; }
 
         public override string ToString()
         {
-            return $"name: {this.Name}, amount: {this.Amount}, amountGiven: {this.AmountGiven}, amountTaken: {this.AmountTaken}, over: {this.Over}";
+            return $"name: {this.Name}, amount: {this.Amount}, amountGiven: {this.AmountGiven}, amountTaken: {this.AmountTaken}, singleTargetAmountTaken: {this.SingleTargetAmountTaken}";
         }
     }
 
@@ -196,7 +224,7 @@ namespace LMeter.Act
 
         public override string ToString()
         {
-            return $"name: {this.Name}, amount: {this.Amount}, amountGiven: {this.AmountGiven}, amountTaken: {this.AmountTaken}";
+            return $"name: {this.Name}, amount: {this.Amount}, amountGiven: {this.AmountGiven}, amountTaken: {this.AmountTaken}, singleTargetAmountTaken: {this.SingleTargetAmountTaken}";
         }
     }
 }

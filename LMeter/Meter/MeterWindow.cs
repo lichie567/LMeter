@@ -517,7 +517,7 @@ namespace LMeter.Meter
                     {
                         using (FontsManager.PushFont(text.FontKey))
                         {
-                            string formattedText = actData.GetFormattedString($" {text.TextFormat} ", text.ThousandsSeparators ? "N" : "F");
+                            string formattedText = actData.GetFormattedString($" {text.TextFormat} ", text.ThousandsSeparators ? "N" : "F", text.EmptyIfZero);
                             Vector2 textSize = ImGui.CalcTextSize(formattedText);
                             
                             if (text.FixedTextWidth && textSize.X > text.TextWidth)

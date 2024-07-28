@@ -78,7 +78,10 @@ namespace LMeter.Config
                 ImGui.Text("Retry ACT Connection");
 
                 ImGui.NewLine();
-                ImGui.Checkbox("Enable FFLogs DPS calculations [EXPERIMENTAL]", ref this.UseFFLogs);
+                if (ImGui.Checkbox("Enable FFLogs DPS Calculations [EXPERIMENTAL]", ref this.UseFFLogs))
+                {
+                    Singletons.Get<LogClient>().ToggleFFlogsUsage();
+                }
 
                 ImGui.NewLine();
                 ImGui.PushItemWidth(30);

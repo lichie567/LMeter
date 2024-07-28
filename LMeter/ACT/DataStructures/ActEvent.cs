@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Dalamud.Plugin.Services;
 using LMeter.Helpers;
 using Newtonsoft.Json;
 
@@ -21,7 +20,6 @@ namespace LMeter.Act.DataStructures
         private bool _active;
 
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
-        public string Data { get; set; } = string.Empty;
 
         [JsonProperty("type")]
         public string EventType { get; set; } = string.Empty;
@@ -35,9 +33,9 @@ namespace LMeter.Act.DataStructures
         [JsonProperty("Combatant")]
         public Dictionary<string, Combatant>? Combatants { get; set; }
         
-        public string GetFormattedString(string format, string numberFormat)
+        public string GetFormattedString(string format, string numberFormat, bool emptyIfZero)
         {
-            return TextTagFormatter.TextTagRegex.Replace(format, new TextTagFormatter(this, numberFormat, _textTagMembers).Evaluate);
+            return TextTagFormatter.TextTagRegex.Replace(format, new TextTagFormatter(this, numberFormat, emptyIfZero, _textTagMembers).Evaluate);
         }
 
         public bool IsEncounterActive()
@@ -79,13 +77,21 @@ namespace LMeter.Act.DataStructures
 
         public void InjectFFLogsData(FFLogsMeter? meter)
         {
-            string? playerName = Singletons.Get<IClientState>().LocalPlayer?.Name.ToString();
+            string playerName = CharacterState.CharacterName;
             if (meter?.Actors is null ||
+                meter?.Encounter is null ||
                 this.Combatants is null ||
+                this.Encounter is null ||
                 string.IsNullOrEmpty(playerName))
             {
                 return;
             }
+
+            // if (!meter.Encounter.Name.Equals(this.Encounter.Title) ||
+            //     meter.IsEncounterActive != this.IsEncounterActive())
+            // {
+            //     return;
+            // }
 
             TimeSpan duration = TimeSpan.FromMilliseconds(meter.EncounterEnd - meter.EncounterStart);
             foreach (Combatant combatant in this.Combatants.Values)

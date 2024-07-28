@@ -35,19 +35,37 @@ namespace LMeter.Act
             }
 
             return _currentEvent;
-        } 
+        }
+
+        public void ToggleFFlogsUsage()
+        {
+            if (this.Config.UseFFLogs)
+            {
+                _fflogsClient?.Dispose();
+                _fflogsClient = new FFLogsClient();
+            }
+            else
+            {
+                _fflogsClient?.Dispose();
+                _fflogsClient = null;
+            }
+        }
 
         protected void ParseLogData(string data)
         {
-            JObject json = JObject.Parse(data);
-            if (json.ContainsKey("type"))
+            this.ParseLogData(JObject.Parse(data));
+        }
+
+        protected void ParseLogData(JObject data)
+        {
+            if (data.ContainsKey("type"))
             {
-                string? value = json.GetValue("type")?.ToString();
+                string? value = data.GetValue("type")?.ToString();
                 if (!string.IsNullOrEmpty(value))
                 {
                     if (this.Config.UseFFLogs && value.Equals("LogLine"))
                     {
-                        string? logLine = json.GetValue("rawLine")?.ToString();
+                        string? logLine = data.GetValue("rawLine")?.ToString();
                         if (!string.IsNullOrEmpty(logLine))
                         {
                             _fflogsClient?.ParseLine(logLine);
@@ -55,15 +73,10 @@ namespace LMeter.Act
                     }
                     else if (value.Equals("CombatData"))
                     {
-                        this.ParseLogData(json);
+                        this.HandleNewEvent(data.ToObject<ActEvent>());
                     }
                 }
             }
-        }
-
-        protected void ParseLogData(JObject data)
-        {
-            this.HandleNewEvent(data.ToObject<ActEvent>());
         }
 
         private void HandleNewEvent(ActEvent? newEvent)

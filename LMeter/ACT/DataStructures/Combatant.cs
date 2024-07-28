@@ -212,9 +212,9 @@ public class Combatant : IActData<Combatant>
         return 0;
     }
 
-    public string GetFormattedString(string format, string numberFormat)
+    public string GetFormattedString(string format, string numberFormat, bool emptyIfZero)
     {
-        return TextTagFormatter.TextTagRegex.Replace(format, new TextTagFormatter(this, numberFormat, _textTagMembers).Evaluate);
+        return TextTagFormatter.TextTagRegex.Replace(format, new TextTagFormatter(this, numberFormat, emptyIfZero, _textTagMembers).Evaluate);
     }
 
     public static Combatant GetTestData()

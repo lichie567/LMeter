@@ -20,6 +20,17 @@ namespace LMeter.Helpers
             980, 981, 982, 983, 999, // Empyreum 
         ];
 
+        public static string CharacterName { get; private set; } = string.Empty;
+
+        public static void UpdateCurrentCharacter()
+        {
+            string? playerName = Singletons.Get<IClientState>().LocalPlayer?.Name.ToString();
+            if (!string.IsNullOrEmpty(playerName))
+            {
+                CharacterName = playerName;
+            }
+        }
+
         public static bool IsCharacterBusy()
         {
             ICondition condition = Singletons.Get<ICondition>();

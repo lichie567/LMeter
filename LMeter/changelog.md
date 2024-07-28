@@ -1,3 +1,8 @@
+# Version 0.4.1.0
+- Add support for FFLogs DPS calculations
+    - Four new TextTags added: RDPS, ADPS, NDPS, CDPS
+- Added new text option to hide text tag value if value is 0
+
 # Version 0.4.0.2
 - Fix issue with maxhitname text tag
 - Added bar color selector for Limit Break

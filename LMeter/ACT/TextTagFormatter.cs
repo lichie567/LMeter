@@ -8,6 +8,7 @@ namespace LMeter.Act
     public partial class TextTagFormatter(
         object source,
         string format,
+        bool emptyIfZero,
         Dictionary<string, MemberInfo> members)
     {
         [GeneratedRegex(@"\[(\w*)(:k)?\.?(\d+)?\]", RegexOptions.Compiled)]
@@ -16,6 +17,7 @@ namespace LMeter.Act
 
         private readonly object _source = source;
         private readonly string _format = format;
+        private readonly bool _emptyIfZero = emptyIfZero;
         private readonly Dictionary<string, MemberInfo> _members = members;
 
         public string Evaluate(Match m)
@@ -46,7 +48,7 @@ namespace LMeter.Act
                     : $"{_format}{m.Groups[3].Value}";
 
                 bool kilo = !string.IsNullOrEmpty(m.Groups[2].Value);
-                value = lazyFloat.ToString(format, kilo) ?? m.Value;
+                value = lazyFloat.ToString(format, kilo, _emptyIfZero) ?? m.Value;
             }
             else if (memberValue is not null)
             {
