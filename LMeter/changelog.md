@@ -1,6 +1,8 @@
 # Version 0.4.1.0
 - Add support for FFLogs DPS calculations
-    - Four new TextTags added: RDPS, ADPS, NDPS, CDPS
+    - Four new TextTags added: RDPS, ADPS, NDPS, CDPS, RAWDPS
+    - RAWDPS is FFLogs DPS without any calculations applied
+    - Added option to sort meter by these numbers (though it is not recommended)
 - Added new text option to hide text tag value if value is 0
 
 # Version 0.4.0.2
