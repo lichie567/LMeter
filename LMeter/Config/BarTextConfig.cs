@@ -347,7 +347,7 @@ namespace LMeter.Config
             ImGui.Checkbox("Hide Tag Values if Zero", ref this.EmptyIfZero);
             if (this.AnchorParent != 0)
             {
-                ImGui.Checkbox("Show Anchor Separator", ref this.ShowSeparator);
+                ImGui.Checkbox("Show Separator", ref this.ShowSeparator);
                 if (this.ShowSeparator)
                 {
                     DrawHelpers.DrawNestIndicator(1);

@@ -143,6 +143,9 @@ public class Combatant : IActData<Combatant>
     [TextTag]
     public LazyFloat? Cdps { get; set; }
 
+    [TextTag]
+    public LazyFloat? Rawdps { get; set; }
+
     [JsonIgnore]
     public FFLogsActor? FFLogsActor { get; set; }
 
@@ -162,6 +165,7 @@ public class Combatant : IActData<Combatant>
         this.Adps = new LazyFloat(this.GenerateAdps);
         this.Ndps = new LazyFloat(this.GenerateNdps);
         this.Cdps = new LazyFloat(this.GenerateCdps);
+        this.Rawdps = new LazyFloat(this.GenerateRawDps);
     }
 
     public float GenerateRdps()
@@ -212,10 +216,35 @@ public class Combatant : IActData<Combatant>
         return 0;
     }
 
+    public float GenerateRawDps()
+    {
+        if (this.FFLogsActor is not null && this.FFLogsDuration.HasValue)
+        {
+            float rawDps = this.FFLogsActor.Amount;
+            rawDps = (float)(rawDps / this.FFLogsDuration.Value.TotalSeconds);
+            return rawDps;
+        }
+
+        return 0;
+    }
+
     public string GetFormattedString(string format, string numberFormat, bool emptyIfZero)
     {
         return TextTagFormatter.TextTagRegex.Replace(format, new TextTagFormatter(this, numberFormat, emptyIfZero, _textTagMembers).Evaluate);
     }
+
+    public float GetValueForDataType(MeterDataType type) => type switch
+    {
+        MeterDataType.Damage => this.DamageTotal?.Value ?? 0,
+        MeterDataType.Healing => this.EffectiveHealing?.Value ?? 0,
+        MeterDataType.DamageTaken => this.DamageTaken?.Value ?? 0,
+        MeterDataType.Rdps => this.Rdps?.Value ?? 0,
+        MeterDataType.Adps => this.Adps?.Value ?? 0,
+        MeterDataType.Ndps => this.Ndps?.Value ?? 0,
+        MeterDataType.Cdps => this.Cdps?.Value ?? 0,
+        MeterDataType.RawDps => this.Rawdps?.Value ?? 0,
+        _ => 0
+    };
 
     public static Combatant GetTestData()
     {

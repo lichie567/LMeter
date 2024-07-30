@@ -35,6 +35,8 @@ namespace LMeter
             ImGuiWindowFlags.NoBringToFrontOnFocus |
             ImGuiWindowFlags.NoSavedSettings;
 
+        public static bool TestMode = false;
+
         public PluginManager(
             IClientState clientState,
             ICommandManager commandManager,
@@ -155,25 +157,11 @@ namespace LMeter
 
         private void PluginCommand(string command, string arguments)
         {
-            // if (arguments.Equals("test"))
-            // {
-            //     try
-            //     {
-            //         FFLogsClient? client = Singletons.Get<LogClient>()._fflogsClient;
-            //         if (client is not null)
-            //         {
-            //             FFLogsMeter? meter = client.CollectMeters();
-            //             if (meter?.Actors is not null)
-            //                 foreach (var actor in meter.Actors.Values)
-            //                     Singletons.Get<IPluginLog>().Info($"{actor}");
-            //         }
-
-            //     }
-            //     catch (Exception ex)
-            //     {
-            //         Singletons.Get<IPluginLog>().Error(ex.ToString());
-            //     }
-            // }
+            if (arguments.Equals("test"))
+            {
+                PluginManager.TestMode ^= true;
+                return;
+            }
 
 
             string[] argArray = arguments.Split(" ");

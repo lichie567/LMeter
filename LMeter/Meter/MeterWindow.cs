@@ -381,14 +381,7 @@ namespace LMeter.Meter
                 // This has the issue that some settings can't behave properly and or don't update till the following combat update/fight
                 List<Combatant> sortedCombatants = [.. this.GetSortedCombatants(actEvent, this.GeneralConfig.DataType)];
 
-                float top = this.GeneralConfig.DataType switch
-                {
-                    MeterDataType.Damage => sortedCombatants[0].DamageTotal?.Value ?? 0,
-                    MeterDataType.Healing => sortedCombatants[0].EffectiveHealing?.Value ?? 0,
-                    MeterDataType.DamageTaken => sortedCombatants[0].DamageTaken?.Value ?? 0,
-                    _ => 0
-                };
-                
+                float top = sortedCombatants[0].GetValueForDataType(this.GeneralConfig.DataType);                
                 int barCount = this.BarConfig.BarCount;
                 float margin = 0;
                 if (this.BarConfig.BarHeightType == 1)
@@ -435,15 +428,8 @@ namespace LMeter.Meter
                     Combatant combatant = sortedCombatants[currentIndex];
                     combatant.Rank = (currentIndex + 1).ToString();
                     UpdatePlayerName(combatant, playerName);
-
-                    float current = this.GeneralConfig.DataType switch
-                    {
-                        MeterDataType.Damage => combatant.DamageTotal?.Value ?? 0,
-                        MeterDataType.Healing => combatant.EffectiveHealing?.Value ?? 0,
-                        MeterDataType.DamageTaken => combatant.DamageTaken?.Value ?? 0,
-                        _ => 0
-                    };
-
+                    
+                    float current = combatant.GetValueForDataType(this.GeneralConfig.DataType);
                     ConfigColor barColor = this.BarConfig.BarColor;
                     ConfigColor jobColor = this.BarColorsConfig.GetColor(combatant.Job);
                     localPos = this.DrawBar(drawList, localPos, size, combatant, jobColor, barColor, top, current);
@@ -666,21 +652,8 @@ namespace LMeter.Meter
             List<Combatant> sortedCombatants = [.. actEvent.Combatants.Values];
             sortedCombatants.Sort((x, y) =>
             {
-                float xFloat = dataType switch
-                {
-                    MeterDataType.Damage => x.DamageTotal?.Value ?? 0,
-                    MeterDataType.Healing => x.EffectiveHealing?.Value ?? 0,
-                    MeterDataType.DamageTaken => x.DamageTaken?.Value ?? 0,
-                    _ => 0
-                };
-
-                float yFloat = dataType switch
-                {
-                    MeterDataType.Damage => y.DamageTotal?.Value ?? 0,
-                    MeterDataType.Healing => y.EffectiveHealing?.Value ?? 0,
-                    MeterDataType.DamageTaken => y.DamageTaken?.Value ?? 0,
-                    _ => 0
-                };
+                float xFloat = x.GetValueForDataType(dataType);
+                float yFloat = y.GetValueForDataType(dataType);
 
                 return (int)(yFloat - xFloat);
             });

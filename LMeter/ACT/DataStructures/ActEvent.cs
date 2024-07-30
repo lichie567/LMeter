@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Dalamud.Plugin.Services;
 using LMeter.Helpers;
 using Newtonsoft.Json;
 
@@ -87,13 +88,19 @@ namespace LMeter.Act.DataStructures
                 return;
             }
 
-            // if (!meter.Encounter.Name.Equals(this.Encounter.Title) ||
-            //     meter.IsEncounterActive != this.IsEncounterActive())
-            // {
-            //     return;
-            // }
+            TimeSpan duration = TimeSpan.FromMilliseconds(meter.EncounterEnd - meter.EncounterStart - meter.Downtime);
+            if (PluginManager.TestMode)
+            {
+                TimeSpan totalDuration = TimeSpan.FromMilliseconds(meter.EncounterEnd - meter.EncounterStart);
+                if (this.Encounter is not null)
+                {
+                    float.TryParse(this.Encounter.DurationRaw, out float actDuration);
+                    Singletons.Get<IPluginLog>().Info($"act title: {this.Encounter.Title}, fflogs name: {meter.Encounter.Name}");
+                    Singletons.Get<IPluginLog>().Info($"actDuration: {actDuration}, fflogsDuration: {totalDuration}, downtime: {meter.Downtime}, adjusted: {duration}");
+                }
+            }
 
-            TimeSpan duration = TimeSpan.FromMilliseconds(meter.EncounterEnd - meter.EncounterStart);
+
             foreach (Combatant combatant in this.Combatants.Values)
             {
                 string name = combatant.OriginalName;

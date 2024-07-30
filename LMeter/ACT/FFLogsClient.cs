@@ -42,18 +42,18 @@ namespace LMeter.Act
                     response = httpClient.GetAsync(parser_url).GetAwaiter().GetResult();
                     this.ParserScript = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
                 }
+                
+                this.InitializeEngine();
             }
             catch (Exception ex)
             {
                 Singletons.Get<IPluginLog>().Error(ex.ToString());
             }
-            
-            this.InitializeEngine();
         }
 
         private void InitializeEngine()
         {
-            if (!string.IsNullOrEmpty(this.ParserScript))
+            if (!this.Initialized && !string.IsNullOrEmpty(this.ParserScript))
             {
                 try
                 {
