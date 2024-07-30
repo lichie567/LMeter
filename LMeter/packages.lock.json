@@ -21,6 +21,12 @@
           "Microsoft.ClearScript.Windows": "7.4.5"
         }
       },
+      "Newtonsoft.Json": {
+        "type": "Direct",
+        "requested": "[13.0.1, )",
+        "resolved": "13.0.1",
+        "contentHash": "ppPFpBcvxdsfUonNcvITKqLl3bqxWbDCZIzDWHzjpdAHRFfZe0Dw9HmA0+za13IdyrgJwpkDTDA9fHaxOrt20A=="
+      },
       "Microsoft.ClearScript.Core": {
         "type": "Transitive",
         "resolved": "7.4.5",
@@ -67,11 +73,6 @@
         "dependencies": {
           "Microsoft.ClearScript.Core": "7.4.5"
         }
-      },
-      "Newtonsoft.Json": {
-        "type": "Transitive",
-        "resolved": "13.0.1",
-        "contentHash": "ppPFpBcvxdsfUonNcvITKqLl3bqxWbDCZIzDWHzjpdAHRFfZe0Dw9HmA0+za13IdyrgJwpkDTDA9fHaxOrt20A=="
       }
     }
   }

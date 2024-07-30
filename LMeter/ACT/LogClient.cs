@@ -63,7 +63,9 @@ namespace LMeter.Act
                 string? value = data.GetValue("type")?.ToString();
                 if (!string.IsNullOrEmpty(value))
                 {
-                    if (this.Config.UseFFLogs && value.Equals("LogLine"))
+                    if (this.Config.UseFFLogs &&
+                        (!this.Config.DisableFFLogsOutsideDuty || CharacterState.IsInDuty()) &&
+                        value.Equals("LogLine"))
                     {
                         string? logLine = data.GetValue("rawLine")?.ToString();
                         if (!string.IsNullOrEmpty(logLine))
@@ -96,7 +98,8 @@ namespace LMeter.Act
                     }
                 }
 
-                if (this.Config.UseFFLogs)
+                if (this.Config.UseFFLogs &&
+                    (!this.Config.DisableFFLogsOutsideDuty || CharacterState.IsInDuty()))
                 {
                     newEvent.InjectFFLogsData(_fflogsClient?.CollectMeters());
                 }

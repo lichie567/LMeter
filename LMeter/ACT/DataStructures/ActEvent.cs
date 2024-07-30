@@ -95,8 +95,8 @@ namespace LMeter.Act.DataStructures
                 if (this.Encounter is not null)
                 {
                     float.TryParse(this.Encounter.DurationRaw, out float actDuration);
-                    Singletons.Get<IPluginLog>().Info($"act title: {this.Encounter.Title}, fflogs name: {meter.Encounter.Name}");
-                    Singletons.Get<IPluginLog>().Info($"actDuration: {actDuration}, fflogsDuration: {totalDuration}, downtime: {meter.Downtime}, adjusted: {duration}");
+                    Singletons.Get<IPluginLog>().Info($"act title: {this.Encounter.Title}, fflogs name: {meter.Encounter.Name}, fflogs state: {meter.State}");
+                    Singletons.Get<IPluginLog>().Info($"actDuration: {this.Encounter.DurationRaw}, fflogsDuration: {totalDuration}, downtime: {meter.Downtime}, adjusted: {duration}");
                 }
             }
 

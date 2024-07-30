@@ -41,7 +41,7 @@ namespace LMeter.Act
                 return string.Empty;
             }
 
-            if (input.Contains(":"))
+            if (input.Contains(':'))
             {
                 return input;
             }

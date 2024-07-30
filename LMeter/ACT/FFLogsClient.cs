@@ -152,7 +152,7 @@ namespace LMeter.Act
         public Dictionary<string, FFLogsActor>? Actors => _actors?.Actors;
 
         [JsonIgnore]
-        public bool IsEncounterActive => this.State.Equals("inProgress");
+        public bool IsEncounterActive => this.State.Equals("inprogress");
     }
 
     public class FFLogsEncounter

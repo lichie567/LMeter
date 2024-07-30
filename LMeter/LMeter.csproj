@@ -46,12 +46,12 @@
 
     <!-- Dalamud Configuration (Windows-specific) -->
     <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
-        <DalamudXIVLauncher>$(APPDATA)\XIVLauncher\addon\Hooks\$(DalamudVersion)\</DalamudXIVLauncher>
+        <DalamudLibPath>$(APPDATA)\XIVLauncher\addon\Hooks\$(DalamudVersion)\</DalamudLibPath>
     </PropertyGroup>
 
     <!-- Dalamud Configuration (Linux-specific) -->
     <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Linux'))">
-        <DalamudXIVLauncher>$(HOME)/.xlcore/dalamud/Hooks/$(DalamudVersion)/</DalamudXIVLauncher>
+        <DalamudLibPath>$(HOME)/.xlcore/dalamud/Hooks/$(DalamudVersion)/</DalamudLibPath>
     </PropertyGroup>
 
     <!-- Assembly Reference Locations -->
@@ -60,7 +60,7 @@
             $(AssemblySearchPaths);
             $(DalamudHome);
             $(DalamudLocal);
-            $(DalamudXIVLauncher);
+            $(DalamudLibPath);
         </AssemblySearchPaths>
     </PropertyGroup>
 
@@ -75,31 +75,31 @@
     <!-- Library References -->
     <ItemGroup>
         <Reference Include="Dalamud">
-            <HintPath>$(DalamudXIVLauncher)Dalamud.dll</HintPath>
+            <HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
             <Private>false</Private>
         </Reference>
-        <Reference Include="Newtonsoft.Json">
-            <HintPath>$(DalamudXIVLauncher)Newtonsoft.Json.dll</HintPath>
+        <Reference Include="Newtonsoft.Json" ExcludeAssets="all">
+            <HintPath>$(DalamudLibPath)Newtonsoft.Json.dll</HintPath>
             <Private>false</Private>
         </Reference>
         <Reference Include="ImGui.NET">
-            <HintPath>$(DalamudXIVLauncher)ImGui.NET.dll</HintPath>
+            <HintPath>$(DalamudLibPath)ImGui.NET.dll</HintPath>
             <Private>false</Private>
         </Reference>
         <Reference Include="ImGuiScene">
-            <HintPath>$(DalamudXIVLauncher)ImGuiScene.dll</HintPath>
+            <HintPath>$(DalamudLibPath)ImGuiScene.dll</HintPath>
             <Private>false</Private>
         </Reference>
         <Reference Include="Lumina">
-            <HintPath>$(DalamudXIVLauncher)Lumina.dll</HintPath>
+            <HintPath>$(DalamudLibPath)Lumina.dll</HintPath>
             <Private>false</Private>
         </Reference>
         <Reference Include="Lumina.Excel">
-            <HintPath>$(DalamudXIVLauncher)Lumina.Excel.dll</HintPath>
+            <HintPath>$(DalamudLibPath)Lumina.Excel.dll</HintPath>
             <Private>false</Private>
         </Reference>
         <Reference Include="FFXIVClientStructs">
-            <HintPath>$(DalamudXIVLauncher)FFXIVClientStructs.dll</HintPath>
+            <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
             <Private>false</Private>
         </Reference>
     </ItemGroup>
@@ -108,6 +108,7 @@
     <ItemGroup>
         <PackageReference Include="DalamudPackager" Version="2.1.13" />
         <PackageReference Include="Microsoft.ClearScript" Version="7.4.5" />
+        <PackageReference Include="Newtonsoft.Json" Version="[13.0.1,)" ExcludeAssets="all" />
     </ItemGroup>
 
     <!-- Dalamud Packager Task-->

@@ -32,6 +32,7 @@ namespace LMeter.Config
         public int AutoEndDelay = 3;
         public int ClientType = 0;
         public bool UseFFLogs = false;
+        public bool DisableFFLogsOutsideDuty = true;
 
         public ActConfig()
         {
@@ -81,6 +82,12 @@ namespace LMeter.Config
                 if (ImGui.Checkbox("Enable FFLogs DPS Calculations [EXPERIMENTAL]", ref this.UseFFLogs))
                 {
                     Singletons.Get<LogClient>().ToggleFFlogsUsage();
+                }
+
+                if (this.UseFFLogs)
+                {
+                    DrawHelpers.DrawNestIndicator(1);
+                    ImGui.Checkbox("Disable FFLogs Calculations Outside Duty", ref this.DisableFFLogsOutsideDuty);
                 }
 
                 ImGui.NewLine();
