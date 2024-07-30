@@ -36,8 +36,6 @@ namespace LMeter
             ImGuiWindowFlags.NoBringToFrontOnFocus |
             ImGuiWindowFlags.NoSavedSettings;
 
-        public static bool TestMode = false;
-
         public PluginManager(
             IClientState clientState,
             ICommandManager commandManager,
@@ -158,33 +156,6 @@ namespace LMeter
 
         private void PluginCommand(string command, string arguments)
         {
-            if (arguments.Equals("test"))
-            {
-                PluginManager.TestMode ^= true;
-                Singletons.Get<IPluginLog>().Info($"{arguments}, {PluginManager.TestMode}");
-                return;
-            }
-
-            if (arguments.Equals("collect"))
-            {
-                FFLogsClient? client = Singletons.Get<LogClient>()._fflogsClient;
-                ActEvent? lastEvent = Singletons.Get<LogClient>().GetEvent();
-                if (client is not null && lastEvent?.Encounter is not null)
-                {
-                    FFLogsMeter? meter = client.CollectMeters();
-                    if (meter?.Encounter is not null)
-                    {
-                        TimeSpan duration = TimeSpan.FromMilliseconds(meter.EncounterEnd - meter.EncounterStart - meter.Downtime);
-                        TimeSpan totalDuration = TimeSpan.FromMilliseconds(meter.EncounterEnd - meter.EncounterStart);
-                        Singletons.Get<IPluginLog>().Info($"act title: {lastEvent.Encounter.Title}, fflogs name: {meter.Encounter.Name}, fflogs state: {meter.State}");
-                        Singletons.Get<IPluginLog>().Info($"actDuration: {lastEvent.Encounter.DurationRaw}, fflogsDuration: {totalDuration}, downtime: {meter.Downtime}, adjusted: {duration}");
-                    }
-                }
-
-                return;
-            }
-
-
             string[] argArray = arguments.Split(" ");
             switch (argArray)
             {

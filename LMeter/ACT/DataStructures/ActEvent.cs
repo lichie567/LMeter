@@ -89,18 +89,6 @@ namespace LMeter.Act.DataStructures
             }
 
             TimeSpan duration = TimeSpan.FromMilliseconds(meter.EncounterEnd - meter.EncounterStart - meter.Downtime);
-            if (PluginManager.TestMode)
-            {
-                TimeSpan totalDuration = TimeSpan.FromMilliseconds(meter.EncounterEnd - meter.EncounterStart);
-                if (this.Encounter is not null)
-                {
-                    float.TryParse(this.Encounter.DurationRaw, out float actDuration);
-                    Singletons.Get<IPluginLog>().Info($"act title: {this.Encounter.Title}, fflogs name: {meter.Encounter.Name}, fflogs state: {meter.State}");
-                    Singletons.Get<IPluginLog>().Info($"actDuration: {this.Encounter.DurationRaw}, fflogsDuration: {totalDuration}, downtime: {meter.Downtime}, adjusted: {duration}");
-                }
-            }
-
-
             foreach (Combatant combatant in this.Combatants.Values)
             {
                 string name = combatant.OriginalName;

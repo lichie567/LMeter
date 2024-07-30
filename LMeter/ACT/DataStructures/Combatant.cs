@@ -15,7 +15,7 @@ public class Combatant : IActData<Combatant>
 
     private static readonly Dictionary<string, MemberInfo> _textTagMembers = 
         typeof(Combatant).GetMembers().Where(x => Attribute.IsDefined(x, typeof(TextTagAttribute))).ToDictionary((x) => x.Name.ToLower());
-    
+
     [JsonProperty("name")]
     public string OriginalName { get; set; } = string.Empty;
 
@@ -271,4 +271,12 @@ public class Combatant : IActData<Combatant>
             MaxHit = "Full Thrust-42069"
         };
     }
+
+// These have to be here because newtonsoft and overlayplugin suck
+#pragma warning disable 0169
+    [JsonProperty("ENCDPS")]
+    private readonly string? _encdps;
+    [JsonProperty("ENCHPS")]
+    private readonly string? _enchps;
+#pragma warning restore 0169
 }

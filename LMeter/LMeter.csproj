@@ -78,7 +78,7 @@
             <HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
             <Private>false</Private>
         </Reference>
-        <Reference Include="Newtonsoft.Json" ExcludeAssets="all">
+        <Reference Include="Newtonsoft.Json">
             <HintPath>$(DalamudLibPath)Newtonsoft.Json.dll</HintPath>
             <Private>false</Private>
         </Reference>
@@ -108,7 +108,7 @@
     <ItemGroup>
         <PackageReference Include="DalamudPackager" Version="2.1.13" />
         <PackageReference Include="Microsoft.ClearScript" Version="7.4.5" />
-        <PackageReference Include="Newtonsoft.Json" Version="[13.0.1,)" ExcludeAssets="all" />
+        <PackageReference Include="Newtonsoft.Json" Version="[13.0.1,)" ExcludeAssets="all" /> <!-- Exclude Newtonsoft.Json.dll pulled by Clearscript -->
     </ItemGroup>
 
     <!-- Dalamud Packager Task-->

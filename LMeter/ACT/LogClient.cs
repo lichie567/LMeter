@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Dalamud.Game.Text;
 using Dalamud.Plugin.Services;
 using LMeter.Act.DataStructures;
 using LMeter.Config;
 using LMeter.Helpers;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace LMeter.Act
@@ -22,6 +24,7 @@ namespace LMeter.Act
         public FFLogsClient? _fflogsClient = config.UseFFLogs ? new FFLogsClient() : null;
         private ActEvent? _lastEvent;
         private ActEvent? _currentEvent;
+        private readonly JsonSerializer _jsonSerializer = new() { Culture = CultureInfo.CurrentCulture };
 
         public abstract void Start();
         public abstract void Shutdown();
@@ -75,7 +78,7 @@ namespace LMeter.Act
                     }
                     else if (value.Equals("CombatData"))
                     {
-                        this.HandleNewEvent(data.ToObject<ActEvent>());
+                        this.HandleNewEvent(data.ToObject<ActEvent>(_jsonSerializer));
                     }
                 }
             }
