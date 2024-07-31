@@ -381,6 +381,13 @@ namespace LMeter.Meter
                 // This has the issue that some settings can't behave properly and or don't update till the following combat update/fight
                 List<Combatant> sortedCombatants = [.. this.GetSortedCombatants(actEvent, this.GeneralConfig.DataType)];
 
+                // add rank to the sorted combatants, with this we have the real rank of the player
+                int rank = 1;
+                foreach (var combatant in sortedCombatants)
+                {
+                    combatant.Rank = rank++;
+                }
+
                 float top = sortedCombatants[0].GetValueForDataType(this.GeneralConfig.DataType);                
                 int barCount = this.BarConfig.BarCount;
                 float margin = 0;
@@ -426,7 +433,6 @@ namespace LMeter.Meter
                 for (; currentIndex < maxIndex; currentIndex++)
                 {
                     Combatant combatant = sortedCombatants[currentIndex];
-                    combatant.Rank = (currentIndex + 1).ToString();
                     UpdatePlayerName(combatant, playerName);
                     
                     float current = combatant.GetValueForDataType(this.GeneralConfig.DataType);
@@ -561,7 +567,7 @@ namespace LMeter.Meter
 
         private void MovePlayerIntoViewableRange(List<Combatant> sortedCombatants, int scrollPosition, string playerName)
         {
-            int oldPlayerIndex = sortedCombatants.FindIndex(combatant => combatant.Name.Contains("YOU") || combatant.Name.Contains(playerName));
+            int oldPlayerIndex = sortedCombatants.FindIndex(combatant => combatant.Name == "YOU" || combatant.Name == playerName);
             if (oldPlayerIndex == -1)
             {
                 return;
@@ -581,7 +587,7 @@ namespace LMeter.Meter
         {
             combatant.NameOverwrite = this.BarConfig.UseCharacterName switch
             {
-                true when combatant.Name.Contains("YOU") => localPlayerName,
+                true when combatant.Name.Contains("YOU") => combatant.Name.Replace("YOU", localPlayerName),
                 false when combatant.NameOverwrite is not null => null,
                 _ => combatant.NameOverwrite
             };
