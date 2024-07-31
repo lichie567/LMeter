@@ -7,6 +7,7 @@ using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 using LMeter.Act;
+using LMeter.Act.DataStructures;
 using LMeter.Config;
 using LMeter.Helpers;
 using LMeter.Meter;
@@ -86,6 +87,7 @@ namespace LMeter
             ImGui.SetNextWindowSize(ImGui.GetMainViewport().Size);
             if (ImGui.Begin("LMeter_Root", _mainWindowFlags))
             {
+                CharacterState.UpdateCurrentCharacter();
                 Singletons.Get<ClipRectsHelper>().Update();
                 foreach (MeterWindow meter in _config.MeterList.Meters)
                 {

@@ -18,6 +18,7 @@ namespace LMeter.Meter
         [JsonIgnore] private bool _lastFrameWasDragging = false;
         [JsonIgnore] private bool _lastFrameWasPreview = false;
         [JsonIgnore] private bool _lastFrameWasCombat = false;
+        [JsonIgnore] private bool _contextMenuWasOpen = false;
         [JsonIgnore] private bool _unlocked = false;
         [JsonIgnore] private bool _hovered = false;
         [JsonIgnore] private bool _dragging = false;
@@ -166,7 +167,7 @@ namespace LMeter.Meter
 
             Vector2 localPos = pos + this.GeneralConfig.Position;
             Vector2 size = this.GeneralConfig.Size;
-            if (!this.ShouldDraw(localPos, size))
+            if (!this.ShouldDraw(localPos, size) && !_contextMenuWasOpen)
             {
                 return;
             }
@@ -181,8 +182,8 @@ namespace LMeter.Meter
                 }
             }
 
-            bool contextMenuOpen = this.DrawContextMenu($"{this.Id}_ContextMenu", out bool selected, out int index);
-            if (contextMenuOpen && selected)
+            _contextMenuWasOpen = this.DrawContextMenu($"{this.Id}_ContextMenu", out bool selected, out int index);
+            if (_contextMenuWasOpen && selected)
             {
                 _eventIndex = index;
                 _lastSortedTimestamp = null;
@@ -380,14 +381,14 @@ namespace LMeter.Meter
                 // This has the issue that some settings can't behave properly and or don't update till the following combat update/fight
                 List<Combatant> sortedCombatants = [.. this.GetSortedCombatants(actEvent, this.GeneralConfig.DataType)];
 
-                float top = this.GeneralConfig.DataType switch
+                // add rank to the sorted combatants, with this we have the real rank of the player
+                int rank = 1;
+                foreach (var combatant in sortedCombatants)
                 {
-                    MeterDataType.Damage => sortedCombatants[0].DamageTotal?.Value ?? 0,
-                    MeterDataType.Healing => sortedCombatants[0].EffectiveHealing?.Value ?? 0,
-                    MeterDataType.DamageTaken => sortedCombatants[0].DamageTaken?.Value ?? 0,
-                    _ => 0
-                };
-                
+                    combatant.Rank = rank++;
+                }
+
+                float top = sortedCombatants[0].GetValueForDataType(this.GeneralConfig.DataType);                
                 int barCount = this.BarConfig.BarCount;
                 float margin = 0;
                 if (this.BarConfig.BarHeightType == 1)
@@ -432,17 +433,9 @@ namespace LMeter.Meter
                 for (; currentIndex < maxIndex; currentIndex++)
                 {
                     Combatant combatant = sortedCombatants[currentIndex];
-                    combatant.Rank = (currentIndex + 1).ToString();
                     UpdatePlayerName(combatant, playerName);
-
-                    float current = this.GeneralConfig.DataType switch
-                    {
-                        MeterDataType.Damage => combatant.DamageTotal?.Value ?? 0,
-                        MeterDataType.Healing => combatant.EffectiveHealing?.Value ?? 0,
-                        MeterDataType.DamageTaken => combatant.DamageTaken?.Value ?? 0,
-                        _ => 0
-                    };
-
+                    
+                    float current = combatant.GetValueForDataType(this.GeneralConfig.DataType);
                     ConfigColor barColor = this.BarConfig.BarColor;
                     ConfigColor jobColor = this.BarColorsConfig.GetColor(combatant.Job);
                     localPos = this.DrawBar(drawList, localPos, size, combatant, jobColor, barColor, top, current);
@@ -516,7 +509,7 @@ namespace LMeter.Meter
                     {
                         using (FontsManager.PushFont(text.FontKey))
                         {
-                            string formattedText = actData.GetFormattedString($" {text.TextFormat} ", text.ThousandsSeparators ? "N" : "F");
+                            string formattedText = actData.GetFormattedString($" {text.TextFormat} ", text.ThousandsSeparators ? "N" : "F", text.EmptyIfZero);
                             Vector2 textSize = ImGui.CalcTextSize(formattedText);
                             
                             if (text.FixedTextWidth && textSize.X > text.TextWidth)
@@ -574,7 +567,7 @@ namespace LMeter.Meter
 
         private void MovePlayerIntoViewableRange(List<Combatant> sortedCombatants, int scrollPosition, string playerName)
         {
-            int oldPlayerIndex = sortedCombatants.FindIndex(combatant => combatant.Name.Contains("YOU") || combatant.Name.Contains(playerName));
+            int oldPlayerIndex = sortedCombatants.FindIndex(combatant => combatant.Name.Equals("YOU") || combatant.Name.Equals(playerName));
             if (oldPlayerIndex == -1)
             {
                 return;
@@ -594,7 +587,7 @@ namespace LMeter.Meter
         {
             combatant.NameOverwrite = this.BarConfig.UseCharacterName switch
             {
-                true when combatant.Name.Contains("YOU") => localPlayerName,
+                true when combatant.Name.Contains("YOU") => combatant.Name.Replace("YOU", localPlayerName),
                 false when combatant.NameOverwrite is not null => null,
                 _ => combatant.NameOverwrite
             };
@@ -665,21 +658,8 @@ namespace LMeter.Meter
             List<Combatant> sortedCombatants = [.. actEvent.Combatants.Values];
             sortedCombatants.Sort((x, y) =>
             {
-                float xFloat = dataType switch
-                {
-                    MeterDataType.Damage => x.DamageTotal?.Value ?? 0,
-                    MeterDataType.Healing => x.EffectiveHealing?.Value ?? 0,
-                    MeterDataType.DamageTaken => x.DamageTaken?.Value ?? 0,
-                    _ => 0
-                };
-
-                float yFloat = dataType switch
-                {
-                    MeterDataType.Damage => y.DamageTotal?.Value ?? 0,
-                    MeterDataType.Healing => y.EffectiveHealing?.Value ?? 0,
-                    MeterDataType.DamageTaken => y.DamageTaken?.Value ?? 0,
-                    _ => 0
-                };
+                float xFloat = x.GetValueForDataType(dataType);
+                float yFloat = y.GetValueForDataType(dataType);
 
                 return (int)(yFloat - xFloat);
             });

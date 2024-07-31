@@ -27,7 +27,12 @@ namespace LMeter.Helpers
     {
         Damage,
         Healing,
-        DamageTaken
+        DamageTaken,
+        Rdps,
+        Adps,
+        Ndps,
+        Cdps,
+        RawDps
     }
 
     public enum ConnectionStatus

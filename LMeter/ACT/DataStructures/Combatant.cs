@@ -15,7 +15,7 @@ public class Combatant : IActData<Combatant>
 
     private static readonly Dictionary<string, MemberInfo> _textTagMembers = 
         typeof(Combatant).GetMembers().Where(x => Attribute.IsDefined(x, typeof(TextTagAttribute))).ToDictionary((x) => x.Name.ToLower());
-    
+
     [JsonProperty("name")]
     public string OriginalName { get; set; } = string.Empty;
 
@@ -35,7 +35,7 @@ public class Combatant : IActData<Combatant>
 
     [TextTag]
     [JsonIgnore]
-    public string Rank = string.Empty;
+    public int Rank = 1;
 
     [TextTag]
     [JsonProperty("Job")]
@@ -131,6 +131,27 @@ public class Combatant : IActData<Combatant>
     [TextTag]
     public LazyFloat? MaxHitValue { get; set; }
 
+    [TextTag]
+    public LazyFloat? Rdps { get; set; }
+
+    [TextTag]
+    public LazyFloat? Adps { get; set; }
+
+    [TextTag]
+    public LazyFloat? Ndps { get; set; }
+
+    [TextTag]
+    public LazyFloat? Cdps { get; set; }
+
+    [TextTag]
+    public LazyFloat? Rawdps { get; set; }
+
+    [JsonIgnore]
+    public FFLogsActor? FFLogsActor { get; set; }
+
+    [JsonIgnore]
+    public TimeSpan? FFLogsDuration { get; set; }
+
     public Combatant()
     {
         this.Duration = new LazyString<string?>(() => this.DurationRaw, LazyStringConverters.Duration);
@@ -140,12 +161,90 @@ public class Combatant : IActData<Combatant>
         this.EffectiveHealing = new LazyFloat(() => (this.HealingTotal?.Value ?? 0) - (this.OverHeal?.Value ?? 0));
         this.MaxHitName = new LazyString<string?>(() => this.MaxHit, LazyStringConverters.MaxHitName);
         this.MaxHitValue = new LazyFloat(() => LazyStringConverters.MaxHitValue(this.MaxHit));
+        this.Rdps = new LazyFloat(this.GenerateRdps);
+        this.Adps = new LazyFloat(this.GenerateAdps);
+        this.Ndps = new LazyFloat(this.GenerateNdps);
+        this.Cdps = new LazyFloat(this.GenerateCdps);
+        this.Rawdps = new LazyFloat(this.GenerateRawDps);
     }
 
-    public string GetFormattedString(string format, string numberFormat)
+    public float GenerateRdps()
     {
-        return TextTagFormatter.TextTagRegex.Replace(format, new TextTagFormatter(this, numberFormat, _textTagMembers).Evaluate);
+        if (this.FFLogsActor is not null && this.FFLogsDuration.HasValue)
+        {
+            float rdps = this.FFLogsActor.Amount + this.FFLogsActor.AmountGiven - this.FFLogsActor.AmountTaken;
+            rdps = (float)(rdps / this.FFLogsDuration.Value.TotalSeconds);
+            return rdps;
+        }
+
+        return 0;
     }
+
+    public float GenerateAdps()
+    {
+        if (this.FFLogsActor is not null && this.FFLogsDuration.HasValue)
+        {
+            float adps = this.FFLogsActor.Amount - this.FFLogsActor.SingleTargetAmountTaken;
+            adps = (float)(adps / this.FFLogsDuration.Value.TotalSeconds);
+            return adps;
+        }
+
+        return 0;
+    }
+
+    public float GenerateNdps()
+    {
+        if (this.FFLogsActor is not null && this.FFLogsDuration.HasValue)
+        {
+            float ndps = this.FFLogsActor.Amount - this.FFLogsActor.AmountTaken;
+            ndps = (float)(ndps / this.FFLogsDuration.Value.TotalSeconds);
+            return ndps;
+        }
+
+        return 0;
+    }
+
+    public float GenerateCdps()
+    {
+        if (this.FFLogsActor is not null && this.FFLogsDuration.HasValue)
+        {
+            float cdps = this.FFLogsActor.Amount - this.FFLogsActor.SingleTargetAmountTaken + this.FFLogsActor.AmountGiven;
+            cdps = (float)(cdps / this.FFLogsDuration.Value.TotalSeconds);
+            return cdps;
+        }
+
+        return 0;
+    }
+
+    public float GenerateRawDps()
+    {
+        if (this.FFLogsActor is not null && this.FFLogsDuration.HasValue)
+        {
+            float rawDps = this.FFLogsActor.Amount;
+            rawDps = (float)(rawDps / this.FFLogsDuration.Value.TotalSeconds);
+            return rawDps;
+        }
+
+        return 0;
+    }
+
+    public string GetFormattedString(string format, string numberFormat, bool emptyIfZero)
+    {
+        return TextTagFormatter.TextTagRegex.Replace(format, new TextTagFormatter(this, numberFormat, emptyIfZero, _textTagMembers).Evaluate);
+    }
+
+    public float GetValueForDataType(MeterDataType type) => type switch
+    {
+        MeterDataType.Damage => this.DamageTotal?.Value ?? 0,
+        MeterDataType.Healing => this.EffectiveHealing?.Value ?? 0,
+        MeterDataType.DamageTaken => this.DamageTaken?.Value ?? 0,
+        MeterDataType.Rdps => this.Rdps?.Value ?? 0,
+        MeterDataType.Adps => this.Adps?.Value ?? 0,
+        MeterDataType.Ndps => this.Ndps?.Value ?? 0,
+        MeterDataType.Cdps => this.Cdps?.Value ?? 0,
+        MeterDataType.RawDps => this.Rawdps?.Value ?? 0,
+        _ => 0
+    };
 
     public static Combatant GetTestData()
     {
@@ -172,4 +271,12 @@ public class Combatant : IActData<Combatant>
             MaxHit = "Full Thrust-42069"
         };
     }
+
+// These have to be here because newtonsoft and overlayplugin suck
+#pragma warning disable 0169
+    [JsonProperty("ENCDPS")]
+    private readonly string? _encdps;
+    [JsonProperty("ENCHPS")]
+    private readonly string? _enchps;
+#pragma warning restore 0169
 }

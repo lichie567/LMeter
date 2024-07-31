@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net8.0-windows7.0": {
+      "DalamudPackager": {
+        "type": "Direct",
+        "requested": "[2.1.13, )",
+        "resolved": "2.1.13",
+        "contentHash": "rMN1omGe8536f4xLMvx9NwfvpAc9YFFfeXJ1t4P4PE6Gu8WCIoFliR1sh07hM+bfODmesk/dvMbji7vNI+B/pQ=="
+      },
+      "Microsoft.ClearScript": {
+        "type": "Direct",
+        "requested": "[7.4.5, )",
+        "resolved": "7.4.5",
+        "contentHash": "KSYzl3IgM83bXXXqeI9bg3vQWqAmm3L4YBqUInAoWBQtlrlLx+QheWGP9VMit2NF+7gY+H4JkosM7UmgTEib9Q==",
+        "dependencies": {
+          "Microsoft.ClearScript.V8": "7.4.5",
+          "Microsoft.ClearScript.V8.ICUData": "7.4.5",
+          "Microsoft.ClearScript.V8.Native.win-x64": "7.4.5",
+          "Microsoft.ClearScript.V8.Native.win-x86": "7.4.5",
+          "Microsoft.ClearScript.Windows": "7.4.5"
+        }
+      },
+      "Newtonsoft.Json": {
+        "type": "Direct",
+        "requested": "[13.0.1, )",
+        "resolved": "13.0.1",
+        "contentHash": "ppPFpBcvxdsfUonNcvITKqLl3bqxWbDCZIzDWHzjpdAHRFfZe0Dw9HmA0+za13IdyrgJwpkDTDA9fHaxOrt20A=="
+      },
+      "Microsoft.ClearScript.Core": {
+        "type": "Transitive",
+        "resolved": "7.4.5",
+        "contentHash": "CIZCty2L4mXy1xg77IbNPqsz2pS0ZsFVJZ5YolPB4j62xzvDuCFU/MKnTnKve67FGIWaB9w4LVV7YUEFmjEwzw=="
+      },
+      "Microsoft.ClearScript.V8": {
+        "type": "Transitive",
+        "resolved": "7.4.5",
+        "contentHash": "/czu8ho8xEiiLF806QP6Iwgp0aN5QE1B/MsXnIIMxiaM/KccD8AfSsM68lVuyW+boGqjF7zjoSlUKs/ERUoLOQ==",
+        "dependencies": {
+          "Microsoft.ClearScript.Core": "7.4.5",
+          "Microsoft.ClearScript.V8.ICUData": "7.4.5",
+          "Newtonsoft.Json": "13.0.1"
+        }
+      },
+      "Microsoft.ClearScript.V8.ICUData": {
+        "type": "Transitive",
+        "resolved": "7.4.5",
+        "contentHash": "Ji6av4T2xtqZYp5Gm0MPxvez5V6s4NF/wflD8a49A/KOI3kJyPHcmL3xCRuhuHo24NbfQX6+f0YbTdwhd5VSvw=="
+      },
+      "Microsoft.ClearScript.V8.Native.win-x64": {
+        "type": "Transitive",
+        "resolved": "7.4.5",
+        "contentHash": "LvsaJoVgcf09FJ6mZ6SIptdeuwmy42s1N2sMVO3Wqp+HAta7PPksxVh8cGelrGQmmW1C5hT1Jzc6ykxrzU4Adg=="
+      },
+      "Microsoft.ClearScript.V8.Native.win-x86": {
+        "type": "Transitive",
+        "resolved": "7.4.5",
+        "contentHash": "igycQHB3p3zOeZhPzOm+FFw+O7tWGDfLALej96u3Z/Ve4SA2K1Qf0UGvWxTqynTV6uQnAdrDKRh1uAx1HV7J2w=="
+      },
+      "Microsoft.ClearScript.Windows": {
+        "type": "Transitive",
+        "resolved": "7.4.5",
+        "contentHash": "bhJWH1gxkIxtbpCi3jIH5tXUGPYlhu2fwEtUzEd5NFQreX2ljsq1WIcV679R84ylAyjz6eD8P2vLFSDa5AIFng==",
+        "dependencies": {
+          "Microsoft.ClearScript.Core": "7.4.5",
+          "Microsoft.ClearScript.Windows.Core": "7.4.5"
+        }
+      },
+      "Microsoft.ClearScript.Windows.Core": {
+        "type": "Transitive",
+        "resolved": "7.4.5",
+        "contentHash": "bzD+S5BbVAOnPEmWJ/bwIoiYcF0g8pbuHI7NYoKfBxleUY/gGybYwuHB1RApnAomG+7u0u7fxno1v5VrsyXQ/A==",
+        "dependencies": {
+          "Microsoft.ClearScript.Core": "7.4.5"
+        }
+      }
+    }
+  }
+}

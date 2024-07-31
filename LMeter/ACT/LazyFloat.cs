@@ -75,10 +75,18 @@ namespace LMeter.Act
         {
             return this.Value.ToString();
         }
+        
+        public string? ToString(string format, bool kilo, bool emptyIfZero)
+        {
+            if (emptyIfZero && this.Value == 0f)
+            {
+                return string.Empty;
+            }
 
-        public string? ToString(string format, bool kilo) => kilo 
-            ? KiloFormat(this.Value, format)
-            : this.Value.ToString(format, CultureInfo.InvariantCulture);
+            return kilo 
+                ? KiloFormat(this.Value, format)
+                : this.Value.ToString(format, CultureInfo.InvariantCulture);
+        }
 
         private static string KiloFormat(float num, string format) => num switch
         {

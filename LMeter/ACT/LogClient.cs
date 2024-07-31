@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Dalamud.Game.Text;
 using Dalamud.Plugin.Services;
@@ -13,15 +14,17 @@ namespace LMeter.Act
 {
     public abstract class LogClient(ActConfig config) : IPluginDisposable
     {
-        protected const string SubscriptionMessage = "{\"call\":\"subscribe\",\"events\":[\"CombatData\"]}";
+        protected const string SubscriptionMessage = "{\"call\":\"subscribe\",\"events\":[\"CombatData\",\"LogLine\"]}";
 
         protected ActConfig Config { get; set; } = config;
 
         public ConnectionStatus Status { get; protected set; } = ConnectionStatus.NotConnected;
         public List<ActEvent> PastEvents { get; protected init; } = [];
 
+        public FFLogsClient? _fflogsClient = config.UseFFLogs ? new FFLogsClient() : null;
         private ActEvent? _lastEvent;
         private ActEvent? _currentEvent;
+        private readonly JsonSerializer _jsonSerializer = new() { Culture = CultureInfo.CurrentCulture };
 
         public abstract void Start();
         public abstract void Shutdown();
@@ -37,14 +40,48 @@ namespace LMeter.Act
             return _currentEvent;
         }
 
+        public void ToggleFFlogsUsage()
+        {
+            if (this.Config.UseFFLogs)
+            {
+                _fflogsClient?.Dispose();
+                _fflogsClient = new FFLogsClient();
+            }
+            else
+            {
+                _fflogsClient?.Dispose();
+                _fflogsClient = null;
+            }
+        }
+
         protected void ParseLogData(string data)
         {
-            this.HandleNewEvent(JsonConvert.DeserializeObject<ActEvent>(data));
+            this.ParseLogData(JObject.Parse(data));
         }
 
         protected void ParseLogData(JObject data)
         {
-            this.HandleNewEvent(data.ToObject<ActEvent>());
+            if (data.ContainsKey("type"))
+            {
+                string? value = data.GetValue("type")?.ToString();
+                if (!string.IsNullOrEmpty(value))
+                {
+                    if (this.Config.UseFFLogs &&
+                        (!this.Config.DisableFFLogsOutsideDuty || CharacterState.IsInDuty()) &&
+                        value.Equals("LogLine"))
+                    {
+                        string? logLine = data.GetValue("rawLine")?.ToString();
+                        if (!string.IsNullOrEmpty(logLine))
+                        {
+                            _fflogsClient?.ParseLine(logLine);
+                        }
+                    }
+                    else if (value.Equals("CombatData"))
+                    {
+                        this.HandleNewEvent(data.ToObject<ActEvent>(_jsonSerializer));
+                    }
+                }
+            }
         }
 
         private void HandleNewEvent(ActEvent? newEvent)
@@ -62,6 +99,12 @@ namespace LMeter.Act
                     {
                         this.PastEvents.RemoveAt(0);
                     }
+                }
+
+                if (this.Config.UseFFLogs &&
+                    (!this.Config.DisableFFLogsOutsideDuty || CharacterState.IsInDuty()))
+                {
+                    newEvent.InjectFFLogsData(_fflogsClient?.CollectMeters());
                 }
 
                 _lastEvent = newEvent;
@@ -85,6 +128,7 @@ namespace LMeter.Act
         {
             _currentEvent = null;
             this.PastEvents.Clear();
+            _fflogsClient?.Reset();
             if (Config.ClearAct)
             {
                 IChatGui chat = Singletons.Get<IChatGui>();
@@ -118,6 +162,7 @@ namespace LMeter.Act
             if (disposing)
             {
                 this.Shutdown();
+                this._fflogsClient?.Dispose();
             }
         }
     }

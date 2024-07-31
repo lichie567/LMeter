@@ -15,11 +15,6 @@ public class Encounter : IActData<Encounter>
     private static readonly Dictionary<string, MemberInfo> _textTagMembers = 
         typeof(Encounter).GetMembers().Where(x => Attribute.IsDefined(x, typeof(TextTagAttribute))).ToDictionary((x) => x.Name.ToLower());
 
-    public string GetFormattedString(string format, string numberFormat)
-    {
-        return TextTagFormatter.TextTagRegex.Replace(format, new TextTagFormatter(this, numberFormat, _textTagMembers).Evaluate);
-    }
-
     [TextTag]
     [JsonProperty("title")]
     public string Title { get; set; } = string.Empty;
@@ -69,6 +64,11 @@ public class Encounter : IActData<Encounter>
     {
         this.Duration = new LazyString<string?>(() => this.DurationRaw, LazyStringConverters.Duration);
     }
+    
+    public string GetFormattedString(string format, string numberFormat, bool emptyIfZero)
+    {
+        return TextTagFormatter.TextTagRegex.Replace(format, new TextTagFormatter(this, numberFormat, emptyIfZero, _textTagMembers).Evaluate);
+    }
 
     public static Encounter GetTestData()
     {
@@ -86,4 +86,12 @@ public class Encounter : IActData<Encounter>
             HealingTotal = new LazyFloat(healing)
         };
     }
+    
+// These have to be here because newtonsoft and overlayplugin suck
+#pragma warning disable 0169
+    [JsonProperty("ENCDPS")]
+    private readonly string? _encdps;
+    [JsonProperty("ENCHPS")]
+    private readonly string? _enchps;
+#pragma warning restore 0169
 }

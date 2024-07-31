@@ -10,9 +10,9 @@
     <!-- Assembly Configuration -->
     <PropertyGroup>
         <AssemblyName>LMeter</AssemblyName>
-        <AssemblyVersion>0.4.0.2</AssemblyVersion>
-        <FileVersion>0.4.0.2</FileVersion>
-        <InformationalVersion>0.4.0.2</InformationalVersion>
+        <AssemblyVersion>0.4.1.0</AssemblyVersion>
+        <FileVersion>0.4.1.0</FileVersion>
+        <InformationalVersion>0.4.1.0</InformationalVersion>
     </PropertyGroup>
 
     <!-- Build Configuration -->
@@ -22,12 +22,14 @@
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
         <DebugSymbols>true</DebugSymbols>
         <DebugType>full</DebugType>
         <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
         <Nullable>enable</Nullable>
         <WarningsAsErrors>Nullable</WarningsAsErrors>
         <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+        <NoWarn>MSB3277</NoWarn> <!-- Supress warning coming from Clearscript being built against net5.0 -->
     </PropertyGroup>
 
     <!-- Release Configuration -->
@@ -44,12 +46,12 @@
 
     <!-- Dalamud Configuration (Windows-specific) -->
     <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
-        <DalamudXIVLauncher>$(APPDATA)\XIVLauncher\addon\Hooks\$(DalamudVersion)</DalamudXIVLauncher>
+        <DalamudLibPath>$(APPDATA)\XIVLauncher\addon\Hooks\$(DalamudVersion)\</DalamudLibPath>
     </PropertyGroup>
 
     <!-- Dalamud Configuration (Linux-specific) -->
     <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Linux'))">
-        <DalamudXIVLauncher>$(HOME)/.xlcore/dalamud/Hooks/$(DalamudVersion)</DalamudXIVLauncher>
+        <DalamudLibPath>$(HOME)/.xlcore/dalamud/Hooks/$(DalamudVersion)/</DalamudLibPath>
     </PropertyGroup>
 
     <!-- Assembly Reference Locations -->
@@ -58,7 +60,7 @@
             $(AssemblySearchPaths);
             $(DalamudHome);
             $(DalamudLocal);
-            $(DalamudXIVLauncher);
+            $(DalamudLibPath);
         </AssemblySearchPaths>
     </PropertyGroup>
 
@@ -73,24 +75,31 @@
     <!-- Library References -->
     <ItemGroup>
         <Reference Include="Dalamud">
+            <HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
             <Private>false</Private>
         </Reference>
         <Reference Include="Newtonsoft.Json">
+            <HintPath>$(DalamudLibPath)Newtonsoft.Json.dll</HintPath>
             <Private>false</Private>
         </Reference>
         <Reference Include="ImGui.NET">
+            <HintPath>$(DalamudLibPath)ImGui.NET.dll</HintPath>
             <Private>false</Private>
         </Reference>
         <Reference Include="ImGuiScene">
+            <HintPath>$(DalamudLibPath)ImGuiScene.dll</HintPath>
             <Private>false</Private>
         </Reference>
         <Reference Include="Lumina">
+            <HintPath>$(DalamudLibPath)Lumina.dll</HintPath>
             <Private>false</Private>
         </Reference>
         <Reference Include="Lumina.Excel">
+            <HintPath>$(DalamudLibPath)Lumina.Excel.dll</HintPath>
             <Private>false</Private>
         </Reference>
         <Reference Include="FFXIVClientStructs">
+            <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
             <Private>false</Private>
         </Reference>
     </ItemGroup>
@@ -98,6 +107,8 @@
     <!-- NuGet Packages -->
     <ItemGroup>
         <PackageReference Include="DalamudPackager" Version="2.1.13" />
+        <PackageReference Include="Microsoft.ClearScript" Version="7.4.5" />
+        <PackageReference Include="Newtonsoft.Json" Version="[13.0.1,)" ExcludeAssets="all" /> <!-- Exclude Newtonsoft.Json.dll pulled by Clearscript -->
     </ItemGroup>
 
     <!-- Dalamud Packager Task-->

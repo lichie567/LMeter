@@ -31,6 +31,8 @@ namespace LMeter.Config
         public bool AutoEnd = false;
         public int AutoEndDelay = 3;
         public int ClientType = 0;
+        public bool UseFFLogs = false;
+        public bool DisableFFLogsOutsideDuty = true;
 
         public ActConfig()
         {
@@ -75,6 +77,18 @@ namespace LMeter.Config
                 ImGui.SameLine();
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() - 1f);
                 ImGui.Text("Retry ACT Connection");
+
+                ImGui.NewLine();
+                if (ImGui.Checkbox("Enable FFLogs DPS Calculations [EXPERIMENTAL]", ref this.UseFFLogs))
+                {
+                    Singletons.Get<LogClient>().ToggleFFlogsUsage();
+                }
+
+                if (this.UseFFLogs)
+                {
+                    DrawHelpers.DrawNestIndicator(1);
+                    ImGui.Checkbox("Disable FFLogs Calculations Outside Duty", ref this.DisableFFLogsOutsideDuty);
+                }
 
                 ImGui.NewLine();
                 ImGui.PushItemWidth(30);

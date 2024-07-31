@@ -17,14 +17,13 @@ namespace LMeter
     {
         public const string ConfigFileName = "LMeter.json";
 
-        public static string Version { get; private set; } = "0.4.0.2";
+        public static string Version { get; private set; } = "0.4.1.0";
         public static string ConfigFileDir { get; private set; } = "";
         public static string ConfigFilePath { get; private set; } = "";
         public static string AssemblyFileDir { get; private set; } = "";
         public static IDalamudTextureWrap? IconTexture { get; private set; } = null;
         public static string Changelog { get; private set; } = string.Empty;
-
-        public string Name => "LMeter";
+        public static string Name => "LMeter";
 
         public Plugin(
             IClientState clientState,

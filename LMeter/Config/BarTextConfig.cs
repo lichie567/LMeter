@@ -278,6 +278,7 @@ namespace LMeter.Config
         public ConfigColor SeparatorColor = new(0f, 0f, 0f, 0.5f);
         public bool UseBackground = false;
         public ConfigColor BackgroundColor = new(0f, 0f, 0f, 0.5f);
+        public bool EmptyIfZero = false;
 
         public Text Clone()
         {
@@ -307,7 +308,8 @@ namespace LMeter.Config
                 SeparatorOffset = this.SeparatorOffset,
                 SeparatorColor = this.SeparatorColor,
                 UseBackground = this.UseBackground,
-                BackgroundColor = this.BackgroundColor
+                BackgroundColor = this.BackgroundColor,
+                EmptyIfZero = this.EmptyIfZero
             };
         }
         
@@ -342,9 +344,10 @@ namespace LMeter.Config
             }
 
             ImGui.Checkbox("Use Thousands Separator for Numbers", ref this.ThousandsSeparators);
+            ImGui.Checkbox("Hide Tag Values if Zero", ref this.EmptyIfZero);
             if (this.AnchorParent != 0)
             {
-                ImGui.Checkbox("Show Anchor Separator", ref this.ShowSeparator);
+                ImGui.Checkbox("Show Separator", ref this.ShowSeparator);
                 if (this.ShowSeparator)
                 {
                     DrawHelpers.DrawNestIndicator(1);

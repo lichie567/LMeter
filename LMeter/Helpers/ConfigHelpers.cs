@@ -16,12 +16,14 @@ namespace LMeter.Helpers
 {
     public static class ConfigHelpers
     {
+        private static readonly ISerializationBinder _serializationBinder = new LMeterSerializationBinder();
+        
         private static readonly JsonSerializerSettings _serializerSettings = new()
         {
             TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
             TypeNameHandling = TypeNameHandling.Objects,
             ObjectCreationHandling = ObjectCreationHandling.Replace,
-            SerializationBinder = new LMeterSerializationBinder()
+            SerializationBinder = _serializationBinder
         };
 
         public static void ExportToClipboard<T>(T toExport)
@@ -104,8 +106,13 @@ namespace LMeter.Helpers
             {
                 if (File.Exists(path))
                 {
-                    string jsonString = File.ReadAllText(path);
-                    config = JsonConvert.DeserializeObject<LMeterConfig>(jsonString, _serializerSettings);
+                    // string jsonString = File.ReadAllText(path);
+                    // config = JsonConvert.DeserializeObject<LMeterConfig>(jsonString, _serializerSettings);
+                    using FileStream fs = File.OpenRead(path);
+                    using StreamReader sr = new(fs);
+                    using JsonTextReader reader = new(sr);
+                    JsonSerializer serializer = JsonSerializer.Create(_serializerSettings);
+                    config = serializer.Deserialize<LMeterConfig>(reader);
                 }
             }
             catch (Exception ex)
