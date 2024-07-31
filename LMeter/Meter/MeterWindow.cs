@@ -567,7 +567,7 @@ namespace LMeter.Meter
 
         private void MovePlayerIntoViewableRange(List<Combatant> sortedCombatants, int scrollPosition, string playerName)
         {
-            int oldPlayerIndex = sortedCombatants.FindIndex(combatant => combatant.Name == "YOU" || combatant.Name == playerName);
+            int oldPlayerIndex = sortedCombatants.FindIndex(combatant => combatant.Name.Equals("YOU") || combatant.Name.Equals(playerName));
             if (oldPlayerIndex == -1)
             {
                 return;
