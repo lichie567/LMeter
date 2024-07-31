@@ -35,7 +35,7 @@ public class Combatant : IActData<Combatant>
 
     [TextTag]
     [JsonIgnore]
-    public string Rank = string.Empty;
+    public int Rank = 1;
 
     [TextTag]
     [JsonProperty("Job")]
