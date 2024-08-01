@@ -57,7 +57,7 @@ namespace LMeter.Act
             {
                 try
                 {
-                    string func = @"function myCollectMeters() {var meters = myParser.collectMeters(); if(meters && meters.length > 0) {return JSON.stringify(meters[meters.length-1])} else {return """"}}";
+                    string func = @"function _0x14aa(){var _0x10b1d9=['11254420ZWmqVP','774QHNEws','3mdAlIM','2723480aiwlpr','1198619rDiHMD','stringify','11TZgZVm','45785BksIEN','collectMeters','9245964TSHnIK','8FxgKss','1399470beUINs','5288319IuoMGh','length'];_0x14aa=function(){return _0x10b1d9;};return _0x14aa();}function _0x4aca(_0x40d76a,_0x2845ad){var _0x14aa14=_0x14aa();return _0x4aca=function(_0x4aca81,_0x584fed){_0x4aca81=_0x4aca81-0x11a;var _0x35b897=_0x14aa14[_0x4aca81];return _0x35b897;},_0x4aca(_0x40d76a,_0x2845ad);}(function(_0x52c294,_0x37b6bd){var _0x1be5fa=_0x4aca,_0x5bee7f=_0x52c294();while(!![]){try{var _0x1146e0=-parseInt(_0x1be5fa(0x127))/0x1+parseInt(_0x1be5fa(0x120))/0x2+parseInt(_0x1be5fa(0x125))/0x3*(-parseInt(_0x1be5fa(0x126))/0x4)+parseInt(_0x1be5fa(0x11c))/0x5*(parseInt(_0x1be5fa(0x124))/0x6)+parseInt(_0x1be5fa(0x11e))/0x7+parseInt(_0x1be5fa(0x11f))/0x8*(parseInt(_0x1be5fa(0x121))/0x9)+-parseInt(_0x1be5fa(0x123))/0xa*(parseInt(_0x1be5fa(0x11b))/0xb);if(_0x1146e0===_0x37b6bd)break;else _0x5bee7f['push'](_0x5bee7f['shift']());}catch(_0x2295b8){_0x5bee7f['push'](_0x5bee7f['shift']());}}}(_0x14aa,0xbf874));function myCollectMeters(){var _0x406937=_0x4aca,_0x158ce9=myParser[_0x406937(0x11d)]();if(!_0x158ce9)return'';var _0x4cd700=_0x158ce9['fights'];return _0x4cd700&&_0x4cd700[_0x406937(0x122)]>0x0?JSON[_0x406937(0x11a)](_0x4cd700[_0x4cd700[_0x406937(0x122)]-0x1]):'';}";
                     this.Engine.Evaluate($"var window = {{}}; {this.ParserScript}; var myParser = new window.LogParser(0, false, [], false, true); {func}");
                     this.Initialized = true;
                 }
@@ -67,6 +67,20 @@ namespace LMeter.Act
                 }
             }
         }
+
+        // Debugging
+        // public void Run(string command)
+        // {
+        //     try
+        //     {
+        //         var result = this.Engine.Evaluate(command);
+        //         Singletons.Get<IPluginLog>().Info($"{result}");
+        //     }
+        //     catch(Exception ex)
+        //     {
+        //             Singletons.Get<IPluginLog>().Error(ex.ToString());
+        //     }
+        // }
 
         public void ParseLine(string logLine)
         {
