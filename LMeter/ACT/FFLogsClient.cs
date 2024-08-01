@@ -93,6 +93,7 @@ namespace LMeter.Act
                 catch (Exception ex)
                 {
                     Singletons.Get<IPluginLog>().Error(ex.ToString());
+                    this.Initialized = false;
                 }
             }
         }
@@ -112,6 +113,7 @@ namespace LMeter.Act
                 catch (Exception ex)
                 {
                     Singletons.Get<IPluginLog>().Error(ex.ToString());
+                    this.Initialized = false;
                 }
             }
 
