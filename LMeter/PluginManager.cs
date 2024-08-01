@@ -156,6 +156,17 @@ namespace LMeter
 
         private void PluginCommand(string command, string arguments)
         {
+            // if (arguments.StartsWith("script"))
+            // {
+            //     string[] split = arguments.Split(" ");
+            //     FFLogsClient? client = Singletons.Get<LogClient>()._fflogsClient;
+            //     if (client is not null && split.Length > 1)
+            //     {
+            //         client.Run(split[1]);
+            //     }
+            //     return;
+            // }
+
             string[] argArray = arguments.Split(" ");
             switch (argArray)
             {
