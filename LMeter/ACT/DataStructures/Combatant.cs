@@ -271,12 +271,4 @@ public class Combatant : IActData<Combatant>
             MaxHit = "Full Thrust-42069"
         };
     }
-
-// These have to be here because newtonsoft and overlayplugin suck
-#pragma warning disable 0169
-    [JsonProperty("ENCDPS")]
-    private readonly string? _encdps;
-    [JsonProperty("ENCHPS")]
-    private readonly string? _enchps;
-#pragma warning restore 0169
 }

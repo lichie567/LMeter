@@ -1,3 +1,6 @@
+# Version 0.4.1.1
+- Fix bug with [dps] tag not working for some users
+
 # Version 0.4.1.0
 - Add support for FFLogs DPS calculations
     - Five new TextTags added: RDPS, ADPS, NDPS, CDPS, RAWDPS
