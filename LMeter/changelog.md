@@ -1,3 +1,6 @@
+# Version 0.4.1.2
+- Update FFLogs integration
+
 # Version 0.4.1.1
 - Fix bug with [dps] tag not working for some users
 
