@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
-using System.Text.RegularExpressions;
 using Microsoft.ClearScript.V8;
 using Dalamud.Plugin.Services;
 using LMeter.Helpers;
@@ -9,14 +9,11 @@ using Newtonsoft.Json;
 
 namespace LMeter.Act
 {
-    public partial class FFLogsClient : IPluginDisposable
+    public class FFLogsClient : IPluginDisposable
     {
-        [GeneratedRegex(@"https://assets.rpglogs.com/js/log-parsers/parser-ff\.[a-f0-9]+\.js", RegexOptions.Compiled)]
-        private static partial Regex GeneratedRegex();
-        private static Regex ParserUrlRegex { get; } = GeneratedRegex();
-
-        private const string FFLOGS_URL = "https://www.fflogs.com/desktop-client/parser";
-        private static readonly string LMETER_USERAGENT = $"LMeter/{Plugin.Version} (+https://github.com/lichie567/LMeter)";
+        private const string PARSER_FILENAME = "parser-ff.c0affdeee3005b9d.js";
+        private readonly string PARSER_URL = $"https://assets.rpglogs.com/js/log-parsers/{PARSER_FILENAME}";
+        private static readonly string LMETER_USERAGENT = $"LMeter/{Plugin.Version}";
 
         private V8ScriptEngine Engine { get; set; }
         private string ParserScript { get; init; }
@@ -31,19 +28,28 @@ namespace LMeter.Act
 
             try
             {
-                HttpClient httpClient = new();
-                httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(LMETER_USERAGENT);
-                HttpResponseMessage response = httpClient.GetAsync(FFLOGS_URL).GetAwaiter().GetResult();
-                string result = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                Match match = ParserUrlRegex.Match(result);
-                if (match.Success)
+                string parserFile = Path.Join(Plugin.ConfigFileDir, PARSER_FILENAME);
+                bool parserCached = File.Exists(parserFile);
+                if (parserCached)
                 {
-                    string parser_url = match.Groups[0].ToString();
-                    response = httpClient.GetAsync(parser_url).GetAwaiter().GetResult();
-                    this.ParserScript = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                    this.ParserScript = File.ReadAllText(parserFile);
                 }
-                
+                else
+                {
+                    HttpClient httpClient = new();
+                    httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(LMETER_USERAGENT);
+                    HttpResponseMessage response = httpClient.GetAsync(PARSER_URL).GetAwaiter().GetResult();
+                    if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                    {
+                        this.ParserScript = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                    }
+                }
+
                 this.InitializeEngine();
+                if (!parserCached && this.Initialized == true)
+                {
+                    File.WriteAllText(parserFile, this.ParserScript);
+                }
             }
             catch (Exception ex)
             {
@@ -67,20 +73,6 @@ namespace LMeter.Act
                 }
             }
         }
-
-        // Debugging
-        // public void Run(string command)
-        // {
-        //     try
-        //     {
-        //         var result = this.Engine.Evaluate(command);
-        //         Singletons.Get<IPluginLog>().Info($"{result}");
-        //     }
-        //     catch(Exception ex)
-        //     {
-        //             Singletons.Get<IPluginLog>().Error(ex.ToString());
-        //     }
-        // }
 
         public void ParseLine(string logLine)
         {
