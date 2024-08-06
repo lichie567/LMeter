@@ -433,11 +433,23 @@ namespace LMeter.Meter
                 for (; currentIndex < maxIndex; currentIndex++)
                 {
                     Combatant combatant = sortedCombatants[currentIndex];
-                    UpdatePlayerName(combatant, playerName);
-                    
                     float current = combatant.GetValueForDataType(this.GeneralConfig.DataType);
                     ConfigColor barColor = this.BarConfig.BarColor;
                     ConfigColor jobColor = this.BarColorsConfig.GetColor(combatant.Job);
+
+                    if (this.BarConfig.UseCustomColorForSelf && combatant.OriginalName.Equals("YOU"))
+                    {
+                        barColor = this.BarConfig.CustomColorForSelf;
+                        jobColor = this.BarConfig.CustomColorForSelf;
+                    }
+
+                    combatant.NameOverwrite = this.BarConfig.UseCharacterName switch
+                    {
+                        true when combatant.Name.Contains("YOU") => combatant.Name.Replace("YOU", playerName),
+                        false when combatant.NameOverwrite is not null => null,
+                        _ => combatant.NameOverwrite
+                    };
+
                     localPos = this.DrawBar(drawList, localPos, size, combatant, jobColor, barColor, top, current);
                 }
             };
@@ -583,16 +595,6 @@ namespace LMeter.Meter
             sortedCombatants.MoveItem(oldPlayerIndex, newPlayerIndex);
         }
 
-        private void UpdatePlayerName(Combatant combatant, string localPlayerName)
-        {
-            combatant.NameOverwrite = this.BarConfig.UseCharacterName switch
-            {
-                true when combatant.Name.Contains("YOU") => combatant.Name.Replace("YOU", localPlayerName),
-                false when combatant.NameOverwrite is not null => null,
-                _ => combatant.NameOverwrite
-            };
-        }
-
         private bool DrawContextMenu(string popupId, out bool selected, out int selectedIndex)
         {
             selectedIndex = -1;
@@ -661,7 +663,12 @@ namespace LMeter.Meter
                 float xFloat = x.GetValueForDataType(dataType);
                 float yFloat = y.GetValueForDataType(dataType);
 
-                return (int)(yFloat - xFloat);
+                return (yFloat - xFloat) switch
+                {
+                    > 0 => 1,
+                    < 0 => -1,
+                    _ => 0
+                };
             });
 
             _lastSortedTimestamp = actEvent.Timestamp;

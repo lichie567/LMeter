@@ -78,12 +78,6 @@ namespace LMeter.Config
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() - 1f);
                 ImGui.Text("Retry ACT Connection");
 
-                ImGui.NewLine();
-                if (ImGui.Checkbox("Enable FFLogs DPS Calculations [EXPERIMENTAL]", ref this.UseFFLogs))
-                {
-                    Singletons.Get<LogClient>().ToggleFFlogsUsage();
-                }
-
                 if (this.UseFFLogs)
                 {
                     DrawHelpers.DrawNestIndicator(1);

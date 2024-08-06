@@ -59,6 +59,11 @@ namespace LMeter.Act
                 {
                     value = memberValue?.ToString().AsSpan(0, trim).ToString();
                 }
+                
+                if (_emptyIfZero && float.TryParse(value, out float val) && val == 0f)
+                {
+                    return string.Empty;
+                }
             }
 
             return value ?? m.Value;
