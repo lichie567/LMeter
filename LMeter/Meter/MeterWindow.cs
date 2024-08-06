@@ -443,16 +443,12 @@ namespace LMeter.Meter
                         jobColor = this.BarConfig.CustomColorForSelf;
                     }
 
-                    if (this.BarConfig.UseCharacterName && 
-                        combatant.NameOverwrite is null &&
-                        combatant.OriginalName.Contains("YOU"))
+                    combatant.NameOverwrite = this.BarConfig.UseCharacterName switch
                     {
-                        combatant.NameOverwrite = combatant.OriginalName.Replace("YOU", playerName);
-                    }
-                    else
-                    {
-                        combatant.NameOverwrite = null;
-                    }
+                        true when combatant.Name.Contains("YOU") => combatant.Name.Replace("YOU", playerName),
+                        false when combatant.NameOverwrite is not null => null,
+                        _ => combatant.NameOverwrite
+                    };
 
                     localPos = this.DrawBar(drawList, localPos, size, combatant, jobColor, barColor, top, current);
                 }
