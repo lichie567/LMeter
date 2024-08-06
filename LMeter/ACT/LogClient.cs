@@ -14,14 +14,13 @@ namespace LMeter.Act
 {
     public abstract class LogClient(ActConfig config) : IPluginDisposable
     {
-        protected const string SubscriptionMessage = "{\"call\":\"subscribe\",\"events\":[\"CombatData\",\"LogLine\"]}";
+        protected const string SubscriptionMessage = "{\"call\":\"subscribe\",\"events\":[\"CombatData\"]}";
 
         protected ActConfig Config { get; set; } = config;
 
         public ConnectionStatus Status { get; protected set; } = ConnectionStatus.NotConnected;
         public List<ActEvent> PastEvents { get; protected init; } = [];
 
-        public FFLogsClient? _fflogsClient = config.UseFFLogs ? new FFLogsClient() : null;
         private ActEvent? _lastEvent;
         private ActEvent? _currentEvent;
         private readonly JsonSerializer _jsonSerializer = new() { Culture = CultureInfo.CurrentCulture };
@@ -40,20 +39,6 @@ namespace LMeter.Act
             return _currentEvent;
         }
 
-        public void ToggleFFlogsUsage()
-        {
-            if (this.Config.UseFFLogs)
-            {
-                _fflogsClient?.Dispose();
-                _fflogsClient = new FFLogsClient();
-            }
-            else
-            {
-                _fflogsClient?.Dispose();
-                _fflogsClient = null;
-            }
-        }
-
         protected void ParseLogData(string data)
         {
             this.ParseLogData(JObject.Parse(data));
@@ -61,27 +46,7 @@ namespace LMeter.Act
 
         protected void ParseLogData(JObject data)
         {
-            if (data.ContainsKey("type"))
-            {
-                string? value = data.GetValue("type")?.ToString();
-                if (!string.IsNullOrEmpty(value))
-                {
-                    if (this.Config.UseFFLogs &&
-                        (!this.Config.DisableFFLogsOutsideDuty || CharacterState.IsInDuty()) &&
-                        value.Equals("LogLine"))
-                    {
-                        string? logLine = data.GetValue("rawLine")?.ToString();
-                        if (!string.IsNullOrEmpty(logLine))
-                        {
-                            _fflogsClient?.ParseLine(logLine);
-                        }
-                    }
-                    else if (value.Equals("CombatData"))
-                    {
-                        this.HandleNewEvent(data.ToObject<ActEvent>(_jsonSerializer));
-                    }
-                }
-            }
+            this.HandleNewEvent(data.ToObject<ActEvent>(_jsonSerializer));
         }
 
         private void HandleNewEvent(ActEvent? newEvent)
@@ -99,12 +64,6 @@ namespace LMeter.Act
                     {
                         this.PastEvents.RemoveAt(0);
                     }
-                }
-
-                if (this.Config.UseFFLogs &&
-                    (!this.Config.DisableFFLogsOutsideDuty || CharacterState.IsInDuty()))
-                {
-                    newEvent.InjectFFLogsData(_fflogsClient?.CollectMeters());
                 }
 
                 _lastEvent = newEvent;
@@ -128,7 +87,6 @@ namespace LMeter.Act
         {
             _currentEvent = null;
             this.PastEvents.Clear();
-            _fflogsClient?.Reset();
             if (Config.ClearAct)
             {
                 IChatGui chat = Singletons.Get<IChatGui>();
@@ -162,7 +120,6 @@ namespace LMeter.Act
             if (disposing)
             {
                 this.Shutdown();
-                this._fflogsClient?.Dispose();
             }
         }
     }

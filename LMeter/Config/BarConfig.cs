@@ -76,6 +76,9 @@ namespace LMeter.Config
         public ConfigColor BarBackgroundColor = new(.3f, .3f, .3f, 1f);
         public int BarFillDirection = 0;
 
+        public bool UseCustomColorForSelf;
+        public ConfigColor CustomColorForSelf = new(218f / 255f, 157f / 255f, 46f / 255f, 1f);
+
         public IConfigPage GetDefault()
         {
             BarConfig defaultConfig = new()
@@ -149,6 +152,13 @@ namespace LMeter.Config
                 {
                     DrawHelpers.DrawNestIndicator(1);
                     DrawHelpers.DrawColorSelector("Bar Color", ref this.BarColor);
+                }
+
+                ImGui.Checkbox("Use Custom Color for your own bar", ref this.UseCustomColorForSelf);
+                if (this.UseCustomColorForSelf)
+                {
+                    DrawHelpers.DrawNestIndicator(1);
+                    DrawHelpers.DrawColorSelector("Self Color", ref this.CustomColorForSelf);
                 }
 
                 ImGui.Checkbox("Use your name instead of 'YOU'", ref this.UseCharacterName);

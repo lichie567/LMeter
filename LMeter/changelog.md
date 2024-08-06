@@ -1,3 +1,8 @@
+# Version 0.4.1.3
+- FFLogs DPS calculation has been disabled (hopefully temporarily)
+- Added feature for custom color for your own bar
+- Fix 'Hide Tag Values if Zero' option not working for some tag values
+
 # Version 0.4.1.2
 - Update FFLogs integration
 

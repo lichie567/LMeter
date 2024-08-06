@@ -75,38 +75,6 @@ namespace LMeter.Act.DataStructures
             return true;
         }
 
-        public void InjectFFLogsData(FFLogsMeter? meter)
-        {
-            string playerName = CharacterState.CharacterName;
-            if (meter?.Actors is null ||
-                meter?.Encounter is null ||
-                this.Combatants is null ||
-                this.Encounter is null ||
-                string.IsNullOrEmpty(playerName))
-            {
-                return;
-            }
-
-            TimeSpan duration = TimeSpan.FromMilliseconds(meter.EncounterEnd - meter.EncounterStart - meter.Downtime);
-            foreach (Combatant combatant in this.Combatants.Values)
-            {
-                string name = combatant.OriginalName;
-                if (name.Equals("YOU"))
-                {
-                    name = playerName;
-                }
-
-                foreach (FFLogsActor actor in meter.Actors.Values)
-                {
-                    if (actor.Name.Equals(name))
-                    {
-                        combatant.FFLogsActor = actor;
-                        combatant.FFLogsDuration = duration;
-                    }
-                }
-            }
-        }
-
         public static ActEvent GetTestData()
         {
             Dictionary<string, Combatant> mockCombatants = new()
