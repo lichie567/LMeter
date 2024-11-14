@@ -149,7 +149,7 @@ namespace LMeter
             }
         }
 
-        private void OnLogout()
+        private void OnLogout(int _, int __)
         {
             ConfigHelpers.SaveConfig();
         }
