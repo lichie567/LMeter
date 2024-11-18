@@ -34,7 +34,8 @@ namespace LMeter
             ImGuiWindowFlags.NoBackground |
             ImGuiWindowFlags.NoInputs |
             ImGuiWindowFlags.NoBringToFrontOnFocus |
-            ImGuiWindowFlags.NoSavedSettings;
+            ImGuiWindowFlags.NoSavedSettings | 
+            ImGuiWindowFlags.NoFocusOnAppearing;
 
         public PluginManager(
             IClientState clientState,
