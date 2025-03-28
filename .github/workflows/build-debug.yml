@@ -28,7 +28,7 @@ jobs:
         run: dotnet build --no-restore --verbosity normal --configuration Debug
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: LMeter-debug-${{ github.sha }}
           path: |

@@ -31,7 +31,7 @@ jobs:
         run: dotnet build --no-restore --verbosity normal --configuration Release
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: LMeter-release-${{ github.sha }}
           path: |
