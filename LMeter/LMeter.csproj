@@ -10,9 +10,9 @@
     <!-- Assembly Configuration -->
     <PropertyGroup>
         <AssemblyName>LMeter</AssemblyName>
-        <AssemblyVersion>0.4.1.5</AssemblyVersion>
-        <FileVersion>0.4.1.5</FileVersion>
-        <InformationalVersion>0.4.1.5</InformationalVersion>
+        <AssemblyVersion>0.4.1.6</AssemblyVersion>
+        <FileVersion>0.4.1.6</FileVersion>
+        <InformationalVersion>0.4.1.6</InformationalVersion>
     </PropertyGroup>
 
     <!-- Build Configuration -->

@@ -186,8 +186,14 @@ public class Combatant : IActData<Combatant>
 
     private static float GetPercent(LazyFloat? val1, LazyFloat? val2)
     {
+
         if (val1 is not null && val2 is not null)
         {
+            if (val2.Value == 0)
+            {
+                return 0;
+            }
+
             return val1.Value / val2.Value * 100;
         }
 
@@ -198,6 +204,11 @@ public class Combatant : IActData<Combatant>
     {
         if (val1 is not null && val2 is not null)
         {
+            if (val2.Value == 0)
+            {
+                return 0;
+            }
+            
             return val1.Value / val2.Value * 100;
         }
 
