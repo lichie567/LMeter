@@ -1,3 +1,7 @@
+# Version 0.4.1.5
+- Updated for Dalamud Api 12
+- Added decimal text tag support for Crit and Direct Hit percent
+
 # Version 0.4.1.3
 - FFLogs DPS calculation has been disabled (hopefully temporarily)
 - Added feature for custom color for your own bar
