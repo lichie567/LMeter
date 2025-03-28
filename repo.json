@@ -8,7 +8,7 @@
         "TestingAssemblyVersion": "0.4.1.4",
         "RepoUrl": "https://github.com/lichie567/LMeter",
         "ApplicableVersion": "any",
-        "DalamudApiLevel": 11,
+        "DalamudApiLevel": 12,
         "IsHide": "False",
         "IsTestingExclusive": "False",
         "DownloadCount": 0,
