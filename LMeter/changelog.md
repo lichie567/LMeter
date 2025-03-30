@@ -1,3 +1,6 @@
+# Version 0.4.2.0
+- Fixed calculation for Crit Direct Hit percentage
+
 # Version 0.4.1.5
 - Updated for Dalamud Api 12
 - Added decimal text tag support for Crit and Direct Hit percent
