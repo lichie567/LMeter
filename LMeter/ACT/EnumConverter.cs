@@ -22,7 +22,7 @@ namespace LMeter.ACT
                 return 0;
             }
 
-            string? value = serializer.Deserialize(reader, typeof(string))?.ToString();
+            string? value = serializer.Deserialize<string>(reader)?.ToString();
             return Enum.TryParse(objectType, value, true, out object? result) ? result : 0;
         }
 

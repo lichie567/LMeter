@@ -1,5 +1,18 @@
 namespace LMeter.Helpers
 {
+    public enum RoundingFlag
+    {
+        All,
+        Left,
+        Right,
+        Top,
+        TopRight,
+        TopLeft,
+        Bottom,
+        BottomRight,
+        BottomLeft
+    }
+
     public enum BooleanOperator
     {
         And,

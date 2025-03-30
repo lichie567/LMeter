@@ -209,7 +209,7 @@ public class Combatant : IActData<Combatant>
         {
             OriginalName = "Firstname Lastname",
             DurationRaw = "00:30",
-            Job = (Job)IActData<Combatant>.Random.Next(Enum.GetNames(typeof(Job)).Length - 1) + 1,
+            Job = (Job)IActData<Combatant>.Random.Next(Enum.GetNames<Job>().Length - 1) + 1,
             DamageTotal = new LazyFloat(damage.ToString()),
             Dps = new LazyFloat((damage / 30).ToString()),
             HealingTotal = new LazyFloat(healing.ToString()),

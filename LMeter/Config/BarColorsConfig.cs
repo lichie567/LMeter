@@ -96,50 +96,50 @@ namespace LMeter.Config
         {
             if (ImGui.BeginChild($"##{this.Name}", new Vector2(size.X, size.Y), border))
             {
-                DrawHelpers.DrawColorSelector("PLD", ref this.PLDColor);
-                DrawHelpers.DrawColorSelector("WAR", ref this.WARColor);
-                DrawHelpers.DrawColorSelector("DRK", ref this.DRKColor);
-                DrawHelpers.DrawColorSelector("GNB", ref this.GNBColor);
+                DrawHelpers.DrawColorSelector("PLD", this.PLDColor);
+                DrawHelpers.DrawColorSelector("WAR", this.WARColor);
+                DrawHelpers.DrawColorSelector("DRK", this.DRKColor);
+                DrawHelpers.DrawColorSelector("GNB", this.GNBColor);
 
                 ImGui.NewLine();
-                DrawHelpers.DrawColorSelector("SCH", ref this.SCHColor);
-                DrawHelpers.DrawColorSelector("WHM", ref this.WHMColor);
-                DrawHelpers.DrawColorSelector("AST", ref this.ASTColor);
-                DrawHelpers.DrawColorSelector("SGE", ref this.SGEColor);
+                DrawHelpers.DrawColorSelector("SCH", this.SCHColor);
+                DrawHelpers.DrawColorSelector("WHM", this.WHMColor);
+                DrawHelpers.DrawColorSelector("AST", this.ASTColor);
+                DrawHelpers.DrawColorSelector("SGE", this.SGEColor);
 
                 ImGui.NewLine();
-                DrawHelpers.DrawColorSelector("MNK", ref this.MNKColor);
-                DrawHelpers.DrawColorSelector("NIN", ref this.NINColor);
-                DrawHelpers.DrawColorSelector("DRG", ref this.DRGColor);
-                DrawHelpers.DrawColorSelector("SAM", ref this.SAMColor);
-                DrawHelpers.DrawColorSelector("RPR", ref this.RPRColor);
-                DrawHelpers.DrawColorSelector("VPR", ref this.VPRColor);
+                DrawHelpers.DrawColorSelector("MNK", this.MNKColor);
+                DrawHelpers.DrawColorSelector("NIN", this.NINColor);
+                DrawHelpers.DrawColorSelector("DRG", this.DRGColor);
+                DrawHelpers.DrawColorSelector("SAM", this.SAMColor);
+                DrawHelpers.DrawColorSelector("RPR", this.RPRColor);
+                DrawHelpers.DrawColorSelector("VPR", this.VPRColor);
 
                 ImGui.NewLine();
-                DrawHelpers.DrawColorSelector("BRD", ref this.BRDColor);
-                DrawHelpers.DrawColorSelector("MCH", ref this.MCHColor);
-                DrawHelpers.DrawColorSelector("DNC", ref this.DNCColor);
+                DrawHelpers.DrawColorSelector("BRD", this.BRDColor);
+                DrawHelpers.DrawColorSelector("MCH", this.MCHColor);
+                DrawHelpers.DrawColorSelector("DNC", this.DNCColor);
 
                 ImGui.NewLine();
-                DrawHelpers.DrawColorSelector("BLM", ref this.BLMColor);
-                DrawHelpers.DrawColorSelector("SMN", ref this.SMNColor);
-                DrawHelpers.DrawColorSelector("RDM", ref this.RDMColor);
-                DrawHelpers.DrawColorSelector("PCT", ref this.PCTColor);
-                DrawHelpers.DrawColorSelector("BLU", ref this.BLUColor);
+                DrawHelpers.DrawColorSelector("BLM", this.BLMColor);
+                DrawHelpers.DrawColorSelector("SMN", this.SMNColor);
+                DrawHelpers.DrawColorSelector("RDM", this.RDMColor);
+                DrawHelpers.DrawColorSelector("PCT", this.PCTColor);
+                DrawHelpers.DrawColorSelector("BLU", this.BLUColor);
 
                 ImGui.NewLine();
-                DrawHelpers.DrawColorSelector("GLA", ref this.GLAColor);
-                DrawHelpers.DrawColorSelector("MRD", ref this.MRDColor);
-                DrawHelpers.DrawColorSelector("CNJ", ref this.CNJColor);
-                DrawHelpers.DrawColorSelector("PGL", ref this.PGLColor);
-                DrawHelpers.DrawColorSelector("ROG", ref this.ROGColor);
-                DrawHelpers.DrawColorSelector("LNC", ref this.LNCColor);
-                DrawHelpers.DrawColorSelector("ARC", ref this.ARCColor);
-                DrawHelpers.DrawColorSelector("THM", ref this.THMColor);
-                DrawHelpers.DrawColorSelector("ACN", ref this.ACNColor);
+                DrawHelpers.DrawColorSelector("GLA", this.GLAColor);
+                DrawHelpers.DrawColorSelector("MRD", this.MRDColor);
+                DrawHelpers.DrawColorSelector("CNJ", this.CNJColor);
+                DrawHelpers.DrawColorSelector("PGL", this.PGLColor);
+                DrawHelpers.DrawColorSelector("ROG", this.ROGColor);
+                DrawHelpers.DrawColorSelector("LNC", this.LNCColor);
+                DrawHelpers.DrawColorSelector("ARC", this.ARCColor);
+                DrawHelpers.DrawColorSelector("THM", this.THMColor);
+                DrawHelpers.DrawColorSelector("ACN", this.ACNColor);
 
                 ImGui.NewLine();
-                DrawHelpers.DrawColorSelector("Limit Break", ref this.UKNColor);
+                DrawHelpers.DrawColorSelector("Limit Break", this.UKNColor);
             }
 
             ImGui.EndChild();

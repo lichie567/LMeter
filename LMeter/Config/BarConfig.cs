@@ -79,6 +79,10 @@ namespace LMeter.Config
         public bool UseCustomColorForSelf;
         public ConfigColor CustomColorForSelf = new(218f / 255f, 157f / 255f, 46f / 255f, 1f);
 
+        public RoundingOptions TopBarRounding = new(false, 10f, RoundingFlag.Top);
+        public RoundingOptions MiddleBarRounding = new(false, 10f, RoundingFlag.All);
+        public RoundingOptions BottomBarRounding = new(false, 10f, RoundingFlag.Bottom);
+
         public IConfigPage GetDefault()
         {
             BarConfig defaultConfig = new()
@@ -119,7 +123,7 @@ namespace LMeter.Config
                 ImGui.NewLine();
                 ImGui.DragFloat("Bar Fill Height (% of Bar Height)", ref this.BarFillHeight, .1f, 0, 1f);
                 ImGui.Combo("Bar Fill Direction", ref this.BarFillDirection, ["Up", "Down"], 2);
-                DrawHelpers.DrawColorSelector("Bar Background Color", ref this.BarBackgroundColor);
+                DrawHelpers.DrawColorSelector("Bar Background Color", this.BarBackgroundColor);
                 
                 ImGui.NewLine();
                 ImGui.Checkbox("Show Job Icon", ref this.ShowJobIcon);
@@ -143,28 +147,7 @@ namespace LMeter.Config
                     DrawHelpers.DrawNestIndicator(1);
                     ImGui.Combo("Job Icon Style", ref this.JobIconStyle, _jobIconStyleOptions, _jobIconStyleOptions.Length);
                     DrawHelpers.DrawNestIndicator(1);
-                    DrawHelpers.DrawColorSelector("Background Color##JobIcon", ref this.JobIconBackgroundColor);
-                }
-
-                ImGui.NewLine();
-                ImGui.Checkbox("Use Job Colors for Bars", ref this.UseJobColor);
-                if (!this.UseJobColor)
-                {
-                    DrawHelpers.DrawNestIndicator(1);
-                    DrawHelpers.DrawColorSelector("Bar Color", ref this.BarColor);
-                }
-
-                ImGui.Checkbox("Use Custom Color for your own bar", ref this.UseCustomColorForSelf);
-                if (this.UseCustomColorForSelf)
-                {
-                    DrawHelpers.DrawNestIndicator(1);
-                    DrawHelpers.DrawColorSelector("Self Color", ref this.CustomColorForSelf);
-                }
-
-                ImGui.Checkbox("Use your name instead of 'YOU'", ref this.UseCharacterName);
-                if (this.BarHeightType == 0)
-                {
-                    ImGui.Checkbox("Always show your own bar", ref this.AlwaysShowSelf);
+                    DrawHelpers.DrawColorSelector("Background Color##JobIcon", this.JobIconBackgroundColor);
                 }
 
                 ImGui.NewLine();
@@ -178,10 +161,10 @@ namespace LMeter.Config
                     ImGui.DragFloat2("Text Offset", ref this.ColumnHeaderOffset);
 
                     DrawHelpers.DrawNestIndicator(1);
-                    DrawHelpers.DrawColorSelector("Background Color", ref this.ColumnHeaderColor);
+                    DrawHelpers.DrawColorSelector("Background Color", this.ColumnHeaderColor);
 
                     DrawHelpers.DrawNestIndicator(1);
-                    DrawHelpers.DrawColorSelector("Text Color", ref this.ColumnHeaderTextColor);
+                    DrawHelpers.DrawColorSelector("Text Color", this.ColumnHeaderTextColor);
 
                     DrawHelpers.DrawNestIndicator(1);
                     ImGui.Checkbox("Use Font from Column", ref this.UseColumnFont);
@@ -196,9 +179,36 @@ namespace LMeter.Config
                     if (this.ColumnHeaderShowOutline)
                     {
                         DrawHelpers.DrawNestIndicator(2);
-                        DrawHelpers.DrawColorSelector("Column Header Color", ref this.ColumnHeaderOutlineColor);
+                        DrawHelpers.DrawColorSelector("Column Header Color", this.ColumnHeaderOutlineColor);
                     }
                 }
+
+                ImGui.NewLine();
+                ImGui.Checkbox("Use Job Colors for Bars", ref this.UseJobColor);
+                if (!this.UseJobColor)
+                {
+                    DrawHelpers.DrawNestIndicator(1);
+                    DrawHelpers.DrawColorSelector("Bar Color", this.BarColor);
+                }
+
+                ImGui.Checkbox("Use Custom Color for your own bar", ref this.UseCustomColorForSelf);
+                if (this.UseCustomColorForSelf)
+                {
+                    DrawHelpers.DrawNestIndicator(1);
+                    DrawHelpers.DrawColorSelector("Self Color", this.CustomColorForSelf);
+                }
+
+                ImGui.Checkbox("Use your name instead of 'YOU'", ref this.UseCharacterName);
+                if (this.BarHeightType == 0)
+                {
+                    ImGui.Checkbox("Always show your own bar", ref this.AlwaysShowSelf);
+                }
+
+                ImGui.NewLine();
+                DrawHelpers.DrawRoundingOptions("Top Bar Rounding", 0, this.TopBarRounding);
+                DrawHelpers.DrawRoundingOptions("Middle Bar Rounding", 0, this.MiddleBarRounding);
+                DrawHelpers.DrawRoundingOptions("Bottom Bar Rounding", 0, this.BottomBarRounding);
+
             }
 
             ImGui.EndChild();
