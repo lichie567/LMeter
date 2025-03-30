@@ -357,7 +357,7 @@ namespace LMeter.Config
                     DrawHelpers.DrawNestIndicator(1);
                     ImGui.DragFloat2("Offset", ref this.SeparatorOffset);
                     DrawHelpers.DrawNestIndicator(1);
-                    DrawHelpers.DrawColorSelector("Color", ref this.SeparatorColor);
+                    DrawHelpers.DrawColorSelector("Color", this.SeparatorColor);
                 }
             }
 
@@ -366,14 +366,14 @@ namespace LMeter.Config
             if (!this.TextJobColor)
             {
                 DrawHelpers.DrawNestIndicator(1);
-                DrawHelpers.DrawColorSelector("Text Color", ref this.TextColor);
+                DrawHelpers.DrawColorSelector("Text Color", this.TextColor);
             }
 
             ImGui.Checkbox("Show Outline", ref this.ShowOutline);
             if (this.ShowOutline)
             {
                 DrawHelpers.DrawNestIndicator(1);
-                DrawHelpers.DrawColorSelector("Outline Color", ref this.OutlineColor);
+                DrawHelpers.DrawColorSelector("Outline Color", this.OutlineColor);
             }
 
             ImGui.NewLine();
@@ -381,7 +381,7 @@ namespace LMeter.Config
             if (this.UseBackground)
             {
                 DrawHelpers.DrawNestIndicator(1);
-                DrawHelpers.DrawColorSelector("Background Color", ref this.BackgroundColor);
+                DrawHelpers.DrawColorSelector("Background Color", this.BackgroundColor);
             }
         }
     }

@@ -32,7 +32,7 @@ namespace LMeter.Act
                 return Job.UKN;
             }
 
-            string? value = serializer.Deserialize(reader, typeof(string))?.ToString();
+            string? value = serializer.Deserialize<string>(reader)?.ToString();
             if (value is not null && Enum.TryParse(value, true, out Job job))
             {
                 return job;

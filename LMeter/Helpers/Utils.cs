@@ -9,7 +9,8 @@ namespace LMeter.Helpers
 {
     public static class Utils
     {
-        public static readonly string[] AnchorOptions = Enum.GetNames(typeof(DrawAnchor));
+        public static readonly string[] AnchorOptions = Enum.GetNames<DrawAnchor>();
+        public static readonly string[] RoundingFlags = Enum.GetNames<RoundingFlag>();
 
         public static Vector2 GetAnchoredPosition(Vector2 position, Vector2 size, DrawAnchor anchor) => anchor switch
         {

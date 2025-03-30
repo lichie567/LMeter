@@ -312,7 +312,7 @@ namespace LMeter.Config
             if (this.ConditionType == VisibilityConditionType.Job)
             {
                 DrawHelpers.DrawNestIndicator(1);
-                string[] jobTypeOptions = Enum.GetNames(typeof(JobType));
+                string[] jobTypeOptions = Enum.GetNames<JobType>();
                 ImGui.Combo("Job Select", ref Unsafe.As<JobType, int>(ref this.ShowForJobTypes), jobTypeOptions, jobTypeOptions.Length);
 
                 if (this.ShowForJobTypes == JobType.Custom)

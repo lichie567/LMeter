@@ -227,7 +227,12 @@ namespace LMeter.Meter
                     for (int i = 0; i < this.GeneralConfig.BorderThickness; i++)
                     {
                         Vector2 offset = new(i, i);
-                        drawList.AddRect(borderPos + offset, borderPos + borderSize - offset, this.GeneralConfig.BorderColor.Base);
+                        DrawHelpers.DrawRect(
+                            drawList,
+                            borderPos + offset,
+                            borderPos + borderSize - offset,
+                            this.GeneralConfig.BorderColor,
+                            this.GeneralConfig.BorderRounding);
                     }
 
                     localPos += Vector2.One * this.GeneralConfig.BorderThickness;
@@ -256,7 +261,13 @@ namespace LMeter.Meter
                 }
                 
                 Vector2 backgroundSize = this.HeaderConfig.ShowFooter ? size.AddY(-this.HeaderConfig.FooterHeight) : size;
-                drawList.AddRectFilled(localPos, localPos + backgroundSize, this.GeneralConfig.BackgroundColor.Base);
+                DrawHelpers.DrawRectFilled(
+                    drawList,
+                    localPos,
+                    localPos + backgroundSize,
+                    this.GeneralConfig.BackgroundColor,
+                    this.GeneralConfig.Rounding);
+
                 if (this.BarConfig.ShowColumnHeader && actEvent is not null)
                 {
                     List<Text> columnHeaderTexts = GetColumnHeaderTexts(this.BarTextConfig.Texts, this.BarConfig);
@@ -326,7 +337,12 @@ namespace LMeter.Meter
             Encounter? encounter)
         {
             Vector2 headerSize = new(size.X, headerConfig.HeaderHeight);
-            drawList.AddRectFilled(pos, pos + headerSize, headerConfig.BackgroundColor.Base);
+            DrawHelpers.DrawRectFilled(
+                drawList,
+                pos,
+                pos + headerSize,
+                headerConfig.BackgroundColor,
+                headerConfig.Rounding);
 
             if (encounter is null && headerConfig.ShowVersion)
             {
@@ -430,6 +446,7 @@ namespace LMeter.Meter
 
                 localPos = localPos.AddY(-_scrollShift);
                 int maxIndex = Math.Min(currentIndex + barCount, sortedCombatants.Count);
+                int startIndex = currentIndex;
                 for (; currentIndex < maxIndex; currentIndex++)
                 {
                     Combatant combatant = sortedCombatants[currentIndex];
@@ -450,7 +467,17 @@ namespace LMeter.Meter
                         _ => combatant.NameOverwrite
                     };
 
-                    localPos = this.DrawBar(drawList, localPos, size, combatant, jobColor, barColor, top, current);
+                    RoundingOptions rounding = this.BarConfig.MiddleBarRounding;
+                    if (currentIndex == startIndex)
+                    {
+                        rounding = this.BarConfig.TopBarRounding;
+                    }
+                    else if (currentIndex == maxIndex - 1)
+                    {
+                        rounding = this.BarConfig.BottomBarRounding;
+                    }
+
+                    localPos = this.DrawBar(drawList, localPos, size, combatant, jobColor, barColor, top, current, rounding);
                 }
             };
         }
@@ -463,7 +490,8 @@ namespace LMeter.Meter
             ConfigColor jobColor,
             ConfigColor barColor,
             float top,
-            float current)
+            float current,
+            RoundingOptions rounding)
         {
             BarConfig barConfig = this.BarConfig;
             float barHeight = barConfig.BarHeightType == 0
@@ -481,7 +509,7 @@ namespace LMeter.Meter
                 drawList.AddRectFilled(localPos, localPos + barBackgroundSize, barConfig.BarBackgroundColor.Base);
             }
 
-            drawList.AddRectFilled(barPos, barPos + barFillSize, barConfig.UseJobColor ? jobColor.Base : barColor.Base);
+            DrawHelpers.DrawRectFilled(drawList, barPos, barPos + barFillSize, barConfig.UseJobColor ? jobColor : barColor, rounding);
 
             if (barConfig.ShowJobIcon && combatant.Job != Job.UKN)
             {

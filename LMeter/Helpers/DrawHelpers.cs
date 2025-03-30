@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using Dalamud.Interface;
 using Dalamud.Interface.ImGuiNotification;
 using Dalamud.Interface.Textures.TextureWraps;
@@ -138,11 +139,47 @@ namespace LMeter.Helpers
             fontKey = fontOptions[fontId];
         }
 
-        public static void DrawColorSelector(string label, ref ConfigColor color)
+        public static void DrawColorSelector(string label, ConfigColor color)
         {
             Vector4 vector = color.Vector;
             ImGui.ColorEdit4(label, ref vector, ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar);
             color.Vector = vector;
+        }
+
+        public static void DrawRoundingOptions(string label, int depth, RoundingOptions options)
+        {
+            ImGui.Checkbox(label, ref options.Enabled);
+            if (options.Enabled)
+            {
+                DrawNestIndicator(depth + 1);
+                ImGui.DragFloat($"Roundness##{label}", ref options.Rounding, 0.1f, 1, 50);
+
+                DrawNestIndicator(depth + 1);
+                ImGui.Combo($"Rounding Type##{label}", ref Unsafe.As<RoundingFlag, int>(ref options.Flag), Utils.RoundingFlags, Utils.RoundingFlags.Length);
+            }
+        }
+
+        public static void DrawRectFilled(ImDrawListPtr drawList, Vector2 p_min, Vector2 p_max, ConfigColor color, RoundingOptions? options = null)
+        {
+            if (options is not null && options.Enabled)
+            {
+                drawList.AddRectFilled(p_min, p_max, color.Base, options.Rounding, options.GetImDrawFlag());
+            }
+            else
+            {
+                drawList.AddRectFilled(p_min, p_max, color.Base);
+            }
+        }
+        public static void DrawRect(ImDrawListPtr drawList, Vector2 p_min, Vector2 p_max, ConfigColor color, RoundingOptions? options = null)
+        {
+            if (options is not null && options.Enabled)
+            {
+                drawList.AddRect(p_min, p_max, color.Base, options.Rounding, options.GetImDrawFlag());
+            }
+            else
+            {
+                drawList.AddRect(p_min, p_max, color.Base);
+            }
         }
 
         public static (Vector2, Vector2) GetTexCoordinates(IDalamudTextureWrap texture, Vector2 size, bool cropIcon = true)

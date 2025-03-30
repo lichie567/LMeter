@@ -57,6 +57,8 @@ namespace LMeter.Config
         public ConfigColor VersionOutlineColor = new(0, 0, 0, 0.5f);
         public string VersionFontKey = FontsManager.DefaultSmallFontKey;
 
+        public RoundingOptions Rounding = new(false, 10f, RoundingFlag.Top);
+
         public IConfigPage GetDefault()
         {
             HeaderConfig defaultConfig = new()
@@ -85,7 +87,10 @@ namespace LMeter.Config
                     ImGui.DragInt("Height##Header", ref this.HeaderHeight, 1, 0, 100);
 
                     DrawHelpers.DrawNestIndicator(1);
-                    DrawHelpers.DrawColorSelector("Background Color##Header", ref this.BackgroundColor);
+                    DrawHelpers.DrawColorSelector("Background Color##Header", this.BackgroundColor);
+
+                    DrawHelpers.DrawNestIndicator(1);
+                    DrawHelpers.DrawRoundingOptions("Use Rounded Corners##Header", 1, this.Rounding);
 
                     DrawHelpers.DrawNestIndicator(1);
                     ImGui.Checkbox("Show LMeter Version when Cleared", ref this.ShowVersion);
@@ -98,14 +103,14 @@ namespace LMeter.Config
                         DrawHelpers.DrawFontSelector("Font##Version", ref this.VersionFontKey, ref this.VersionFontId);
 
                         DrawHelpers.DrawNestIndicator(2);
-                        DrawHelpers.DrawColorSelector("Text Color##Version", ref this.VersionColor);
+                        DrawHelpers.DrawColorSelector("Text Color##Version", this.VersionColor);
 
                         DrawHelpers.DrawNestIndicator(2);
                         ImGui.Checkbox("Show Outline##Version", ref this.VersionShowOutline);
                         if (this.VersionShowOutline)
                         {
                             DrawHelpers.DrawNestIndicator(3);
-                            DrawHelpers.DrawColorSelector("Outline Color##Version", ref this.VersionOutlineColor);
+                            DrawHelpers.DrawColorSelector("Outline Color##Version", this.VersionOutlineColor);
                         }
                     }
 
@@ -119,7 +124,7 @@ namespace LMeter.Config
                     ImGui.DragInt("Height##Footer", ref this.FooterHeight, 1, 0, 100);
 
                     DrawHelpers.DrawNestIndicator(1);
-                    DrawHelpers.DrawColorSelector("Background Color##Footer", ref this.FooterBackgroundColor);
+                    DrawHelpers.DrawColorSelector("Background Color##Footer", this.FooterBackgroundColor);
                 }
                 
                 ImGui.EndChild();
