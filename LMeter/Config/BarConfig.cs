@@ -81,7 +81,7 @@ namespace LMeter.Config
 
         public RoundingOptions TopBarRounding = new(false, 10f, RoundingFlag.Top);
         public RoundingOptions MiddleBarRounding = new(false, 10f, RoundingFlag.All);
-        public RoundingOptions BottomBarRounding = new(false, 10f, RoundingFlag.Bottom);
+        public RoundingOptions BottomBarRounding = new(false, 10f, RoundingFlag.BottomLeft);
 
         public IConfigPage GetDefault()
         {
@@ -205,9 +205,9 @@ namespace LMeter.Config
                 }
 
                 ImGui.NewLine();
-                DrawHelpers.DrawRoundingOptions("Top Bar Rounding", 0, this.TopBarRounding);
-                DrawHelpers.DrawRoundingOptions("Middle Bar Rounding", 0, this.MiddleBarRounding);
-                DrawHelpers.DrawRoundingOptions("Bottom Bar Rounding", 0, this.BottomBarRounding);
+                DrawHelpers.DrawRoundingOptions("Top Bar Rounded Corners", 0, this.TopBarRounding);
+                DrawHelpers.DrawRoundingOptions("Middle Bar Rounded Corners", 0, this.MiddleBarRounding);
+                DrawHelpers.DrawRoundingOptions("Bottom Bar Rounded Corners", 0, this.BottomBarRounding);
 
             }
 

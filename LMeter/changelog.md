@@ -1,5 +1,6 @@
 # Version 0.4.2.0
 - Fixed calculation for Crit Direct Hit percentage
+- Added option to add rounded corners to certain elements
 
 # Version 0.4.1.5
 - Updated for Dalamud Api 12
