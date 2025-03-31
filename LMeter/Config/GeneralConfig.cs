@@ -10,7 +10,7 @@ namespace LMeter.Config
     public class GeneralConfig : IConfigPage
     {
         [JsonIgnore]
-        private static readonly string[] _meterTypeOptions = Enum.GetNames(typeof(MeterDataType));
+        private static readonly string[] _meterTypeOptions = Enum.GetNames<MeterDataType>();
 
         [JsonIgnore]
         public bool Preview = false;
@@ -31,6 +31,8 @@ namespace LMeter.Config
         public int BorderThickness = 2;
         public MeterDataType DataType = MeterDataType.Damage;
         public bool ReturnToCurrent = true;
+        public RoundingOptions Rounding = new(false, 10f, RoundingFlag.Bottom);
+        public RoundingOptions BorderRounding = new(false, 10f, RoundingFlag.All);
 
         public IConfigPage GetDefault() => new GeneralConfig();
 
@@ -46,8 +48,10 @@ namespace LMeter.Config
                 ImGui.Checkbox("Preview", ref this.Preview);
                 ImGui.NewLine();
 
-                DrawHelpers.DrawColorSelector("Background Color", ref this.BackgroundColor);
+                DrawHelpers.DrawColorSelector("Background Color", this.BackgroundColor);
+                DrawHelpers.DrawRoundingOptions("Use Rounded Corners", 0, this.Rounding);
 
+                ImGui.NewLine();
                 ImGui.Checkbox("Show Border", ref this.ShowBorder);
                 if (this.ShowBorder)
                 {
@@ -55,7 +59,10 @@ namespace LMeter.Config
                     ImGui.DragInt("Border Thickness", ref this.BorderThickness, 1, 1, 20);
 
                     DrawHelpers.DrawNestIndicator(1);
-                    DrawHelpers.DrawColorSelector("Border Color", ref this.BorderColor);
+                    DrawHelpers.DrawColorSelector("Border Color", this.BorderColor);
+
+                    DrawHelpers.DrawNestIndicator(1);
+                    DrawHelpers.DrawRoundingOptions("Use Rounded Corners##Border", 1, this.BorderRounding);
 
                     DrawHelpers.DrawNestIndicator(1);
                     ImGui.Checkbox("Hide border around Header", ref this.BorderAroundBars);

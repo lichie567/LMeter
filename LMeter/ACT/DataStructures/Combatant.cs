@@ -135,27 +135,27 @@ public class Combatant : IActData<Combatant>
     [JsonProperty("MAXHIT")]
     private string _maxHit { get; set; } = string.Empty;
 
-    [JsonProperty("hits")]
-    [JsonConverter(typeof(LazyFloatConverter))]
-    private LazyFloat? _hits;
-
-    [JsonProperty("crithits")]
-    [JsonConverter(typeof(LazyFloatConverter))]
-    private LazyFloat? _critHits;
-
-    [JsonProperty("DirectHitCount")]
-    [JsonConverter(typeof(LazyFloatConverter))]
-    private LazyFloat? _directHits;
-
-    [JsonProperty("CritDirectHitCount")]
-    [JsonConverter(typeof(LazyFloatConverter))]
-    private LazyFloat? _critdirectHits;
-
     [TextTag]
     public LazyString<string?> MaxHitName { get; set; }
 
     [TextTag]
     public LazyFloat MaxHitValue { get; set; }
+
+    [JsonProperty("hits")]
+    [JsonConverter(typeof(LazyFloatConverter))]
+    private LazyFloat? _hits { get; set; }
+
+    [JsonProperty("crithits")]
+    [JsonConverter(typeof(LazyFloatConverter))]
+    private LazyFloat? _critHits { get; set; }
+
+    [JsonProperty("DirectHitCount")]
+    [JsonConverter(typeof(LazyFloatConverter))]
+    private LazyFloat? _directHits { get; set; }
+
+    [JsonProperty("CritDirectHitCount")]
+    [JsonConverter(typeof(LazyFloatConverter))]
+    private LazyFloat? _critdirectHits { get; set; }
 
     public Combatant()
     {
@@ -168,7 +168,7 @@ public class Combatant : IActData<Combatant>
         this.MaxHitValue = new LazyFloat(() => LazyStringConverters.MaxHitValue(this.MaxHit));
         this.CritHitPct = new LazyFloat(() => GetPercent(_critHits, _hits));
         this.DirectHitPct = new LazyFloat(() => GetPercent(_directHits, _hits));
-        this.CritDirectHitPct = new LazyFloat(() => GetCombinedPercent(_critHits, _directHits, _hits));
+        this.CritDirectHitPct = new LazyFloat(() => GetPercent(_critdirectHits, _hits));
     }
 
     public string GetFormattedString(string format, string numberFormat, bool emptyIfZero)
@@ -200,21 +200,6 @@ public class Combatant : IActData<Combatant>
         return 0;
     }
 
-    private static float GetCombinedPercent(LazyFloat? val1, LazyFloat? val2, LazyFloat? val3)
-    {
-        if (val1 is not null && val2 is not null)
-        {
-            if (val2.Value == 0)
-            {
-                return 0;
-            }
-            
-            return val1.Value / val2.Value * 100;
-        }
-
-        return 0;
-    }
-
     public static Combatant GetTestData()
     {
         float damage = IActData<Combatant>.Random.Next(212345);
@@ -224,7 +209,7 @@ public class Combatant : IActData<Combatant>
         {
             OriginalName = "Firstname Lastname",
             DurationRaw = "00:30",
-            Job = (Job)IActData<Combatant>.Random.Next(Enum.GetNames(typeof(Job)).Length - 1) + 1,
+            Job = (Job)IActData<Combatant>.Random.Next(Enum.GetNames<Job>().Length - 1) + 1,
             DamageTotal = new LazyFloat(damage.ToString()),
             Dps = new LazyFloat((damage / 30).ToString()),
             HealingTotal = new LazyFloat(healing.ToString()),
