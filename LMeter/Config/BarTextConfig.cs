@@ -25,8 +25,6 @@ namespace LMeter.Config
 
         public string NameInternal = name;
         public string Name => NameInternal;
-
-        public bool Initialized = false;
         public List<Text> Texts { get; init; } = [];
 
         public IConfigPage GetDefault()
@@ -64,7 +62,7 @@ namespace LMeter.Config
                     ImGui.TableHeadersRow();
 
                     int i = 0;
-                    for (; i < Texts.Count; i++)
+                    for (; i < this.Texts.Count; i++)
                     {
                         ImGui.PushID(i.ToString());
                         ImGui.TableNextRow(ImGuiTableRowFlags.None, 28);
@@ -248,7 +246,7 @@ namespace LMeter.Config
             }
 
             this.Texts.RemoveAt(index);
-            _selectedIndex = Math.Clamp(_selectedIndex, 0, this.Texts.Count - 1);
+            _selectedIndex = Math.Clamp(_selectedIndex, 0, Math.Max(this.Texts.Count - 1, 0));
         }
     }
 

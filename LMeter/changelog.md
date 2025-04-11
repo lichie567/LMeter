@@ -1,3 +1,6 @@
+# Version 0.4.2.1
+- Misc bug fixes
+
 # Version 0.4.2.0
 - Fixed calculation for Crit Direct Hit percentage
 - Added option to add rounded corners to certain elements

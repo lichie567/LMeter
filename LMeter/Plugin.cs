@@ -17,7 +17,7 @@ namespace LMeter
     {
         public const string ConfigFileName = "LMeter.json";
 
-        public static string Version { get; private set; } = "0.4.2.0";
+        public static string Version { get; private set; } = "0.4.2.1";
         public static string ConfigFileDir { get; private set; } = "";
         public static string ConfigFilePath { get; private set; } = "";
         public static string AssemblyFileDir { get; private set; } = "";
@@ -82,9 +82,6 @@ namespace LMeter
             // Load config
             FontsManager.CopyPluginFontsToUserPath();
             LMeterConfig config = ConfigHelpers.LoadConfig(Plugin.ConfigFilePath);
-            
-            // Convert old configs
-            ConfigHelpers.ConvertOldConfig(config);
 
             // Refresh fonts
             config.FontConfig.RefreshFontList();

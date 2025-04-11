@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Numerics;
 using System.Text;
 using Dalamud.Interface.ImGuiNotification;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
-using LMeter.Act.DataStructures;
 using LMeter.Config;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -46,18 +44,13 @@ namespace LMeter.Helpers
             try
             {
                 string jsonString = JsonConvert.SerializeObject(toExport, Formatting.None, _serializerSettings);
-                using (MemoryStream outputStream = new())
-                {
-                    using (DeflateStream compressionStream = new(outputStream, CompressionLevel.Optimal))
-                    {
-                        using (StreamWriter writer = new(compressionStream, Encoding.UTF8))
-                        {
-                            writer.Write(jsonString);
-                        }
-                    }
 
-                    return Convert.ToBase64String(outputStream.ToArray());
-                }
+                using MemoryStream outputStream = new();
+                using DeflateStream compressionStream = new(outputStream, CompressionLevel.Optimal);
+                using StreamWriter writer = new(compressionStream, Encoding.UTF8);
+
+                writer.Write(jsonString);
+                return Convert.ToBase64String(outputStream.ToArray());
             }
             catch (Exception ex)
             {
@@ -74,19 +67,13 @@ namespace LMeter.Helpers
             try
             {
                 byte[] bytes = Convert.FromBase64String(importString);
-
                 string decodedJsonString;
-                using (MemoryStream inputStream = new(bytes))
-                {
-                    using (DeflateStream compressionStream = new(inputStream, CompressionMode.Decompress))
-                    {
-                        using (StreamReader reader = new(compressionStream, Encoding.UTF8))
-                        {
-                            decodedJsonString = reader.ReadToEnd();
-                        }
-                    }
-                }
 
+                using MemoryStream inputStream = new(bytes);
+                using DeflateStream compressionStream = new(inputStream, CompressionMode.Decompress);
+                using StreamReader reader = new(compressionStream, Encoding.UTF8);
+                
+                decodedJsonString = reader.ReadToEnd();
                 T? importedObj = JsonConvert.DeserializeObject<T>(decodedJsonString, _serializerSettings);
                 return importedObj;
             }
@@ -106,8 +93,6 @@ namespace LMeter.Helpers
             {
                 if (File.Exists(path))
                 {
-                    // string jsonString = File.ReadAllText(path);
-                    // config = JsonConvert.DeserializeObject<LMeterConfig>(jsonString, _serializerSettings);
                     using FileStream fs = File.OpenRead(path);
                     using StreamReader sr = new(fs);
                     using JsonTextReader reader = new(sr);
@@ -152,114 +137,6 @@ namespace LMeter.Helpers
             catch (Exception ex)
             {
                 Singletons.Get<IPluginLog>().Error(ex.ToString());
-            }
-        }
-
-        public static void ConvertOldConfig(LMeterConfig config)
-        {
-            foreach (var meter in config.MeterList.Meters)
-            {   
-                Vector2 size = meter.GeneralConfig.Size;
-                size -= Vector2.One * meter.GeneralConfig.BorderThickness * 2;
-                size.AddY(-meter.HeaderConfig.HeaderHeight);
-                float barHeight = (size.Y - (meter.BarConfig.BarCount - 1) * meter.BarConfig.BarGaps) / meter.BarConfig.BarCount;
-                float rankTextOffset = meter.BarConfig.ShowRankText ? ImGui.CalcTextSize("00.").X : 0;
-                BarConfig barConfig = meter.BarConfig;
-                TextListConfig<Combatant> barTextConfig = meter.BarTextConfig;
-
-                if (!barTextConfig.Initialized &&
-                    barTextConfig.Texts.Count == 0)
-                {
-                    barTextConfig.AddText(new Text("Name")
-                    {
-                        Enabled = true,
-                        TextFormat = barConfig.LeftTextFormat.Replace("[encdps", "[dps"),
-                        TextOffset = barConfig.LeftTextOffset.AddX(rankTextOffset + barHeight - 5f),
-                        TextAlignment = DrawAnchor.Left,
-                        AnchorPoint = DrawAnchor.Left,
-                        TextJobColor = barConfig.LeftTextJobColor,
-                        TextColor = barConfig.BarNameColor,
-                        ShowOutline = barConfig.BarNameShowOutline,
-                        OutlineColor = barConfig.BarNameOutlineColor,
-                        FontKey = barConfig.BarNameFontKey,
-                        FontId = barConfig.BarNameFontId,
-                        ThousandsSeparators = barConfig.ThousandsSeparators
-                    });
-
-                    barTextConfig.AddText(new Text("Data")
-                    {
-                        Enabled = true,
-                        TextFormat = barConfig.RightTextFormat.Replace("[encdps", "[dps"),
-                        TextOffset = barConfig.RightTextOffset,
-                        TextAlignment = DrawAnchor.Right,
-                        AnchorPoint = DrawAnchor.Right,
-                        TextJobColor = barConfig.RightTextJobColor,
-                        TextColor = barConfig.BarDataColor,
-                        ShowOutline = barConfig.BarDataShowOutline,
-                        OutlineColor = barConfig.BarDataOutlineColor,
-                        FontKey = barConfig.BarDataFontKey,
-                        FontId = barConfig.BarDataFontId,
-                        ThousandsSeparators = barConfig.ThousandsSeparators
-                    });
-                }
-
-                
-                HeaderConfig headerConfig = meter.HeaderConfig;
-                TextListConfig<Encounter> headerTextConfig = meter.HeaderTextConfig;
-                if (!headerTextConfig.Initialized &&
-                    headerTextConfig.Texts.Count == 0)
-                {
-                    headerTextConfig.AddText(new Text("Encounter Duration")
-                    {
-                        Enabled = true,
-                        TextFormat = "[duration]",
-                        AnchorParent = 0,
-                        TextOffset = headerConfig.DurationOffset,
-                        TextAlignment = DrawAnchor.Left,
-                        AnchorPoint = DrawAnchor.Left,
-                        TextJobColor = false,
-                        TextColor = headerConfig.DurationColor,
-                        ShowOutline = headerConfig.DurationShowOutline,
-                        OutlineColor = headerConfig.DurationOutlineColor,
-                        FontKey = headerConfig.DurationFontKey,
-                        FontId = headerConfig.DurationFontId,
-                        ThousandsSeparators = false
-                    });
-
-                    headerTextConfig.AddText(new Text("Encounter Name")
-                    {
-                        Enabled = true,
-                        TextFormat = "[title]",
-                        AnchorParent = 1,
-                        TextOffset = headerConfig.DurationOffset - headerConfig.NameOffset,
-                        TextAlignment = DrawAnchor.Left,
-                        AnchorPoint = DrawAnchor.Right,
-                        TextJobColor = false,
-                        TextColor = headerConfig.NameColor,
-                        ShowOutline = headerConfig.NameShowOutline,
-                        OutlineColor = headerConfig.NameOutlineColor,
-                        FontKey = headerConfig.NameFontKey,
-                        FontId = headerConfig.NameFontId,
-                        ThousandsSeparators = false
-                    });
-
-                    headerTextConfig.AddText(new Text("Raid Stats")
-                    {
-                        Enabled = true,
-                        TextFormat = headerConfig.RaidStatsFormat,
-                        AnchorParent = 0,
-                        TextOffset = headerConfig.StatsOffset,
-                        TextAlignment = DrawAnchor.Right,
-                        AnchorPoint = DrawAnchor.Right,
-                        TextJobColor = false,
-                        TextColor = headerConfig.RaidStatsColor,
-                        ShowOutline = headerConfig.StatsShowOutline,
-                        OutlineColor = headerConfig.StatsOutlineColor,
-                        FontKey = headerConfig.StatsFontKey,
-                        FontId = headerConfig.StatsFontId,
-                        ThousandsSeparators = false
-                    });
-                }
             }
         }
     }
