@@ -46,11 +46,14 @@ namespace LMeter.Helpers
                 string jsonString = JsonConvert.SerializeObject(toExport, Formatting.None, _serializerSettings);
 
                 using MemoryStream outputStream = new();
-                using DeflateStream compressionStream = new(outputStream, CompressionLevel.Optimal);
-                using StreamWriter writer = new(compressionStream, Encoding.UTF8);
+                using (DeflateStream compressionStream = new(outputStream, CompressionLevel.Optimal))
+                using (StreamWriter writer = new(compressionStream, Encoding.UTF8))
 
                 writer.Write(jsonString);
-                return Convert.ToBase64String(outputStream.ToArray());
+
+                byte[] compressedBytes = outputStream.ToArray();
+                string base64 = Convert.ToBase64String(compressedBytes);
+                return base64;
             }
             catch (Exception ex)
             {
@@ -59,6 +62,7 @@ namespace LMeter.Helpers
 
             return null;
         }
+
 
         public static T? GetFromImportString<T>(string importString)
         {
