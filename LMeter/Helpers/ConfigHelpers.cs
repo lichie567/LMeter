@@ -44,13 +44,18 @@ namespace LMeter.Helpers
             try
             {
                 string jsonString = JsonConvert.SerializeObject(toExport, Formatting.None, _serializerSettings);
+                using (MemoryStream outputStream = new())
+                {
+                    using (DeflateStream compressionStream = new(outputStream, CompressionLevel.Optimal))
+                    {
+                        using (StreamWriter writer = new(compressionStream, Encoding.UTF8))
+                        {
+                            writer.Write(jsonString);
+                        }
+                    }
 
-                using MemoryStream outputStream = new();
-                using DeflateStream compressionStream = new(outputStream, CompressionLevel.Optimal);
-                using StreamWriter writer = new(compressionStream, Encoding.UTF8);
-
-                writer.Write(jsonString);
-                return Convert.ToBase64String(outputStream.ToArray());
+                    return Convert.ToBase64String(outputStream.ToArray());
+                }
             }
             catch (Exception ex)
             {
@@ -67,13 +72,19 @@ namespace LMeter.Helpers
             try
             {
                 byte[] bytes = Convert.FromBase64String(importString);
-                string decodedJsonString;
 
-                using MemoryStream inputStream = new(bytes);
-                using DeflateStream compressionStream = new(inputStream, CompressionMode.Decompress);
-                using StreamReader reader = new(compressionStream, Encoding.UTF8);
-                
-                decodedJsonString = reader.ReadToEnd();
+                string decodedJsonString;
+                using (MemoryStream inputStream = new(bytes))
+                {
+                    using (DeflateStream compressionStream = new(inputStream, CompressionMode.Decompress))
+                    {
+                        using (StreamReader reader = new(compressionStream, Encoding.UTF8))
+                        {
+                            decodedJsonString = reader.ReadToEnd();
+                        }
+                    }
+                }
+
                 T? importedObj = JsonConvert.DeserializeObject<T>(decodedJsonString, _serializerSettings);
                 return importedObj;
             }
