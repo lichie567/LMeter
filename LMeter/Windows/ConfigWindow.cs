@@ -14,27 +14,20 @@ namespace LMeter.Windows
     {
         private const float NavBarHeight = 40;
 
+        private bool _firstOpen = true;
         private bool _back = false;
         private bool _home = false;
         private string _name = string.Empty;
         private Vector2 _windowSize;
         private readonly Stack<IConfigurable> _configStack;
 
-        public ConfigWindow(string id, Vector2 position, Vector2 size) : base(id)
+        public ConfigWindow(string id, Vector2 size) : base(id)
         {
             this.Flags =
                 ImGuiWindowFlags.NoScrollbar |
                 ImGuiWindowFlags.NoCollapse |
                 ImGuiWindowFlags.NoScrollWithMouse |
                 ImGuiWindowFlags.NoSavedSettings;
-
-            this.Position = position - size / 2;
-            this.PositionCondition = ImGuiCond.Appearing;
-            this.SizeConstraints = new WindowSizeConstraints()
-            {
-                MinimumSize = new Vector2(size.X, 160),
-                MaximumSize = ImGui.GetMainViewport().Size
-            };
 
             _windowSize = size;
             _configStack = new Stack<IConfigurable>();
@@ -51,6 +44,20 @@ namespace LMeter.Windows
         {
             if (_configStack.Count != 0)
             {
+                if (_firstOpen)
+                {
+                    Vector2 viewPort = ImGui.GetMainViewport().Size;
+                    this.PositionCondition = ImGuiCond.Appearing;
+                    this.SizeConstraints = new WindowSizeConstraints()
+                    {
+                        MinimumSize = new Vector2(_windowSize.X, 160),
+                        MaximumSize = ImGui.GetMainViewport().Size
+                    };
+
+                    this.Position = viewPort / 2f - (_windowSize / 2);
+                    _firstOpen = false;
+                }
+
                 this.WindowName = string.Join("  >  ", _configStack.Reverse().Select(c => c.Name));
                 ImGui.SetNextWindowSize(_windowSize);
             }

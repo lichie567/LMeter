@@ -7,7 +7,6 @@ using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 using LMeter.Act;
-using LMeter.Act.DataStructures;
 using LMeter.Config;
 using LMeter.Helpers;
 using LMeter.Meter;
@@ -49,7 +48,7 @@ namespace LMeter
             _config = config;
 
             _origin = ImGui.GetMainViewport().Size / 2f;
-            _configRoot = new ConfigWindow("ConfigRoot", _origin, _configSize);
+            _configRoot = new ConfigWindow("LMeter_ConfigRoot", _configSize);
             _windowSystem = new WindowSystem("LMeter");
             _windowSystem.AddWindow(_configRoot);
 
