@@ -4,7 +4,7 @@ using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using Dalamud.Interface;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using LMeter.Act;
 using LMeter.Helpers;
 using Newtonsoft.Json;

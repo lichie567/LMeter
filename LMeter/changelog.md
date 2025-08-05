@@ -1,3 +1,6 @@
+# Version 0.4.2.3
+- Updated for Dalamud API 13
+
 # Version 0.4.2.2
 - Fix problem with exporting and importing profiles
 
