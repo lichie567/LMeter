@@ -5,7 +5,7 @@ using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using LMeter.Act;
 using LMeter.Config;
 using LMeter.Helpers;

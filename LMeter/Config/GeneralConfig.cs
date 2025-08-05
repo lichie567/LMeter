@@ -1,7 +1,7 @@
 using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using LMeter.Helpers;
 using Newtonsoft.Json;
 

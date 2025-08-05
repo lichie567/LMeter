@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 using System.Text.Json.Serialization;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using LMeter.Helpers;
 
 namespace LMeter.Config
@@ -30,7 +30,7 @@ namespace LMeter.Config
                 //     {
                 //         ImDrawListPtr drawList = ImGui.GetWindowDrawList();
                 //         Vector2 pos = ImGui.GetWindowPos().AddX(size.X / 2 - iconSize.X / 2);
-                //         drawList.AddImage(Plugin.IconTexture.ImGuiHandle, pos, pos + iconSize);
+                //         drawList.AddImage(Plugin.IconTexture.Handle, pos, pos + iconSize);
                 //         Vector2 textPos = ImGui.GetWindowPos().AddX(size.X / 2 - textSize.X / 2).AddY(iconSize.Y);
                 //         drawList.AddText(textPos, 0xFFFFFFFF, versionText);
                 //         ImGui.End();
