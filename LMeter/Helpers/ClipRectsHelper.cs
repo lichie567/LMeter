@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using Dalamud.Bindings.ImGui;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
-using ImGuiNET;
 
 namespace LMeter.Helpers
 {
