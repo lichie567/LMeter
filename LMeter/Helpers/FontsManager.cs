@@ -2,20 +2,15 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.ManagedFontAtlas;
 using Dalamud.Interface.Utility;
 using Dalamud.Plugin.Services;
-using ImGuiNET;
 
 namespace LMeter.Helpers
 {
-    public struct FontData(
-        string name,
-        string path,
-        int size,
-        bool chinese,
-        bool korean)
+    public struct FontData(string name, string path, int size, bool chinese, bool korean)
     {
         public string Name = name;
         public string Path = path;
@@ -80,12 +75,9 @@ namespace LMeter.Helpers
 
                 try
                 {
-                    IFontHandle fontHandle = this._uiBuilder.FontAtlas.NewDelegateFontHandle
-                    (
-                        e => e.OnPreBuild
-                        (
-                            tk => tk.AddFontFromFile
-                            (
+                    IFontHandle fontHandle = this._uiBuilder.FontAtlas.NewDelegateFontHandle(e =>
+                        e.OnPreBuild(tk =>
+                            tk.AddFontFromFile(
                                 path,
                                 new SafeFontConfig
                                 {
@@ -236,7 +228,10 @@ namespace LMeter.Helpers
             string[] pluginFonts;
             try
             {
-                pluginFonts = Directory.GetFiles(pluginFontPath).Where(x => x.EndsWith(".ttf") || x.EndsWith(".otf")).ToArray();
+                pluginFonts = Directory
+                    .GetFiles(pluginFontPath)
+                    .Where(x => x.EndsWith(".ttf") || x.EndsWith(".otf"))
+                    .ToArray();
             }
             catch
             {
@@ -259,7 +254,9 @@ namespace LMeter.Helpers
                 }
                 catch (Exception ex)
                 {
-                    Singletons.Get<IPluginLog>().Warning($"Failed to copy font {fontFileNames} to User Font Directory: {ex}");
+                    Singletons
+                        .Get<IPluginLog>()
+                        .Warning($"Failed to copy font {fontFileNames} to User Font Directory: {ex}");
                 }
             }
         }
@@ -282,7 +279,8 @@ namespace LMeter.Helpers
 
         public static string GetFontName(string? fontPath, string fontFile)
         {
-            return fontFile.Replace(fontPath ?? string.Empty, string.Empty)
+            return fontFile
+                .Replace(fontPath ?? string.Empty, string.Empty)
                 .Replace(".otf", string.Empty, StringComparison.OrdinalIgnoreCase)
                 .Replace(".ttf", string.Empty, StringComparison.OrdinalIgnoreCase);
         }

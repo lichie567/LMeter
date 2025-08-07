@@ -9,10 +9,12 @@ namespace LMeter.Act
         object source,
         string format,
         bool emptyIfZero,
-        Dictionary<string, MemberInfo> members)
+        Dictionary<string, MemberInfo> members
+    )
     {
         [GeneratedRegex(@"\[(\w*)(:k)?\.?(\d+)?\]", RegexOptions.Compiled)]
         private static partial Regex GeneratedRegex();
+
         public static Regex TextTagRegex { get; } = GeneratedRegex();
 
         private readonly object _source = source;
@@ -37,7 +39,7 @@ namespace LMeter.Act
             {
                 MemberTypes.Field => ((FieldInfo)memberInfo).GetValue(_source),
                 MemberTypes.Property => ((PropertyInfo)memberInfo).GetValue(_source),
-                _ => null
+                _ => null,
             };
 
             string? value = null;
@@ -53,13 +55,15 @@ namespace LMeter.Act
             else if (memberValue is not null)
             {
                 value = memberValue.ToString();
-                if (!string.IsNullOrEmpty(value) &&
-                    int.TryParse(m.Groups[3].Value, out int trim) &&
-                    trim < value.Length)
+                if (
+                    !string.IsNullOrEmpty(value)
+                    && int.TryParse(m.Groups[3].Value, out int trim)
+                    && trim < value.Length
+                )
                 {
                     value = memberValue?.ToString().AsSpan(0, trim).ToString();
                 }
-                
+
                 if (_emptyIfZero && float.TryParse(value, out float val) && val == 0f)
                 {
                     return string.Empty;

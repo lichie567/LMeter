@@ -10,7 +10,12 @@ namespace LMeter.ACT
             throw new NotImplementedException("Write not supported.");
         }
 
-        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
+        public override object? ReadJson(
+            JsonReader reader,
+            Type objectType,
+            object? existingValue,
+            JsonSerializer serializer
+        )
         {
             if (!objectType.IsEnum)
             {

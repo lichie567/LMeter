@@ -7,12 +7,11 @@ namespace LMeter.Helpers
 {
     public class TextureCache : IPluginDisposable
     {
-        public static IDalamudTextureWrap? GetTextureById(
-            uint iconId,
-            uint stackCount = 0,
-            bool hdIcon = true)
+        public static IDalamudTextureWrap? GetTextureById(uint iconId, uint stackCount = 0, bool hdIcon = true)
         {
-            string path = Singletons.Get<ITextureProvider>().GetIconPath(new GameIconLookup(iconId: iconId + stackCount, hiRes: hdIcon));
+            string path = Singletons
+                .Get<ITextureProvider>()
+                .GetIconPath(new GameIconLookup(iconId: iconId + stackCount, hiRes: hdIcon));
             return Singletons.Get<ITextureProvider>().GetFromGame(path).GetWrapOrDefault();
         }
 
@@ -22,8 +21,6 @@ namespace LMeter.Helpers
             GC.SuppressFinalize(this);
         }
 
-        protected virtual void Dispose(bool disposing)
-        {
-        }
+        protected virtual void Dispose(bool disposing) { }
     }
 }

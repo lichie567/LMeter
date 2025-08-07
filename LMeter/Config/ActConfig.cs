@@ -1,7 +1,7 @@
 using System;
 using System.Numerics;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
-using ImGuiNET;
 using LMeter.Act;
 using LMeter.Helpers;
 using Newtonsoft.Json;
@@ -50,7 +50,9 @@ namespace LMeter.Config
                 ImGui.RadioButton("WebSocket", ref this.ClientType, 0);
                 if (ImGui.IsItemHovered())
                 {
-                    ImGui.SetTooltip("Use this option if you are using the standard standalone Advanced Combat Tracker program.");
+                    ImGui.SetTooltip(
+                        "Use this option if you are using the standard standalone Advanced Combat Tracker program."
+                    );
                 }
 
                 ImGui.SameLine();
@@ -69,10 +71,21 @@ namespace LMeter.Config
                 ImGui.Text($"ACT Status: {Singletons.Get<LogClient>().Status}");
                 if (this.ClientType == 0)
                 {
-                    ImGui.InputTextWithHint("ACT Websocket Address", $"Default: '{_defaultSocketAddress}'", ref this.ActSocketAddress, 64);
+                    ImGui.InputTextWithHint(
+                        "ACT Websocket Address",
+                        $"Default: '{_defaultSocketAddress}'",
+                        ref this.ActSocketAddress,
+                        64
+                    );
                 }
 
-                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Sync, () => Singletons.Get<LogClient>().Reset(), "Reconnect", buttonSize);
+                DrawHelpers.DrawButton(
+                    string.Empty,
+                    FontAwesomeIcon.Sync,
+                    () => Singletons.Get<LogClient>().Reset(),
+                    "Reconnect",
+                    buttonSize
+                );
 
                 ImGui.SameLine();
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() - 1f);
@@ -99,14 +112,15 @@ namespace LMeter.Config
                     ImGui.PopItemWidth();
                 }
 
-
                 ImGui.NewLine();
                 ImGui.Checkbox("Clear ACT when clearing LMeter", ref this.ClearAct);
                 ImGui.Checkbox("Force ACT to end encounter after combat", ref this.AutoEnd);
                 if (ImGui.IsItemHovered())
                 {
-                    ImGui.SetTooltip("It is recommended to disable ACT Command Sounds if you use this feature.\n" +
-                                     "The option can be found in ACT under Options -> Sound Settings.");
+                    ImGui.SetTooltip(
+                        "It is recommended to disable ACT Command Sounds if you use this feature.\n"
+                            + "The option can be found in ACT under Options -> Sound Settings."
+                    );
                 }
 
                 if (this.AutoEnd)
@@ -118,12 +132,24 @@ namespace LMeter.Config
                 }
 
                 ImGui.NewLine();
-                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Stop, () => Singletons.Get<LogClient>().EndEncounter(), null, buttonSize);
+                DrawHelpers.DrawButton(
+                    string.Empty,
+                    FontAwesomeIcon.Stop,
+                    () => Singletons.Get<LogClient>().EndEncounter(),
+                    null,
+                    buttonSize
+                );
                 ImGui.SameLine();
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() - 1f);
                 ImGui.Text("Force End Combat");
 
-                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Trash, () => Singletons.Get<PluginManager>().Clear(), null, buttonSize);
+                DrawHelpers.DrawButton(
+                    string.Empty,
+                    FontAwesomeIcon.Trash,
+                    () => Singletons.Get<PluginManager>().Clear(),
+                    null,
+                    buttonSize
+                );
                 ImGui.SameLine();
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() - 1f);
                 ImGui.Text("Clear LMeter");
@@ -135,11 +161,15 @@ namespace LMeter.Config
         public void TryReconnect()
         {
             ConnectionStatus status = Singletons.Get<LogClient>().Status;
-            if (this.LastReconnectAttempt.HasValue &&
-                (status == ConnectionStatus.NotConnected || status == ConnectionStatus.ConnectionFailed))
+            if (
+                this.LastReconnectAttempt.HasValue
+                && (status == ConnectionStatus.NotConnected || status == ConnectionStatus.ConnectionFailed)
+            )
             {
-                if (this.AutoReconnect &&
-                    this.LastReconnectAttempt < DateTime.UtcNow - TimeSpan.FromSeconds(this.ReconnectDelay))
+                if (
+                    this.AutoReconnect
+                    && this.LastReconnectAttempt < DateTime.UtcNow - TimeSpan.FromSeconds(this.ReconnectDelay)
+                )
                 {
                     Singletons.Get<LogClient>().Reset();
                     this.LastReconnectAttempt = DateTime.UtcNow;
@@ -159,8 +189,10 @@ namespace LMeter.Config
                 {
                     this.LastCombatTime = DateTime.UtcNow;
                 }
-                else if (this.LastCombatTime is not null &&
-                         this.LastCombatTime < DateTime.UtcNow - TimeSpan.FromSeconds(this.AutoEndDelay))
+                else if (
+                    this.LastCombatTime is not null
+                    && this.LastCombatTime < DateTime.UtcNow - TimeSpan.FromSeconds(this.AutoEndDelay)
+                )
                 {
                     Singletons.Get<LogClient>().EndEncounter();
                     this.LastCombatTime = null;

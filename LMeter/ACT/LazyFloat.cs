@@ -35,8 +35,10 @@ namespace LMeter.Act
                     }
                 }
 
-                if (float.TryParse(_input, NumberStyles.Float, CultureInfo.InvariantCulture, out float parsed) &&
-                    !float.IsNaN(parsed))
+                if (
+                    float.TryParse(_input, NumberStyles.Float, CultureInfo.InvariantCulture, out float parsed)
+                    && !float.IsNaN(parsed)
+                )
                 {
                     _value = parsed;
                 }
@@ -75,7 +77,7 @@ namespace LMeter.Act
         {
             return this.Value.ToString();
         }
-        
+
         public string? ToString(string format, bool kilo, bool emptyIfZero)
         {
             if (emptyIfZero && this.Value == 0f)
@@ -83,16 +85,15 @@ namespace LMeter.Act
                 return string.Empty;
             }
 
-            return kilo 
-                ? KiloFormat(this.Value, format)
-                : this.Value.ToString(format, CultureInfo.InvariantCulture);
+            return kilo ? KiloFormat(this.Value, format) : this.Value.ToString(format, CultureInfo.InvariantCulture);
         }
 
-        private static string KiloFormat(float num, string format) => num switch
-        {
-            >= 1000000 => (num / 1000000f).ToString(format, CultureInfo.InvariantCulture) + "M",
-            >= 1000 => (num / 1000f).ToString(format, CultureInfo.InvariantCulture) + "K",
-            _ => num.ToString(format, CultureInfo.InvariantCulture)
-        };
+        private static string KiloFormat(float num, string format) =>
+            num switch
+            {
+                >= 1000000 => (num / 1000000f).ToString(format, CultureInfo.InvariantCulture) + "M",
+                >= 1000 => (num / 1000f).ToString(format, CultureInfo.InvariantCulture) + "K",
+                _ => num.ToString(format, CultureInfo.InvariantCulture),
+            };
     }
 }

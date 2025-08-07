@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Numerics;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Game.Command;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using ImGuiNET;
 using LMeter.Act;
-using LMeter.Act.DataStructures;
 using LMeter.Config;
 using LMeter.Helpers;
 using LMeter.Meter;
@@ -28,20 +27,21 @@ namespace LMeter
         private Vector2 _origin;
 
         private readonly ImGuiWindowFlags _mainWindowFlags =
-            ImGuiWindowFlags.NoTitleBar |
-            ImGuiWindowFlags.NoScrollbar |
-            ImGuiWindowFlags.AlwaysAutoResize |
-            ImGuiWindowFlags.NoBackground |
-            ImGuiWindowFlags.NoInputs |
-            ImGuiWindowFlags.NoBringToFrontOnFocus |
-            ImGuiWindowFlags.NoSavedSettings | 
-            ImGuiWindowFlags.NoFocusOnAppearing;
+            ImGuiWindowFlags.NoTitleBar
+            | ImGuiWindowFlags.NoScrollbar
+            | ImGuiWindowFlags.AlwaysAutoResize
+            | ImGuiWindowFlags.NoBackground
+            | ImGuiWindowFlags.NoInputs
+            | ImGuiWindowFlags.NoBringToFrontOnFocus
+            | ImGuiWindowFlags.NoSavedSettings
+            | ImGuiWindowFlags.NoFocusOnAppearing;
 
         public PluginManager(
             IClientState clientState,
             ICommandManager commandManager,
             IDalamudPluginInterface pluginInterface,
-            LMeterConfig config)
+            LMeterConfig config
+        )
         {
             _clientState = clientState;
             _commandManager = commandManager;
@@ -49,7 +49,7 @@ namespace LMeter
             _config = config;
 
             _origin = ImGui.GetMainViewport().Size / 2f;
-            _configRoot = new ConfigWindow("ConfigRoot", _origin, _configSize);
+            _configRoot = new ConfigWindow("LMeter_ConfigRoot", _configSize);
             _windowSystem = new WindowSystem("LMeter");
             _windowSystem.AddWindow(_configRoot);
 
@@ -57,12 +57,13 @@ namespace LMeter
                 "/lm",
                 new CommandInfo(PluginCommand)
                 {
-                    HelpMessage = "Opens the LMeter configuration window.\n"
-                                + "/lm end → Ends current Act Encounter.\n"
-                                + "/lm clear → Clears all Act encounter log data.\n"
-                                + "/lm ct <number> → Toggles clickthrough status for the given profile.\n"
-                                + "/lm toggle <number> [on|off] → Toggles visibility for the given profile.",
-                    ShowInHelp = true
+                    HelpMessage =
+                        "Opens the LMeter configuration window.\n"
+                        + "/lm end → Ends current Act Encounter.\n"
+                        + "/lm clear → Clears all Act encounter log data.\n"
+                        + "/lm ct <number> → Toggles clickthrough status for the given profile.\n"
+                        + "/lm toggle <number> [on|off] → Toggles visibility for the given profile.",
+                    ShowInHelp = true,
                 }
             );
 
@@ -121,7 +122,7 @@ namespace LMeter
             LogClient newClient = clientType switch
             {
                 1 => new IpcClient(_config.ActConfig),
-                _ => new WebSocketClient(_config.ActConfig)
+                _ => new WebSocketClient(_config.ActConfig),
             };
 
             newClient.Start();
@@ -160,10 +161,10 @@ namespace LMeter
             string[] argArray = arguments.Split(" ");
             switch (argArray)
             {
-                case {} args when args[0].Equals("end"):
+                case { } args when args[0].Equals("end"):
                     Singletons.Get<LogClient>().EndEncounter();
                     break;
-                case {} args when args[0].Equals("clear"):
+                case { } args when args[0].Equals("clear"):
                     this.Clear();
                     break;
                 case { } args when args[0].Equals("toggle"):

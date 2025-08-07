@@ -1,7 +1,7 @@
 using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using LMeter.Helpers;
 using Newtonsoft.Json;
 
@@ -14,12 +14,12 @@ namespace LMeter.Config
 
         [JsonIgnore]
         public bool Preview = false;
-        
+
         [JsonIgnore]
         public bool Active { get; set; }
-        
+
         public string Name => "General";
-        
+
         public Vector2 Position = Vector2.Zero;
         public Vector2 Size = new(ImGui.GetMainViewport().Size.Y * 16 / 90, ImGui.GetMainViewport().Size.Y / 10);
         public bool Lock = false;
@@ -69,7 +69,12 @@ namespace LMeter.Config
                 }
 
                 ImGui.NewLine();
-                ImGui.Combo("Sort Type", ref Unsafe.As<MeterDataType, int>(ref this.DataType), _meterTypeOptions, _meterTypeOptions.Length);
+                ImGui.Combo(
+                    "Sort Type",
+                    ref Unsafe.As<MeterDataType, int>(ref this.DataType),
+                    _meterTypeOptions,
+                    _meterTypeOptions.Length
+                );
 
                 ImGui.Checkbox("Return to Current Data when entering combat", ref this.ReturnToCurrent);
             }

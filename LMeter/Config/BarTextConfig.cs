@@ -3,20 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.ImGuiNotification;
-using ImGuiNET;
 using LMeter.Act.DataStructures;
 using LMeter.Helpers;
 using Newtonsoft.Json;
 
 namespace LMeter.Config
 {
-    public class TextListConfig<T>(string name = "Texts") : IConfigPage where T : IActData<T>
+    public class TextListConfig<T>(string name = "Texts") : IConfigPage
+        where T : IActData<T>
     {
         [JsonIgnore]
         private string _textInput = string.Empty;
-        
+
         [JsonIgnore]
         private int _selectedIndex;
 
@@ -34,19 +35,25 @@ namespace LMeter.Config
 
         public void DrawConfig(Vector2 size, float padX, float padY, bool border = true)
         {
-
             if (ImGui.BeginChild($"##TextListConfig", size, border))
             {
                 ImGui.Text(this.Name);
                 ImGuiTableFlags tableFlags =
-                    ImGuiTableFlags.RowBg |
-                    ImGuiTableFlags.Borders |
-                    ImGuiTableFlags.BordersOuter |
-                    ImGuiTableFlags.BordersInner |
-                    ImGuiTableFlags.ScrollY |
-                    ImGuiTableFlags.NoSavedSettings;
+                    ImGuiTableFlags.RowBg
+                    | ImGuiTableFlags.Borders
+                    | ImGuiTableFlags.BordersOuter
+                    | ImGuiTableFlags.BordersInner
+                    | ImGuiTableFlags.ScrollY
+                    | ImGuiTableFlags.NoSavedSettings;
 
-                if (ImGui.BeginTable($"##TextList_Table", 5, tableFlags, new Vector2(size.X - padX * 2, (size.Y - ImGui.GetCursorPosY() - padY * 2) / 3)))
+                if (
+                    ImGui.BeginTable(
+                        $"##TextList_Table",
+                        5,
+                        tableFlags,
+                        new Vector2(size.X - padX * 2, (size.Y - ImGui.GetCursorPosY() - padY * 2) / 3)
+                    )
+                )
                 {
                     Vector2 buttonSize = new(30, 0);
                     float actionsWidth = buttonSize.X * 3 + ImGui.GetStyle().ItemSpacing.X * 2;
@@ -85,7 +92,14 @@ namespace LMeter.Config
                             string[] anchorOptions = ["Bar", .. this.Texts.Select(x => x.Name)];
                             ImGui.PushItemWidth(anchorComboWidth);
                             ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 1f);
-                            if (ImGui.Combo($"##Text_{i}_AnchorToCombo", ref text.AnchorParent, anchorOptions, anchorOptions.Length))
+                            if (
+                                ImGui.Combo(
+                                    $"##Text_{i}_AnchorToCombo",
+                                    ref text.AnchorParent,
+                                    anchorOptions,
+                                    anchorOptions.Length
+                                )
+                            )
                             {
                                 // Check for circular dependency
                                 int parent = text.AnchorParent;
@@ -106,7 +120,8 @@ namespace LMeter.Config
                                     text.AnchorParent = 0;
                                     DrawHelpers.DrawNotification(
                                         $"Cannot Anchor to {this.Texts[parent - 1].Name}, anchor chain must eventually anchor to Bar.",
-                                        NotificationType.Error);
+                                        NotificationType.Error
+                                    );
                                 }
                             }
 
@@ -117,7 +132,12 @@ namespace LMeter.Config
                         {
                             ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 1f);
                             ImGui.PushItemWidth(anchorComboWidth);
-                            ImGui.Combo($"##Text_{i}_AnchorPointCombo", ref Unsafe.As<DrawAnchor, int>(ref text.AnchorPoint), Utils.AnchorOptions, Utils.AnchorOptions.Length);
+                            ImGui.Combo(
+                                $"##Text_{i}_AnchorPointCombo",
+                                ref Unsafe.As<DrawAnchor, int>(ref text.AnchorPoint),
+                                Utils.AnchorOptions,
+                                Utils.AnchorOptions.Length
+                            );
 
                             ImGui.PopItemWidth();
                         }
@@ -125,13 +145,31 @@ namespace LMeter.Config
                         if (ImGui.TableSetColumnIndex(4))
                         {
                             ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 1f);
-                            DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Pen, () => SelectText(i), "Edit", buttonSize);
+                            DrawHelpers.DrawButton(
+                                string.Empty,
+                                FontAwesomeIcon.Pen,
+                                () => SelectText(i),
+                                "Edit",
+                                buttonSize
+                            );
 
                             ImGui.SameLine();
-                            DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Upload, () => ExportText(text), "Export", buttonSize);
+                            DrawHelpers.DrawButton(
+                                string.Empty,
+                                FontAwesomeIcon.Upload,
+                                () => ExportText(text),
+                                "Export",
+                                buttonSize
+                            );
 
                             ImGui.SameLine();
-                            DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Trash, () => DeleteText(i), "Delete", buttonSize);
+                            DrawHelpers.DrawButton(
+                                string.Empty,
+                                FontAwesomeIcon.Trash,
+                                () => DeleteText(i),
+                                "Delete",
+                                buttonSize
+                            );
                         }
                     }
 
@@ -148,10 +186,22 @@ namespace LMeter.Config
                     if (ImGui.TableSetColumnIndex(4))
                     {
                         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 1f);
-                        DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Plus, () => AddText(_textInput), "Create Text", buttonSize);
+                        DrawHelpers.DrawButton(
+                            string.Empty,
+                            FontAwesomeIcon.Plus,
+                            () => AddText(_textInput),
+                            "Create Text",
+                            buttonSize
+                        );
 
                         ImGui.SameLine();
-                        DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Download, () => ImportText(), "Import Text", buttonSize);
+                        DrawHelpers.DrawButton(
+                            string.Empty,
+                            FontAwesomeIcon.Download,
+                            () => ImportText(),
+                            "Import Text",
+                            buttonSize
+                        );
                     }
 
                     ImGui.EndTable();
@@ -160,7 +210,13 @@ namespace LMeter.Config
                 if (this.Texts.Count != 0)
                 {
                     ImGui.Text($"Edit {this.Texts[_selectedIndex].Name}");
-                    if (ImGui.BeginChild($"##SelectedText_Edit", new(size.X - padX * 2, size.Y - ImGui.GetCursorPosY() - padY * 2), true))
+                    if (
+                        ImGui.BeginChild(
+                            $"##SelectedText_Edit",
+                            new(size.X - padX * 2, size.Y - ImGui.GetCursorPosY() - padY * 2),
+                            true
+                        )
+                    )
                     {
                         this.Texts[_selectedIndex].DrawConfig<T>();
                         ImGui.EndChild();
@@ -232,7 +288,8 @@ namespace LMeter.Config
                 {
                     DrawHelpers.DrawNotification(
                         $"Cannot delete {this.Texts[index].Name} while other texts are anchored to it.",
-                        NotificationType.Error);
+                        NotificationType.Error
+                    );
                     return;
                 }
             }
@@ -307,11 +364,12 @@ namespace LMeter.Config
                 SeparatorColor = this.SeparatorColor,
                 UseBackground = this.UseBackground,
                 BackgroundColor = this.BackgroundColor,
-                EmptyIfZero = this.EmptyIfZero
+                EmptyIfZero = this.EmptyIfZero,
             };
         }
-        
-        public void DrawConfig<T>() where T : IActData<T>
+
+        public void DrawConfig<T>()
+            where T : IActData<T>
         {
             ImGui.InputText("Text Name", ref this.Name, 512);
             ImGui.InputText("Text Format", ref this.TextFormat, 512);
@@ -336,7 +394,12 @@ namespace LMeter.Config
                 DrawHelpers.DrawNestIndicator(1);
                 ImGui.DragFloat("Text Width", ref this.TextWidth, .1f, 0f, 10000f);
                 DrawHelpers.DrawNestIndicator(1);
-                ImGui.Combo("Text Alignment", ref Unsafe.As<DrawAnchor, int>(ref this.TextAlignment), Utils.AnchorOptions, Utils.AnchorOptions.Length);
+                ImGui.Combo(
+                    "Text Alignment",
+                    ref Unsafe.As<DrawAnchor, int>(ref this.TextAlignment),
+                    Utils.AnchorOptions,
+                    Utils.AnchorOptions.Length
+                );
                 DrawHelpers.DrawNestIndicator(1);
                 ImGui.Checkbox("Add ellipsis (...) to truncated text", ref this.UseEllipsis);
             }

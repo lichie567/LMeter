@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Windowing;
-using ImGuiNET;
 using LMeter.Config;
 using LMeter.Helpers;
 using LMeter.Meter;
@@ -14,27 +14,21 @@ namespace LMeter.Windows
     {
         private const float NavBarHeight = 40;
 
+        private bool _firstOpen = true;
         private bool _back = false;
         private bool _home = false;
         private string _name = string.Empty;
         private Vector2 _windowSize;
         private readonly Stack<IConfigurable> _configStack;
 
-        public ConfigWindow(string id, Vector2 position, Vector2 size) : base(id)
+        public ConfigWindow(string id, Vector2 size)
+            : base(id)
         {
             this.Flags =
-                ImGuiWindowFlags.NoScrollbar |
-                ImGuiWindowFlags.NoCollapse |
-                ImGuiWindowFlags.NoScrollWithMouse |
-                ImGuiWindowFlags.NoSavedSettings;
-
-            this.Position = position - size / 2;
-            this.PositionCondition = ImGuiCond.Appearing;
-            this.SizeConstraints = new WindowSizeConstraints()
-            {
-                MinimumSize = new Vector2(size.X, 160),
-                MaximumSize = ImGui.GetMainViewport().Size
-            };
+                ImGuiWindowFlags.NoScrollbar
+                | ImGuiWindowFlags.NoCollapse
+                | ImGuiWindowFlags.NoScrollWithMouse
+                | ImGuiWindowFlags.NoSavedSettings;
 
             _windowSize = size;
             _configStack = new Stack<IConfigurable>();
@@ -51,6 +45,20 @@ namespace LMeter.Windows
         {
             if (_configStack.Count != 0)
             {
+                if (_firstOpen)
+                {
+                    Vector2 viewPort = ImGui.GetMainViewport().Size;
+                    this.PositionCondition = ImGuiCond.Appearing;
+                    this.SizeConstraints = new WindowSizeConstraints()
+                    {
+                        MinimumSize = new Vector2(_windowSize.X, 160),
+                        MaximumSize = ImGui.GetMainViewport().Size,
+                    };
+
+                    this.Position = viewPort / 2f - (_windowSize / 2);
+                    _firstOpen = false;
+                }
+
                 this.WindowName = string.Join("  >  ", _configStack.Reverse().Select(c => c.Name));
                 ImGui.SetNextWindowSize(_windowSize);
             }
@@ -107,7 +115,13 @@ namespace LMeter.Windows
 
             if (ImGui.BeginChild($"##{this.WindowName}_NavBar", new Vector2(size.X, NavBarHeight), true))
             {
-                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.LongArrowAltLeft, () => _back = true, "Back", buttonsize);
+                DrawHelpers.DrawButton(
+                    string.Empty,
+                    FontAwesomeIcon.LongArrowAltLeft,
+                    () => _back = true,
+                    "Back",
+                    buttonsize
+                );
 
                 ImGui.SameLine();
                 if (_configStack.Count > 2)
@@ -124,7 +138,13 @@ namespace LMeter.Windows
                 float offset = size.X - buttonsize.X * 5 - textInputWidth - padX * 7;
                 ImGui.SetCursorPosX(ImGui.GetCursorPosX() + offset);
 
-                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.UndoAlt, () => Reset(openPage), $"Reset {openPage?.Name} to Defaults", buttonsize);
+                DrawHelpers.DrawButton(
+                    string.Empty,
+                    FontAwesomeIcon.UndoAlt,
+                    () => Reset(openPage),
+                    $"Reset {openPage?.Name} to Defaults",
+                    buttonsize
+                );
 
                 ImGui.SameLine();
                 ImGui.PushItemWidth(textInputWidth);
@@ -141,10 +161,22 @@ namespace LMeter.Windows
                 ImGui.PopItemWidth();
 
                 ImGui.SameLine();
-                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Upload, () => Export(openPage), $"Export {openPage?.Name}", buttonsize);
+                DrawHelpers.DrawButton(
+                    string.Empty,
+                    FontAwesomeIcon.Upload,
+                    () => Export(openPage),
+                    $"Export {openPage?.Name}",
+                    buttonsize
+                );
 
                 ImGui.SameLine();
-                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Download, () => Import(), $"Import {openPage?.Name}", buttonsize);
+                DrawHelpers.DrawButton(
+                    string.Empty,
+                    FontAwesomeIcon.Download,
+                    () => Import(),
+                    $"Import {openPage?.Name}",
+                    buttonsize
+                );
             }
 
             ImGui.EndChild();

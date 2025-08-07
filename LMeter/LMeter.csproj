@@ -6,7 +6,6 @@
         <Platforms>x64</Platforms>
         <Configurations>Debug;Release</Configurations>
     </PropertyGroup>
-
     <!-- Assembly Configuration -->
     <PropertyGroup>
         <AssemblyName>LMeter</AssemblyName>
@@ -14,7 +13,6 @@
         <FileVersion>0.4.2.2</FileVersion>
         <InformationalVersion>0.4.2.2</InformationalVersion>
     </PropertyGroup>
-
     <!-- Build Configuration -->
     <PropertyGroup>
         <OutputType>Library</OutputType>
@@ -30,29 +28,24 @@
         <WarningsAsErrors>Nullable</WarningsAsErrors>
         <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
     </PropertyGroup>
-
     <!-- Release Configuration -->
     <PropertyGroup Condition="'$(Configuration)'=='Release'">
         <Deterministic>true</Deterministic>
     </PropertyGroup>
-
     <!-- Dalamud Configuration -->
     <PropertyGroup>
         <DalamudVersion>dev</DalamudVersion>
         <DalamudHome>$(DALAMUD_HOME)/</DalamudHome>
         <DalamudLocal>../dalamud/</DalamudLocal>
     </PropertyGroup>
-
     <!-- Dalamud Configuration (Windows-specific) -->
     <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
         <DalamudLibPath>$(APPDATA)\XIVLauncher\addon\Hooks\$(DalamudVersion)\</DalamudLibPath>
     </PropertyGroup>
-
     <!-- Dalamud Configuration (Linux-specific) -->
     <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Linux'))">
         <DalamudLibPath>$(HOME)/.xlcore/dalamud/Hooks/$(DalamudVersion)/</DalamudLibPath>
     </PropertyGroup>
-
     <!-- Assembly Reference Locations -->
     <PropertyGroup>
         <AssemblySearchPaths>
@@ -62,15 +55,18 @@
             $(DalamudLibPath);
         </AssemblySearchPaths>
     </PropertyGroup>
-
     <!-- Included Content -->
     <ItemGroup>
         <Content Include="LMeter.json" CopyToOutputDirectory="Always" />
         <Content Include="changelog.md" CopyToOutputDirectory="Always" />
         <Content Include="Media\**" CopyToOutputDirectory="PreserveNewest" />
-        <Content Include="Media\Images\icon.png" Link="images/icon.png" CopyToOutputDirectory="PreserveNewest" Visible="false" />
+        <Content
+            Include="Media\Images\icon.png"
+            Link="images/icon.png"
+            CopyToOutputDirectory="PreserveNewest"
+            Visible="false"
+        />
     </ItemGroup>
-
     <!-- Library References -->
     <ItemGroup>
         <Reference Include="Dalamud">
@@ -81,12 +77,8 @@
             <HintPath>$(DalamudLibPath)Newtonsoft.Json.dll</HintPath>
             <Private>false</Private>
         </Reference>
-        <Reference Include="ImGui.NET">
-            <HintPath>$(DalamudLibPath)ImGui.NET.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="ImGuiScene">
-            <HintPath>$(DalamudLibPath)ImGuiScene.dll</HintPath>
+        <Reference Include="Dalamud.Bindings.ImGui">
+            <HintPath>$(DalamudLibPath)Dalamud.Bindings.ImGui.dll</HintPath>
             <Private>false</Private>
         </Reference>
         <Reference Include="Lumina">
@@ -101,19 +93,24 @@
             <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
             <Private>false</Private>
         </Reference>
-		<Reference Include="InteropGenerator.Runtime">
-			<HintPath>$(DalamudLibPath)InteropGenerator.Runtime.dll</HintPath>
-			<Private>false</Private>
-		</Reference>
+        <Reference Include="InteropGenerator.Runtime">
+            <HintPath>$(DalamudLibPath)InteropGenerator.Runtime.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
     </ItemGroup>
-
     <!-- NuGet Packages -->
     <ItemGroup>
-        <PackageReference Include="DalamudPackager" Version="12.0.0" />
+        <PackageReference Include="DalamudPackager" Version="13.0.0" />
     </ItemGroup>
-
     <!-- Dalamud Packager Task-->
     <Target Name="DalamudPackage" AfterTargets="Build">
-        <DalamudPackager ProjectDir="$(ProjectDir)" OutputPath="$(TargetDir)..\$(Configuration)" AssemblyName="$(AssemblyName)" MakeZip="true" Exclude="LMeter.pdb;LMeter.deps.json" VersionComponents="4" />
+        <DalamudPackager
+            ProjectDir="$(ProjectDir)"
+            OutputPath="$(TargetDir)..\$(Configuration)"
+            AssemblyName="$(AssemblyName)"
+            MakeZip="true"
+            Exclude="LMeter.pdb;LMeter.deps.json"
+            VersionComponents="4"
+        />
     </Target>
 </Project>

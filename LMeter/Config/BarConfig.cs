@@ -1,6 +1,6 @@
 using System.Numerics;
 using System.Text.Json.Serialization;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using LMeter.Helpers;
 
 namespace LMeter.Config
@@ -94,7 +94,7 @@ namespace LMeter.Config
                 BarDataFontId = FontsManager.GetFontIndex(FontsManager.DefaultSmallFontKey),
 
                 RankTextFontKey = FontsManager.DefaultSmallFontKey,
-                RankTextFontId = FontsManager.GetFontIndex(FontsManager.DefaultSmallFontKey)
+                RankTextFontId = FontsManager.GetFontIndex(FontsManager.DefaultSmallFontKey),
             };
 
             return defaultConfig;
@@ -124,7 +124,7 @@ namespace LMeter.Config
                 ImGui.DragFloat("Bar Fill Height (% of Bar Height)", ref this.BarFillHeight, .1f, 0, 1f);
                 ImGui.Combo("Bar Fill Direction", ref this.BarFillDirection, ["Up", "Down"], 2);
                 DrawHelpers.DrawColorSelector("Bar Background Color", this.BarBackgroundColor);
-                
+
                 ImGui.NewLine();
                 ImGui.Checkbox("Show Job Icon", ref this.ShowJobIcon);
                 if (this.ShowJobIcon)
@@ -145,7 +145,12 @@ namespace LMeter.Config
                     ImGui.DragFloat2("Job Icon Offset", ref this.JobIconOffset);
 
                     DrawHelpers.DrawNestIndicator(1);
-                    ImGui.Combo("Job Icon Style", ref this.JobIconStyle, _jobIconStyleOptions, _jobIconStyleOptions.Length);
+                    ImGui.Combo(
+                        "Job Icon Style",
+                        ref this.JobIconStyle,
+                        _jobIconStyleOptions,
+                        _jobIconStyleOptions.Length
+                    );
                     DrawHelpers.DrawNestIndicator(1);
                     DrawHelpers.DrawColorSelector("Background Color##JobIcon", this.JobIconBackgroundColor);
                 }
@@ -171,7 +176,11 @@ namespace LMeter.Config
                     if (!this.UseColumnFont)
                     {
                         DrawHelpers.DrawNestIndicator(2);
-                        DrawHelpers.DrawFontSelector("Font##Column", ref this.ColumnHeaderFontKey, ref this.ColumnHeaderFontId);
+                        DrawHelpers.DrawFontSelector(
+                            "Font##Column",
+                            ref this.ColumnHeaderFontKey,
+                            ref this.ColumnHeaderFontId
+                        );
                     }
 
                     DrawHelpers.DrawNestIndicator(1);
@@ -208,7 +217,6 @@ namespace LMeter.Config
                 DrawHelpers.DrawRoundingOptions("Top Bar Rounded Corners", 0, this.TopBarRounding);
                 DrawHelpers.DrawRoundingOptions("Middle Bar Rounded Corners", 0, this.MiddleBarRounding);
                 DrawHelpers.DrawRoundingOptions("Bottom Bar Rounded Corners", 0, this.BottomBarRounding);
-
             }
 
             ImGui.EndChild();

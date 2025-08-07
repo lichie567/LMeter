@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
-using ImGuiNET;
 using LMeter.Act;
 using LMeter.Helpers;
 using Newtonsoft.Json;
@@ -13,12 +13,21 @@ namespace LMeter.Config
 {
     public class VisibilityConfig : IConfigPage
     {
-        [JsonIgnore] public static readonly string[] OperatorOptions = [ "AND", "OR", "XOR" ];
-        [JsonIgnore] public static readonly string[] ResultOptions = [ "Show", "Hide" ];
-        [JsonIgnore] private int _swapX = -1;
-        [JsonIgnore] private int _swapY = -1;
-        [JsonIgnore] private int _selectedIndex = 0;
-        
+        [JsonIgnore]
+        public static readonly string[] OperatorOptions = ["AND", "OR", "XOR"];
+
+        [JsonIgnore]
+        public static readonly string[] ResultOptions = ["Show", "Hide"];
+
+        [JsonIgnore]
+        private int _swapX = -1;
+
+        [JsonIgnore]
+        private int _swapY = -1;
+
+        [JsonIgnore]
+        private int _selectedIndex = 0;
+
         [JsonIgnore]
         public bool Active { get; set; }
 
@@ -34,7 +43,7 @@ namespace LMeter.Config
 
         public VisibilityConfig()
         {
-            this.VisibilityConditions = [ new() ];
+            this.VisibilityConditions = [new()];
         }
 
         public IConfigPage GetDefault() => new VisibilityConfig();
@@ -67,7 +76,7 @@ namespace LMeter.Config
                     BooleanOperator.And => active && currentActive,
                     BooleanOperator.Or => active || currentActive,
                     BooleanOperator.Xor => active ^ currentActive,
-                    _ => false
+                    _ => false,
                 };
             }
 
@@ -93,14 +102,21 @@ namespace LMeter.Config
                 ImGui.Text("Visibility Conditions");
 
                 ImGuiTableFlags tableFlags =
-                    ImGuiTableFlags.RowBg |
-                    ImGuiTableFlags.Borders |
-                    ImGuiTableFlags.BordersOuter |
-                    ImGuiTableFlags.BordersInner |
-                    ImGuiTableFlags.ScrollY |
-                    ImGuiTableFlags.NoSavedSettings;
+                    ImGuiTableFlags.RowBg
+                    | ImGuiTableFlags.Borders
+                    | ImGuiTableFlags.BordersOuter
+                    | ImGuiTableFlags.BordersInner
+                    | ImGuiTableFlags.ScrollY
+                    | ImGuiTableFlags.NoSavedSettings;
 
-                if (ImGui.BeginTable("##VisibilityOptions_Table", 4, tableFlags, new Vector2(size.X - padX * 2, (size.Y - ImGui.GetCursorPosY() - padY * 2) / 4)))
+                if (
+                    ImGui.BeginTable(
+                        "##VisibilityOptions_Table",
+                        4,
+                        tableFlags,
+                        new Vector2(size.X - padX * 2, (size.Y - ImGui.GetCursorPosY() - padY * 2) / 4)
+                    )
+                )
                 {
                     Vector2 buttonSize = new(30, 0);
                     int buttonCount = this.VisibilityConditions.Count > 1 ? 5 : 3;
@@ -122,14 +138,30 @@ namespace LMeter.Config
                     ImGui.PushID(this.VisibilityConditions.Count.ToString());
                     ImGui.TableNextRow(ImGuiTableRowFlags.None, 28);
                     ImGui.TableSetColumnIndex(3);
-                    DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Plus, () => this.AddOption(), "New Condition", buttonSize);
+                    DrawHelpers.DrawButton(
+                        string.Empty,
+                        FontAwesomeIcon.Plus,
+                        () => this.AddOption(),
+                        "New Condition",
+                        buttonSize
+                    );
                     ImGui.SameLine();
-                    DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Download, () => this.ImportOption(), "Import Condition", buttonSize);
+                    DrawHelpers.DrawButton(
+                        string.Empty,
+                        FontAwesomeIcon.Download,
+                        () => this.ImportOption(),
+                        "Import Condition",
+                        buttonSize
+                    );
 
                     ImGui.EndTable();
 
-                    if (_swapX < this.VisibilityConditions.Count && _swapX >= 0 &&
-                        _swapY < this.VisibilityConditions.Count && _swapY >= 0)
+                    if (
+                        _swapX < this.VisibilityConditions.Count
+                        && _swapX >= 0
+                        && _swapY < this.VisibilityConditions.Count
+                        && _swapY >= 0
+                    )
                     {
                         VisibilityCondition temp = this.VisibilityConditions[_swapX];
                         this.VisibilityConditions[_swapX] = this.VisibilityConditions[_swapY];
@@ -148,11 +180,17 @@ namespace LMeter.Config
                 ImGui.PopItemWidth();
 
                 ImGui.Text($"Edit Condition {_selectedIndex + 1}");
-                if (ImGui.BeginChild("##ConditionEdit", new Vector2(size.X - padX * 2, size.Y - ImGui.GetCursorPosY() - padY * 2), true))
+                if (
+                    ImGui.BeginChild(
+                        "##ConditionEdit",
+                        new Vector2(size.X - padX * 2, size.Y - ImGui.GetCursorPosY() - padY * 2),
+                        true
+                    )
+                )
                 {
                     VisibilityCondition selectedOption = this.VisibilityConditions[_selectedIndex];
                     selectedOption.DrawConfig(ImGui.GetWindowSize(), padX, padX);
-                    
+
                     ImGui.EndChild();
                 }
 
@@ -178,7 +216,12 @@ namespace LMeter.Config
                 else
                 {
                     ImGui.PushItemWidth(ImGui.GetColumnWidth());
-                    ImGui.Combo("##CondCombo", ref Unsafe.As<BooleanOperator, int>(ref condition.Operator), OperatorOptions, OperatorOptions.Length);
+                    ImGui.Combo(
+                        "##CondCombo",
+                        ref Unsafe.As<BooleanOperator, int>(ref condition.Operator),
+                        OperatorOptions,
+                        OperatorOptions.Length
+                    );
                     ImGui.PopItemWidth();
                 }
             }
@@ -191,30 +234,64 @@ namespace LMeter.Config
 
             if (ImGui.TableSetColumnIndex(2))
             {
-                ImGui.Text(condition.ConditionType == VisibilityConditionType.Zone ? $"Zone: {condition.Zone}" : $"{condition.ConditionType}");
+                ImGui.Text(
+                    condition.ConditionType == VisibilityConditionType.Zone
+                        ? $"Zone: {condition.Zone}"
+                        : $"{condition.ConditionType}"
+                );
             }
 
             if (ImGui.TableSetColumnIndex(3))
             {
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 1f);
                 Vector2 buttonSize = new(30, 0);
-                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Pen, () => this.SelectOption(i), "Edit Condition", buttonSize);
+                DrawHelpers.DrawButton(
+                    string.Empty,
+                    FontAwesomeIcon.Pen,
+                    () => this.SelectOption(i),
+                    "Edit Condition",
+                    buttonSize
+                );
 
                 if (this.VisibilityConditions.Count > 1)
                 {
                     ImGui.SameLine();
-                    DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.ArrowUp, () => this.Swap(i, i - 1), "Move Up", buttonSize);
+                    DrawHelpers.DrawButton(
+                        string.Empty,
+                        FontAwesomeIcon.ArrowUp,
+                        () => this.Swap(i, i - 1),
+                        "Move Up",
+                        buttonSize
+                    );
 
                     ImGui.SameLine();
-                    DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.ArrowDown, () => this.Swap(i, i + 1), "Move Down", buttonSize);
+                    DrawHelpers.DrawButton(
+                        string.Empty,
+                        FontAwesomeIcon.ArrowDown,
+                        () => this.Swap(i, i + 1),
+                        "Move Down",
+                        buttonSize
+                    );
                 }
 
                 ImGui.SameLine();
-                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Upload, () => this.ExportOption(i), "Export Condition", buttonSize);
+                DrawHelpers.DrawButton(
+                    string.Empty,
+                    FontAwesomeIcon.Upload,
+                    () => this.ExportOption(i),
+                    "Export Condition",
+                    buttonSize
+                );
                 if (this.VisibilityConditions.Count > 1)
                 {
                     ImGui.SameLine();
-                    DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Trash, () => this.RemoveOption(i), "Remove Condition", buttonSize);
+                    DrawHelpers.DrawButton(
+                        string.Empty,
+                        FontAwesomeIcon.Trash,
+                        () => this.RemoveOption(i),
+                        "Remove Condition",
+                        buttonSize
+                    );
                 }
             }
         }
@@ -266,10 +343,11 @@ namespace LMeter.Config
             _swapY = y;
         }
     }
-    
+
     public class VisibilityCondition
     {
-        [JsonIgnore] private string _customJobInput = string.Empty;
+        [JsonIgnore]
+        private string _customJobInput = string.Empty;
 
         public bool Inverted = false;
         public BooleanOperator Operator = BooleanOperator.And;
@@ -281,39 +359,78 @@ namespace LMeter.Config
 
         public ZoneType Zone;
 
-        public bool IsActive() => this.Inverted ^ this.ConditionType switch
-        {
-            VisibilityConditionType.AlwaysTrue => true,
-            VisibilityConditionType.InCombat => CharacterState.IsInCombat(),
-            VisibilityConditionType.InDuty => CharacterState.IsInDuty(),
-            VisibilityConditionType.Performing => CharacterState.IsPerforming(),
-            VisibilityConditionType.Zone => CharacterState.InZone(this.Zone),
-            VisibilityConditionType.Job => CharacterState.IsJobType(CharacterState.GetCharacterJob(), this.ShowForJobTypes, this.CustomJobList),
-            _ => true
-        };
+        public bool IsActive() =>
+            this.Inverted
+            ^ this.ConditionType switch
+            {
+                VisibilityConditionType.AlwaysTrue => true,
+                VisibilityConditionType.InCombat => CharacterState.IsInCombat(),
+                VisibilityConditionType.InDuty => CharacterState.IsInDuty(),
+                VisibilityConditionType.Performing => CharacterState.IsPerforming(),
+                VisibilityConditionType.Zone => CharacterState.InZone(this.Zone),
+                VisibilityConditionType.Job => CharacterState.IsJobType(
+                    CharacterState.GetCharacterJob(),
+                    this.ShowForJobTypes,
+                    this.CustomJobList
+                ),
+                _ => true,
+            };
 
         public void DrawConfig(Vector2 size, float padX, float padY)
         {
-            ImGui.RadioButton("Always True", ref Unsafe.As<VisibilityConditionType, int>(ref this.ConditionType), (int)VisibilityConditionType.AlwaysTrue);
-            ImGui.RadioButton("In Combat", ref Unsafe.As<VisibilityConditionType, int>(ref this.ConditionType), (int)VisibilityConditionType.InCombat);
-            ImGui.RadioButton("In Duty", ref Unsafe.As<VisibilityConditionType, int>(ref this.ConditionType), (int)VisibilityConditionType.InDuty);
-            ImGui.RadioButton("Performing", ref Unsafe.As<VisibilityConditionType, int>(ref this.ConditionType), (int)VisibilityConditionType.Performing);
+            ImGui.RadioButton(
+                "Always True",
+                ref Unsafe.As<VisibilityConditionType, int>(ref this.ConditionType),
+                (int)VisibilityConditionType.AlwaysTrue
+            );
+            ImGui.RadioButton(
+                "In Combat",
+                ref Unsafe.As<VisibilityConditionType, int>(ref this.ConditionType),
+                (int)VisibilityConditionType.InCombat
+            );
+            ImGui.RadioButton(
+                "In Duty",
+                ref Unsafe.As<VisibilityConditionType, int>(ref this.ConditionType),
+                (int)VisibilityConditionType.InDuty
+            );
+            ImGui.RadioButton(
+                "Performing",
+                ref Unsafe.As<VisibilityConditionType, int>(ref this.ConditionType),
+                (int)VisibilityConditionType.Performing
+            );
 
-            ImGui.RadioButton("In Zone", ref Unsafe.As<VisibilityConditionType, int>(ref this.ConditionType), (int)VisibilityConditionType.Zone);
+            ImGui.RadioButton(
+                "In Zone",
+                ref Unsafe.As<VisibilityConditionType, int>(ref this.ConditionType),
+                (int)VisibilityConditionType.Zone
+            );
             if (this.ConditionType == VisibilityConditionType.Zone)
             {
                 DrawHelpers.DrawNestIndicator(1);
                 ImGui.RadioButton("Gold Saucer", ref Unsafe.As<ZoneType, int>(ref this.Zone), (int)ZoneType.GoldSaucer);
                 DrawHelpers.DrawNestIndicator(1);
-                ImGui.RadioButton("Player House", ref Unsafe.As<ZoneType, int>(ref this.Zone), (int)ZoneType.PlayerHouse);
+                ImGui.RadioButton(
+                    "Player House",
+                    ref Unsafe.As<ZoneType, int>(ref this.Zone),
+                    (int)ZoneType.PlayerHouse
+                );
             }
 
-            ImGui.RadioButton("Job", ref Unsafe.As<VisibilityConditionType, int>(ref this.ConditionType), (int)VisibilityConditionType.Job);
+            ImGui.RadioButton(
+                "Job",
+                ref Unsafe.As<VisibilityConditionType, int>(ref this.ConditionType),
+                (int)VisibilityConditionType.Job
+            );
             if (this.ConditionType == VisibilityConditionType.Job)
             {
                 DrawHelpers.DrawNestIndicator(1);
                 string[] jobTypeOptions = Enum.GetNames<JobType>();
-                ImGui.Combo("Job Select", ref Unsafe.As<JobType, int>(ref this.ShowForJobTypes), jobTypeOptions, jobTypeOptions.Length);
+                ImGui.Combo(
+                    "Job Select",
+                    ref Unsafe.As<JobType, int>(ref this.ShowForJobTypes),
+                    jobTypeOptions,
+                    jobTypeOptions.Length
+                );
 
                 if (this.ShowForJobTypes == JobType.Custom)
                 {
@@ -323,7 +440,15 @@ namespace LMeter.Config
                     }
 
                     DrawHelpers.DrawNestIndicator(1);
-                    if (ImGui.InputTextWithHint("Custom Job List", "Comma Separated List (ex: WAR, SAM, BLM)", ref _customJobInput, 100, ImGuiInputTextFlags.EnterReturnsTrue))
+                    if (
+                        ImGui.InputTextWithHint(
+                            "Custom Job List",
+                            "Comma Separated List (ex: WAR, SAM, BLM)",
+                            ref _customJobInput,
+                            100,
+                            ImGuiInputTextFlags.EnterReturnsTrue
+                        )
+                    )
                     {
                         IEnumerable<string> jobStrings = _customJobInput.Split(',').Select(j => j.Trim());
                         List<Job> jobList = [];

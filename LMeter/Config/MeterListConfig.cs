@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.ImGuiNotification;
-using ImGuiNET;
 using LMeter.Helpers;
 using LMeter.Meter;
 using Newtonsoft.Json;
@@ -18,14 +18,14 @@ namespace LMeter.Config
 
         [JsonIgnore]
         private MeterDataType _meterDataType = MeterDataType.Damage;
-        
+
         private const float MenuBarHeight = 40;
 
         [JsonIgnore]
         public bool Active { get; set; }
 
         public string Name => "Profiles";
-        
+
         public List<MeterWindow> Meters { get; set; }
 
         public MeterListConfig()
@@ -89,10 +89,22 @@ namespace LMeter.Config
                 ImGui.PopItemWidth();
 
                 ImGui.SameLine();
-                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Plus, () => CreateMeter(_input, _meterDataType), "Create new Meter", buttonSize);
+                DrawHelpers.DrawButton(
+                    string.Empty,
+                    FontAwesomeIcon.Plus,
+                    () => CreateMeter(_input, _meterDataType),
+                    "Create new Meter",
+                    buttonSize
+                );
 
                 ImGui.SameLine();
-                DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Download, () => ImportMeter(_input), "Import new Meter", buttonSize);
+                DrawHelpers.DrawButton(
+                    string.Empty,
+                    FontAwesomeIcon.Download,
+                    () => ImportMeter(_input),
+                    "Import new Meter",
+                    buttonSize
+                );
                 ImGui.PopItemWidth();
             }
 
@@ -102,12 +114,12 @@ namespace LMeter.Config
         private void DrawMeterTable(Vector2 size, float padX)
         {
             ImGuiTableFlags flags =
-                ImGuiTableFlags.RowBg |
-                ImGuiTableFlags.Borders |
-                ImGuiTableFlags.BordersOuter |
-                ImGuiTableFlags.BordersInner |
-                ImGuiTableFlags.ScrollY |
-                ImGuiTableFlags.NoSavedSettings;
+                ImGuiTableFlags.RowBg
+                | ImGuiTableFlags.Borders
+                | ImGuiTableFlags.BordersOuter
+                | ImGuiTableFlags.BordersInner
+                | ImGuiTableFlags.ScrollY
+                | ImGuiTableFlags.NoSavedSettings;
 
             if (ImGui.BeginTable("##Meter_Table", 3, flags, new Vector2(size.X, size.Y - MenuBarHeight)))
             {
@@ -125,8 +137,10 @@ namespace LMeter.Config
                 {
                     MeterWindow meter = this.Meters[i];
 
-                    if (!string.IsNullOrEmpty(_input) &&
-                        !meter.Name.Contains(_input, StringComparison.OrdinalIgnoreCase))
+                    if (
+                        !string.IsNullOrEmpty(_input)
+                        && !meter.Name.Contains(_input, StringComparison.OrdinalIgnoreCase)
+                    )
                     {
                         continue;
                     }
@@ -149,13 +163,31 @@ namespace LMeter.Config
                     if (ImGui.TableSetColumnIndex(2))
                     {
                         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 1f);
-                        DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Pen, () => EditMeter(meter), "Edit", buttonsize);
+                        DrawHelpers.DrawButton(
+                            string.Empty,
+                            FontAwesomeIcon.Pen,
+                            () => EditMeter(meter),
+                            "Edit",
+                            buttonsize
+                        );
 
                         ImGui.SameLine();
-                        DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Upload, () => ExportMeter(meter), "Export", buttonsize);
+                        DrawHelpers.DrawButton(
+                            string.Empty,
+                            FontAwesomeIcon.Upload,
+                            () => ExportMeter(meter),
+                            "Export",
+                            buttonsize
+                        );
 
                         ImGui.SameLine();
-                        DrawHelpers.DrawButton(string.Empty, FontAwesomeIcon.Trash, () => DeleteMeter(meter), "Delete", buttonsize);
+                        DrawHelpers.DrawButton(
+                            string.Empty,
+                            FontAwesomeIcon.Trash,
+                            () => DeleteMeter(meter),
+                            "Delete",
+                            buttonsize
+                        );
                     }
                 }
 

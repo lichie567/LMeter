@@ -10,14 +10,14 @@ namespace LMeter.Helpers
         TopLeft,
         Bottom,
         BottomRight,
-        BottomLeft
+        BottomLeft,
     }
 
     public enum BooleanOperator
     {
         And,
         Or,
-        Xor
+        Xor,
     }
 
     public enum VisibilityConditionType
@@ -27,15 +27,15 @@ namespace LMeter.Helpers
         InDuty,
         Performing,
         Zone,
-        Job
+        Job,
     }
 
     public enum ZoneType
     {
         GoldSaucer,
-        PlayerHouse
+        PlayerHouse,
     }
-    
+
     public enum MeterDataType
     {
         Damage,
@@ -45,7 +45,7 @@ namespace LMeter.Helpers
         Adps,
         Ndps,
         Cdps,
-        RawDps
+        RawDps,
     }
 
     public enum ConnectionStatus
@@ -54,7 +54,7 @@ namespace LMeter.Helpers
         Connected,
         ShuttingDown,
         Connecting,
-        ConnectionFailed
+        ConnectionFailed,
     }
 
     public enum Job
@@ -108,7 +108,7 @@ namespace LMeter.Helpers
 
         MIN = 16,
         BOT = 17,
-        FSH = 18
+        FSH = 18,
     }
 
     public enum JobType
@@ -125,7 +125,7 @@ namespace LMeter.Helpers
         Combat,
         Crafters,
         DoH,
-        DoL
+        DoL,
     }
 
     public enum DrawAnchor
@@ -138,6 +138,6 @@ namespace LMeter.Helpers
         TopRight = 5,
         Bottom = 6,
         BottomLeft = 7,
-        BottomRight = 8
+        BottomRight = 8,
     }
 }

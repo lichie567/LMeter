@@ -8,7 +8,7 @@ namespace LMeter.Act.DataStructures
 
         static abstract string[] TextTags { get; }
         static abstract T GetTestData();
-        
+
         string GetFormattedString(string format, string numberFormat, bool emptyIfZero);
     }
 }

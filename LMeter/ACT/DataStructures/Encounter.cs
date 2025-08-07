@@ -9,11 +9,17 @@ namespace LMeter.Act.DataStructures;
 public class Encounter : IActData<Encounter>
 {
     [JsonIgnore]
-    public static string[] TextTags { get; } = 
-        typeof(Encounter).GetMembers().Where(x => Attribute.IsDefined(x, typeof(TextTagAttribute))).Select(x => $"[{x.Name.ToLower()}]").ToArray();
+    public static string[] TextTags { get; } =
+        typeof(Encounter)
+            .GetMembers()
+            .Where(x => Attribute.IsDefined(x, typeof(TextTagAttribute)))
+            .Select(x => $"[{x.Name.ToLower()}]")
+            .ToArray();
 
-    private static readonly Dictionary<string, MemberInfo> _textTagMembers = 
-        typeof(Encounter).GetMembers().Where(x => Attribute.IsDefined(x, typeof(TextTagAttribute))).ToDictionary((x) => x.Name.ToLower());
+    private static readonly Dictionary<string, MemberInfo> _textTagMembers = typeof(Encounter)
+        .GetMembers()
+        .Where(x => Attribute.IsDefined(x, typeof(TextTagAttribute)))
+        .ToDictionary((x) => x.Name.ToLower());
 
     [TextTag]
     [JsonProperty("title")]
@@ -64,10 +70,13 @@ public class Encounter : IActData<Encounter>
     {
         this.Duration = new LazyString<string?>(() => this.DurationRaw, LazyStringConverters.Duration);
     }
-    
+
     public string GetFormattedString(string format, string numberFormat, bool emptyIfZero)
     {
-        return TextTagFormatter.TextTagRegex.Replace(format, new TextTagFormatter(this, numberFormat, emptyIfZero, _textTagMembers).Evaluate);
+        return TextTagFormatter.TextTagRegex.Replace(
+            format,
+            new TextTagFormatter(this, numberFormat, emptyIfZero, _textTagMembers).Evaluate
+        );
     }
 
     public static Encounter GetTestData()
@@ -83,7 +92,7 @@ public class Encounter : IActData<Encounter>
             Hps = new LazyFloat(healing / 30),
             Deaths = "0",
             DamageTotal = new LazyFloat(damage),
-            HealingTotal = new LazyFloat(healing)
+            HealingTotal = new LazyFloat(healing),
         };
     }
 }

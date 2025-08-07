@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.ImGuiNotification;
 using Dalamud.Plugin.Services;
-using ImGuiNET;
 using LMeter.Config;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -15,13 +15,13 @@ namespace LMeter.Helpers
     public static class ConfigHelpers
     {
         private static readonly ISerializationBinder _serializationBinder = new LMeterSerializationBinder();
-        
+
         private static readonly JsonSerializerSettings _serializerSettings = new()
         {
             TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
             TypeNameHandling = TypeNameHandling.Objects,
             ObjectCreationHandling = ObjectCreationHandling.Replace,
-            SerializationBinder = _serializationBinder
+            SerializationBinder = _serializationBinder,
         };
 
         public static void ExportToClipboard<T>(T toExport)
@@ -67,7 +67,8 @@ namespace LMeter.Helpers
 
         public static T? GetFromImportString<T>(string importString)
         {
-            if (string.IsNullOrEmpty(importString)) return default;
+            if (string.IsNullOrEmpty(importString))
+                return default;
 
             try
             {
@@ -158,14 +159,11 @@ namespace LMeter.Helpers
     /// </summary>
     public class LMeterSerializationBinder : ISerializationBinder
     {
-        private static readonly List<Type> _configTypes =
-        [
-            typeof(ActConfig)
-        ];
+        private static readonly List<Type> _configTypes = [typeof(ActConfig)];
 
         private static readonly Dictionary<string, string> _typeNameConversions = new()
         {
-            { "VisibilityConfig2", "VisibilityConfig" }
+            { "VisibilityConfig2", "VisibilityConfig" },
         };
 
         private readonly Dictionary<Type, string> _typeToName = [];
@@ -221,8 +219,8 @@ namespace LMeter.Helpers
                 }
             }
 
-            return Type.GetType($"{typeName}, {assemblyName}", true) ??
-                throw new TypeLoadException($"Unable to load type '{typeName}' from assembly '{assemblyName}'");
+            return Type.GetType($"{typeName}, {assemblyName}", true)
+                ?? throw new TypeLoadException($"Unable to load type '{typeName}' from assembly '{assemblyName}'");
         }
     }
 }
