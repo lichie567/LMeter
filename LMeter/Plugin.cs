@@ -96,7 +96,7 @@ namespace LMeter
             LogClient actClient = config.ActConfig.ClientType switch
             {
                 1 => new IpcClient(config.ActConfig),
-                _ => new WebSocketClient(config.ActConfig)
+                _ => new WebSocketClient(config.ActConfig),
             };
 
             actClient.Start();
@@ -111,7 +111,7 @@ namespace LMeter
                 hps.Enabled = false;
                 config.MeterList.Meters.Add(hps);
             }
-            
+
             config.FirstLoad = false;
 
             // Start the plugin
@@ -135,7 +135,6 @@ namespace LMeter
             try
             {
                 texture = textureProvider.GetFromFile(iconPath).GetWrapOrDefault();
-                
             }
             catch (Exception ex)
             {

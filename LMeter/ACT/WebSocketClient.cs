@@ -43,10 +43,11 @@ namespace LMeter.Act
                 await _socket.ConnectAsync(new Uri(host), _cancellationTokenSource.Token);
 
                 await _socket.SendAsync(
-                        Encoding.UTF8.GetBytes(SubscriptionMessage),
-                        WebSocketMessageType.Text,
-                        endOfMessage: true,
-                        _cancellationTokenSource.Token);
+                    Encoding.UTF8.GetBytes(SubscriptionMessage),
+                    WebSocketMessageType.Text,
+                    endOfMessage: true,
+                    _cancellationTokenSource.Token
+                );
             }
             catch (Exception ex)
             {
@@ -76,8 +77,7 @@ namespace LMeter.Act
                         {
                             result = await _socket.ReceiveAsync(buffer, _cancellationTokenSource.Token);
                             ms.Write(buffer.Array, buffer.Offset, result.Count);
-                        }
-                        while (!result.EndOfMessage);
+                        } while (!result.EndOfMessage);
 
                         if (result.MessageType == WebSocketMessageType.Close)
                         {
@@ -98,8 +98,7 @@ namespace LMeter.Act
                             }
                         }
                     }
-                }
-                while (this.Status == ConnectionStatus.Connected);
+                } while (this.Status == ConnectionStatus.Connected);
             }
             catch
             {
@@ -117,15 +116,15 @@ namespace LMeter.Act
         public override void Shutdown()
         {
             this.Status = ConnectionStatus.ShuttingDown;
-            if (_socket.State == WebSocketState.Open ||
-                _socket.State == WebSocketState.Connecting)
+            if (_socket.State == WebSocketState.Open || _socket.State == WebSocketState.Connecting)
             {
                 try
                 {
                     // Close the websocket
-                    _socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None)
-                               .GetAwaiter()
-                               .GetResult();
+                    _socket
+                        .CloseOutputAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None)
+                        .GetAwaiter()
+                        .GetResult();
                 }
                 catch
                 {

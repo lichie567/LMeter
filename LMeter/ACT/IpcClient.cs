@@ -19,9 +19,12 @@ namespace LMeter.Act
 
         private readonly ICallGateProvider<JObject, bool> _subscriptionReceiver;
 
-        public IpcClient(ActConfig config) : base(config)
+        public IpcClient(ActConfig config)
+            : base(config)
         {
-            _subscriptionReceiver = Singletons.Get<IDalamudPluginInterface>().GetIpcProvider<JObject, bool>(LMeterSubscriptionIpcEndpoint);
+            _subscriptionReceiver = Singletons
+                .Get<IDalamudPluginInterface>()
+                .GetIpcProvider<JObject, bool>(LMeterSubscriptionIpcEndpoint);
             _subscriptionReceiver.RegisterFunc(ReceiveIpcMessage);
         }
 
@@ -46,8 +49,10 @@ namespace LMeter.Act
             try
             {
                 this.Status = ConnectionStatus.Connecting;
-                bool result = Singletons.Get<IDalamudPluginInterface>()
-                    .GetIpcSubscriber<bool>(IinactListeningIpcEndpoint).InvokeFunc();
+                bool result = Singletons
+                    .Get<IDalamudPluginInterface>()
+                    .GetIpcSubscriber<bool>(IinactListeningIpcEndpoint)
+                    .InvokeFunc();
 
                 Singletons.Get<IPluginLog>().Info("Check if IINACT installed and running: " + result);
                 if (!result)
@@ -66,7 +71,8 @@ namespace LMeter.Act
             Singletons.Get<IPluginLog>().Info("Successfully discovered IINACT IPC endpoint");
             try
             {
-                bool result = Singletons.Get<IDalamudPluginInterface>()
+                bool result = Singletons
+                    .Get<IDalamudPluginInterface>()
                     .GetIpcSubscriber<string, bool>(IinactSubscribeIpcEndpoint)
                     .InvokeFunc(LMeterSubscriptionIpcEndpoint);
 
@@ -85,7 +91,8 @@ namespace LMeter.Act
 
             try
             {
-                Singletons.Get<IDalamudPluginInterface>()
+                Singletons
+                    .Get<IDalamudPluginInterface>()
                     .GetIpcSubscriber<JObject, bool>(IinactProviderEditEndpoint)
                     .InvokeAction(SubscriptionMessageObject);
 
@@ -126,15 +133,16 @@ namespace LMeter.Act
 
             try
             {
-                bool result = Singletons.Get<IDalamudPluginInterface>()
+                bool result = Singletons
+                    .Get<IDalamudPluginInterface>()
                     .GetIpcSubscriber<string, bool>(IinactUnsubscribeIpcEndpoint)
                     .InvokeFunc(LMeterSubscriptionIpcEndpoint);
 
-                Singletons.Get<IPluginLog>().Info(
-                    result
-                        ? "Successfully unsubscribed from IINACT IPC"
-                        : "Failed to unsubscribe from IINACT IPC"
-                );
+                Singletons
+                    .Get<IPluginLog>()
+                    .Info(
+                        result ? "Successfully unsubscribed from IINACT IPC" : "Failed to unsubscribe from IINACT IPC"
+                    );
             }
             catch (Exception)
             {

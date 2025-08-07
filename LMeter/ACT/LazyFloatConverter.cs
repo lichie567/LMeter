@@ -19,7 +19,12 @@ namespace LMeter.Act
             throw new NotImplementedException("Write not supported.");
         }
 
-        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
+        public override object? ReadJson(
+            JsonReader reader,
+            Type objectType,
+            object? existingValue,
+            JsonSerializer serializer
+        )
         {
             if (objectType != typeof(LazyFloat))
             {
@@ -30,7 +35,7 @@ namespace LMeter.Act
             {
                 JsonToken.Float or JsonToken.Integer => new LazyFloat(serializer.Deserialize<float>(reader)),
                 JsonToken.String => new LazyFloat(serializer.Deserialize<string?>(reader)),
-                _ => new LazyFloat(0f)
+                _ => new LazyFloat(0f),
             };
         }
     }

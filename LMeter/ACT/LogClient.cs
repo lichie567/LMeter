@@ -51,13 +51,14 @@ namespace LMeter.Act
 
         private void HandleNewEvent(ActEvent? newEvent)
         {
-            if (newEvent?.Encounter is not null &&
-                newEvent?.Combatants is not null &&
-                newEvent.Combatants.Count != 0 &&
-                !newEvent.Equals(_lastEvent))
+            if (
+                newEvent?.Encounter is not null
+                && newEvent?.Combatants is not null
+                && newEvent.Combatants.Count != 0
+                && !newEvent.Equals(_lastEvent)
+            )
             {
-                if (!newEvent.IsEncounterActive() &&
-                    !newEvent.Equals(this.PastEvents.LastOrDefault()))
+                if (!newEvent.IsEncounterActive() && !newEvent.Equals(this.PastEvents.LastOrDefault()))
                 {
                     this.PastEvents.Add(newEvent);
                     while (this.PastEvents.Count > Config.EncounterHistorySize)
@@ -74,11 +75,7 @@ namespace LMeter.Act
         public virtual void EndEncounter()
         {
             IChatGui chat = Singletons.Get<IChatGui>();
-            XivChatEntry message = new()
-            {
-                Message = "end",
-                Type = XivChatType.Echo
-            };
+            XivChatEntry message = new() { Message = "end", Type = XivChatType.Echo };
 
             chat.Print(message);
         }
@@ -90,11 +87,7 @@ namespace LMeter.Act
             if (Config.ClearAct)
             {
                 IChatGui chat = Singletons.Get<IChatGui>();
-                XivChatEntry message = new()
-                {
-                    Message = "clear",
-                    Type = XivChatType.Echo
-                };
+                XivChatEntry message = new() { Message = "clear", Type = XivChatType.Echo };
 
                 chat.Print(message);
             }

@@ -2,10 +2,11 @@
 <Project>
     <Target Name="PackagePlugin" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
         <DalamudPackager
-                ProjectDir="$(ProjectDir)"
-                OutputPath="$(OutputPath)"
-                AssemblyName="$(AssemblyName)"
-                MakeZip="true"
-                Include="LMeterPlugin.dll;"/>
+            ProjectDir="$(ProjectDir)"
+            OutputPath="$(OutputPath)"
+            AssemblyName="$(AssemblyName)"
+            MakeZip="true"
+            Include="LMeterPlugin.dll;"
+        />
     </Target>
 </Project>

@@ -9,7 +9,7 @@ namespace LMeter.Config
     {
         [JsonIgnore]
         public bool Active { get; set; }
-        
+
         public string Name => "Colors";
 
         public IConfigPage GetDefault() => new BarColorsConfig();
@@ -52,45 +52,46 @@ namespace LMeter.Config
 
         public ConfigColor UKNColor = new(218f / 255f, 157f / 255f, 46f / 255f, 1f);
 
-        public ConfigColor GetColor(Job job) => job switch
-        {
-            Job.GLA => this.GLAColor,
-            Job.MRD => this.MRDColor,
-            Job.PLD => this.PLDColor,
-            Job.WAR => this.WARColor,
-            Job.DRK => this.DRKColor,
-            Job.GNB => this.GNBColor,
+        public ConfigColor GetColor(Job job) =>
+            job switch
+            {
+                Job.GLA => this.GLAColor,
+                Job.MRD => this.MRDColor,
+                Job.PLD => this.PLDColor,
+                Job.WAR => this.WARColor,
+                Job.DRK => this.DRKColor,
+                Job.GNB => this.GNBColor,
 
-            Job.CNJ => this.CNJColor,
-            Job.WHM => this.WHMColor,
-            Job.SCH => this.SCHColor,
-            Job.AST => this.ASTColor,
-            Job.SGE => this.SGEColor,
+                Job.CNJ => this.CNJColor,
+                Job.WHM => this.WHMColor,
+                Job.SCH => this.SCHColor,
+                Job.AST => this.ASTColor,
+                Job.SGE => this.SGEColor,
 
-            Job.PGL => this.PGLColor,
-            Job.LNC => this.LNCColor,
-            Job.ROG => this.ROGColor,
-            Job.MNK => this.MNKColor,
-            Job.DRG => this.DRGColor,
-            Job.NIN => this.NINColor,
-            Job.SAM => this.SAMColor,
-            Job.RPR => this.RPRColor,
-            Job.VPR => this.VPRColor,
+                Job.PGL => this.PGLColor,
+                Job.LNC => this.LNCColor,
+                Job.ROG => this.ROGColor,
+                Job.MNK => this.MNKColor,
+                Job.DRG => this.DRGColor,
+                Job.NIN => this.NINColor,
+                Job.SAM => this.SAMColor,
+                Job.RPR => this.RPRColor,
+                Job.VPR => this.VPRColor,
 
-            Job.ARC => this.ARCColor,
-            Job.BRD => this.BRDColor,
-            Job.MCH => this.MCHColor,
-            Job.DNC => this.DNCColor,
+                Job.ARC => this.ARCColor,
+                Job.BRD => this.BRDColor,
+                Job.MCH => this.MCHColor,
+                Job.DNC => this.DNCColor,
 
-            Job.THM => this.THMColor,
-            Job.ACN => this.ACNColor,
-            Job.BLM => this.BLMColor,
-            Job.SMN => this.SMNColor,
-            Job.RDM => this.RDMColor,
-            Job.PCT => this.PCTColor,
-            Job.BLU => this.BLUColor,
-            _       => this.UKNColor
-        };
+                Job.THM => this.THMColor,
+                Job.ACN => this.ACNColor,
+                Job.BLM => this.BLMColor,
+                Job.SMN => this.SMNColor,
+                Job.RDM => this.RDMColor,
+                Job.PCT => this.PCTColor,
+                Job.BLU => this.BLUColor,
+                _ => this.UKNColor,
+            };
 
         public void DrawConfig(Vector2 size, float padX, float padY, bool border = true)
         {

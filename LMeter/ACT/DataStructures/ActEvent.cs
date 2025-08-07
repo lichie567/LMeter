@@ -10,11 +10,17 @@ namespace LMeter.Act.DataStructures
     public class ActEvent : IActData<ActEvent>
     {
         [JsonIgnore]
-        public static string[] TextTags { get; } = 
-            typeof(ActEvent).GetMembers().Where(x => Attribute.IsDefined(x, typeof(TextTagAttribute))).Select(x => $"[{x.Name.ToLower()}]").ToArray();
+        public static string[] TextTags { get; } =
+            typeof(ActEvent)
+                .GetMembers()
+                .Where(x => Attribute.IsDefined(x, typeof(TextTagAttribute)))
+                .Select(x => $"[{x.Name.ToLower()}]")
+                .ToArray();
 
-        private static readonly Dictionary<string, MemberInfo> _textTagMembers = 
-            typeof(ActEvent).GetMembers().Where(x => Attribute.IsDefined(x, typeof(TextTagAttribute))).ToDictionary((x) => x.Name.ToLower());
+        private static readonly Dictionary<string, MemberInfo> _textTagMembers = typeof(ActEvent)
+            .GetMembers()
+            .Where(x => Attribute.IsDefined(x, typeof(TextTagAttribute)))
+            .ToDictionary((x) => x.Name.ToLower());
 
         private bool _parsedActive;
         private bool _active;
@@ -32,10 +38,13 @@ namespace LMeter.Act.DataStructures
 
         [JsonProperty("Combatant")]
         public Dictionary<string, Combatant>? Combatants { get; set; }
-        
+
         public string GetFormattedString(string format, string numberFormat, bool emptyIfZero)
         {
-            return TextTagFormatter.TextTagRegex.Replace(format, new TextTagFormatter(this, numberFormat, emptyIfZero, _textTagMembers).Evaluate);
+            return TextTagFormatter.TextTagRegex.Replace(
+                format,
+                new TextTagFormatter(this, numberFormat, emptyIfZero, _textTagMembers).Evaluate
+            );
         }
 
         public bool IsEncounterActive()
@@ -56,20 +65,26 @@ namespace LMeter.Act.DataStructures
                 return false;
             }
 
-            if (this.Encounter is null ^ actEvent.Encounter is null ||
-                this.Combatants is null ^ actEvent.Combatants is null)
+            if (
+                this.Encounter is null ^ actEvent.Encounter is null
+                || this.Combatants is null ^ actEvent.Combatants is null
+            )
             {
                 return false;
             }
 
-            if (this.Encounter is not null && actEvent.Encounter is not null &&
-                this.Combatants is not null && actEvent.Combatants is not null)
+            if (
+                this.Encounter is not null
+                && actEvent.Encounter is not null
+                && this.Combatants is not null
+                && actEvent.Combatants is not null
+            )
             {
-                return this.Encounter.DurationRaw.Equals(actEvent.Encounter.DurationRaw) &&
-                       this.Encounter.Title.Equals(actEvent.Encounter.Title) &&
-                       (this.Encounter.DamageTotal?.Value ?? 0f) == (actEvent.Encounter.DamageTotal?.Value ?? 0f) &&
-                       this.IsEncounterActive() == actEvent.IsEncounterActive() &&
-                       this.Combatants.Count == actEvent.Combatants.Count;
+                return this.Encounter.DurationRaw.Equals(actEvent.Encounter.DurationRaw)
+                    && this.Encounter.Title.Equals(actEvent.Encounter.Title)
+                    && (this.Encounter.DamageTotal?.Value ?? 0f) == (actEvent.Encounter.DamageTotal?.Value ?? 0f)
+                    && this.IsEncounterActive() == actEvent.IsEncounterActive()
+                    && this.Combatants.Count == actEvent.Combatants.Count;
             }
 
             return true;
@@ -90,14 +105,10 @@ namespace LMeter.Act.DataStructures
                 { "9", GetCombatant("SAM", "DRG", "MNK", "NIN", "RPR", "VPR") },
                 { "10", GetCombatant("SAM", "DRG", "MNK", "NIN", "RPR", "VPR") },
                 { "11", GetCombatant("BLM", "SMN", "RDM", "PCT") },
-                { "12", GetCombatant("DNC", "MCH", "BRD") }
+                { "12", GetCombatant("DNC", "MCH", "BRD") },
             };
 
-            return new()
-            {
-                Encounter = Encounter.GetTestData(),
-                Combatants = mockCombatants
-            };
+            return new() { Encounter = Encounter.GetTestData(), Combatants = mockCombatants };
         }
 
         private static Combatant GetCombatant(params string[] jobs)

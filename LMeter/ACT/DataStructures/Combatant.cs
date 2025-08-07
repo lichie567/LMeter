@@ -10,11 +10,17 @@ namespace LMeter.Act.DataStructures;
 public class Combatant : IActData<Combatant>
 {
     [JsonIgnore]
-    public static string[] TextTags { get; } = 
-        typeof(Combatant).GetMembers().Where(x => Attribute.IsDefined(x, typeof(TextTagAttribute))).Select(x => $"[{x.Name.ToLower()}]").ToArray();
+    public static string[] TextTags { get; } =
+        typeof(Combatant)
+            .GetMembers()
+            .Where(x => Attribute.IsDefined(x, typeof(TextTagAttribute)))
+            .Select(x => $"[{x.Name.ToLower()}]")
+            .ToArray();
 
-    private static readonly Dictionary<string, MemberInfo> _textTagMembers = 
-        typeof(Combatant).GetMembers().Where(x => Attribute.IsDefined(x, typeof(TextTagAttribute))).ToDictionary((x) => x.Name.ToLower());
+    private static readonly Dictionary<string, MemberInfo> _textTagMembers = typeof(Combatant)
+        .GetMembers()
+        .Where(x => Attribute.IsDefined(x, typeof(TextTagAttribute)))
+        .ToDictionary((x) => x.Name.ToLower());
 
     [JsonProperty("name")]
     public string OriginalName { get; set; } = string.Empty;
@@ -70,12 +76,14 @@ public class Combatant : IActData<Combatant>
     [TextTag]
     [JsonIgnore]
     public LazyFloat CritHitPct { get; set; }
+
     [TextTag]
     [JsonIgnore]
-    public LazyFloat DirectHitPct  { get; set; }
+    public LazyFloat DirectHitPct { get; set; }
+
     [TextTag]
     [JsonIgnore]
-    public LazyFloat CritDirectHitPct   { get; set; }
+    public LazyFloat CritDirectHitPct { get; set; }
 
     // [TextTag]
     [JsonProperty("crithit%")]
@@ -104,7 +112,7 @@ public class Combatant : IActData<Combatant>
 
     [TextTag]
     [JsonProperty("healed%")]
-    public string HealingPct { get; set; }= string.Empty;
+    public string HealingPct { get; set; } = string.Empty;
 
     [TextTag]
     [JsonProperty("overHeal")]
@@ -113,7 +121,7 @@ public class Combatant : IActData<Combatant>
 
     [TextTag]
     [JsonProperty("OverHealPct")]
-    public string OverHealPct { get; set; }= string.Empty;
+    public string OverHealPct { get; set; } = string.Empty;
 
     [TextTag]
     [JsonProperty("damagetaken")]
@@ -122,11 +130,11 @@ public class Combatant : IActData<Combatant>
 
     [TextTag]
     [JsonProperty("deaths")]
-    public string Deaths { get; set; }= string.Empty;
+    public string Deaths { get; set; } = string.Empty;
 
     [TextTag]
     [JsonProperty("kills")]
-    public string Kills { get; set; }= string.Empty;
+    public string Kills { get; set; } = string.Empty;
 
     [TextTag]
     [JsonProperty("maxhit")]
@@ -173,20 +181,23 @@ public class Combatant : IActData<Combatant>
 
     public string GetFormattedString(string format, string numberFormat, bool emptyIfZero)
     {
-        return TextTagFormatter.TextTagRegex.Replace(format, new TextTagFormatter(this, numberFormat, emptyIfZero, _textTagMembers).Evaluate);
+        return TextTagFormatter.TextTagRegex.Replace(
+            format,
+            new TextTagFormatter(this, numberFormat, emptyIfZero, _textTagMembers).Evaluate
+        );
     }
 
-    public float GetValueForDataType(MeterDataType type) => type switch
-    {
-        MeterDataType.Damage => this.DamageTotal?.Value ?? 0,
-        MeterDataType.Healing => this.EffectiveHealing?.Value ?? 0,
-        MeterDataType.DamageTaken => this.DamageTaken?.Value ?? 0,
-        _ => 0
-    };
+    public float GetValueForDataType(MeterDataType type) =>
+        type switch
+        {
+            MeterDataType.Damage => this.DamageTotal?.Value ?? 0,
+            MeterDataType.Healing => this.EffectiveHealing?.Value ?? 0,
+            MeterDataType.DamageTaken => this.DamageTaken?.Value ?? 0,
+            _ => 0,
+        };
 
     private static float GetPercent(LazyFloat? val1, LazyFloat? val2)
     {
-
         if (val1 is not null && val2 is not null)
         {
             if (val2.Value == 0)
@@ -222,7 +233,7 @@ public class Combatant : IActData<Combatant>
             CritDirectHitPct = new LazyFloat($"{IActData<Combatant>.Random.Next(10)}%"),
             DamageTaken = new LazyFloat((damage / 20).ToString()),
             Deaths = IActData<Combatant>.Random.Next(4).ToString(),
-            MaxHit = "Full Thrust-42069"
+            MaxHit = "Full Thrust-42069",
         };
     }
 }

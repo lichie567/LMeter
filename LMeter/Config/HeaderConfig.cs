@@ -9,7 +9,7 @@ namespace LMeter.Config
     {
         [JsonIgnore]
         public bool Active { get; set; }
-        
+
         public string Name => "Header/Footer";
 
         public bool ShowHeader = true;
@@ -70,7 +70,7 @@ namespace LMeter.Config
                 NameFontId = FontsManager.GetFontIndex(FontsManager.DefaultSmallFontKey),
 
                 StatsFontKey = FontsManager.DefaultSmallFontKey,
-                StatsFontId = FontsManager.GetFontIndex(FontsManager.DefaultSmallFontKey)
+                StatsFontId = FontsManager.GetFontIndex(FontsManager.DefaultSmallFontKey),
             };
 
             return defaultConfig;
@@ -126,7 +126,7 @@ namespace LMeter.Config
                     DrawHelpers.DrawNestIndicator(1);
                     DrawHelpers.DrawColorSelector("Background Color##Footer", this.FooterBackgroundColor);
                 }
-                
+
                 ImGui.EndChild();
             }
         }

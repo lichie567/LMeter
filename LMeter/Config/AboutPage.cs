@@ -39,7 +39,7 @@ namespace LMeter.Config
 
                 // ImGui.SetCursorPosY(ImGui.GetCursorPosY() + headerSize.Y);
                 // DrawHelpers.DrawSpacing(1);
-                
+
                 ImGui.Text("Changelog");
                 Vector2 changeLogSize = new(size.X - padX * 2, size.Y - ImGui.GetCursorPosY() - padY - 30);
 

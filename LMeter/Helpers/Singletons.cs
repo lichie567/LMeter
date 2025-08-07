@@ -75,7 +75,5 @@ namespace LMeter.Helpers
         }
     }
 
-    public interface IPluginDisposable : IDisposable
-    {
-    }
+    public interface IPluginDisposable : IDisposable { }
 }

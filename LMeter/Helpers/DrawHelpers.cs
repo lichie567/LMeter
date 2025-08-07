@@ -17,7 +17,8 @@ namespace LMeter.Helpers
             FontAwesomeIcon icon,
             Action clickAction,
             string? help = null,
-            Vector2? size = null)
+            Vector2? size = null
+        )
         {
             if (!string.IsNullOrEmpty(label))
             {
@@ -42,7 +43,8 @@ namespace LMeter.Helpers
             string message,
             NotificationType type = NotificationType.Info,
             uint durationInMs = 3000,
-            string title = "LMeter")
+            string title = "LMeter"
+        )
         {
             Notification notification = new()
             {
@@ -50,7 +52,7 @@ namespace LMeter.Helpers
                 Content = message,
                 Type = type,
                 InitialDuration = TimeSpan.FromMilliseconds(durationInMs),
-                Minimized = false
+                Minimized = false,
             };
 
             Singletons.Get<INotificationManager>().AddNotification(notification);
@@ -77,11 +79,7 @@ namespace LMeter.Helpers
             }
         }
 
-        public static void DrawIcon(
-            uint iconId,
-            Vector2 position,
-            Vector2 size,
-            ImDrawListPtr drawList)
+        public static void DrawIcon(uint iconId, Vector2 position, Vector2 size, ImDrawListPtr drawList)
         {
             IDalamudTextureWrap? tex = TextureCache.GetTextureById(iconId);
 
@@ -100,7 +98,8 @@ namespace LMeter.Helpers
             bool cropIcon,
             int stackCount,
             float opacity,
-            ImDrawListPtr drawList)
+            ImDrawListPtr drawList
+        )
         {
             IDalamudTextureWrap? tex = TextureCache.GetTextureById(iconId, (uint)stackCount, true);
 
@@ -155,11 +154,22 @@ namespace LMeter.Helpers
                 ImGui.DragFloat($"Roundness##{label}", ref options.Rounding, 0.1f, 1, 50);
 
                 DrawNestIndicator(depth + 1);
-                ImGui.Combo($"Rounding Type##{label}", ref Unsafe.As<RoundingFlag, int>(ref options.Flag), Utils.RoundingFlags, Utils.RoundingFlags.Length);
+                ImGui.Combo(
+                    $"Rounding Type##{label}",
+                    ref Unsafe.As<RoundingFlag, int>(ref options.Flag),
+                    Utils.RoundingFlags,
+                    Utils.RoundingFlags.Length
+                );
             }
         }
 
-        public static void DrawRectFilled(ImDrawListPtr drawList, Vector2 p_min, Vector2 p_max, ConfigColor color, RoundingOptions? options = null)
+        public static void DrawRectFilled(
+            ImDrawListPtr drawList,
+            Vector2 p_min,
+            Vector2 p_max,
+            ConfigColor color,
+            RoundingOptions? options = null
+        )
         {
             if (options is not null && options.Enabled)
             {
@@ -170,7 +180,14 @@ namespace LMeter.Helpers
                 drawList.AddRectFilled(p_min, p_max, color.Base);
             }
         }
-        public static void DrawRect(ImDrawListPtr drawList, Vector2 p_min, Vector2 p_max, ConfigColor color, RoundingOptions? options = null)
+
+        public static void DrawRect(
+            ImDrawListPtr drawList,
+            Vector2 p_min,
+            Vector2 p_max,
+            ConfigColor color,
+            RoundingOptions? options = null
+        )
         {
             if (options is not null && options.Enabled)
             {
@@ -182,7 +199,11 @@ namespace LMeter.Helpers
             }
         }
 
-        public static (Vector2, Vector2) GetTexCoordinates(IDalamudTextureWrap texture, Vector2 size, bool cropIcon = true)
+        public static (Vector2, Vector2) GetTexCoordinates(
+            IDalamudTextureWrap texture,
+            Vector2 size,
+            bool cropIcon = true
+        )
         {
             if (texture == null)
             {
@@ -210,7 +231,8 @@ namespace LMeter.Helpers
             Vector2 size,
             bool needsInput,
             bool setPosition,
-            Action<ImDrawListPtr> drawAction)
+            Action<ImDrawListPtr> drawAction
+        )
         {
             DrawInWindow(name, pos, size, needsInput, false, setPosition, drawAction);
         }
@@ -223,14 +245,15 @@ namespace LMeter.Helpers
             bool needsFocus,
             bool locked,
             Action<ImDrawListPtr> drawAction,
-            ImGuiWindowFlags extraFlags = ImGuiWindowFlags.None)
+            ImGuiWindowFlags extraFlags = ImGuiWindowFlags.None
+        )
         {
             ImGuiWindowFlags windowFlags =
-                ImGuiWindowFlags.NoSavedSettings |
-                ImGuiWindowFlags.NoTitleBar |
-                ImGuiWindowFlags.NoScrollbar |
-                ImGuiWindowFlags.NoBackground |
-                extraFlags;
+                ImGuiWindowFlags.NoSavedSettings
+                | ImGuiWindowFlags.NoTitleBar
+                | ImGuiWindowFlags.NoScrollbar
+                | ImGuiWindowFlags.NoBackground
+                | extraFlags;
 
             if (!needsInput)
             {
@@ -269,7 +292,8 @@ namespace LMeter.Helpers
             uint color,
             bool outline,
             uint outlineColor = 0xFF000000,
-            int thickness = 1)
+            int thickness = 1
+        )
         {
             if (outline)
             {

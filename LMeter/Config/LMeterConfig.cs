@@ -10,10 +10,10 @@ namespace LMeter.Config
     {
         public bool FirstLoad = true;
         public string Version => Plugin.Version;
-        public string Name 
-        { 
+        public string Name
+        {
             get => "LMeter";
-            set {}
+            set { }
         }
 
         [JsonIgnore]
@@ -52,8 +52,6 @@ namespace LMeter.Config
             yield return this.AboutPage;
         }
 
-        public void ImportPage(IConfigPage page)
-        {
-        }
+        public void ImportPage(IConfigPage page) { }
     }
 }

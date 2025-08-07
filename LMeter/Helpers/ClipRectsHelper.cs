@@ -134,7 +134,7 @@ namespace LMeter.Helpers
             "ChatConfig",
             "ColorPicker",
             "PlayGuide",
-            "SelectYesno"
+            "SelectYesno",
         ];
 
         private readonly List<ClipRect> _clipRects = [];
@@ -144,13 +144,22 @@ namespace LMeter.Helpers
             _clipRects.Clear();
 
             AtkStage* stage = AtkStage.Instance();
-            if (stage == null) { return; }
+            if (stage == null)
+            {
+                return;
+            }
 
             RaptureAtkUnitManager* manager = stage->RaptureAtkUnitManager;
-            if (manager == null) { return; }
+            if (manager == null)
+            {
+                return;
+            }
 
             AtkUnitList* loadedUnitsList = &manager->AtkUnitManager.AllLoadedUnitsList;
-            if (loadedUnitsList == null) { return; }
+            if (loadedUnitsList == null)
+            {
+                return;
+            }
 
             for (int i = 0; i < loadedUnitsList->Count; i++)
             {
@@ -239,8 +248,7 @@ namespace LMeter.Helpers
 
         public bool IntersectsWith(ClipRect other)
         {
-            return other.Max.X >= Min.X && other.Min.X <= Max.X &&
-                other.Max.Y >= Min.Y && other.Min.Y <= Max.Y;
+            return other.Max.X >= Min.X && other.Min.X <= Max.X && other.Max.Y >= Min.Y && other.Min.Y <= Max.Y;
         }
 
         private static Vector2 Clamp(Vector2 vector, Vector2 min, Vector2 max)
