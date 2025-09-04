@@ -33,6 +33,7 @@ namespace LMeter.Config
         public int ClientType = 0;
         public bool UseFFLogs = false;
         public bool DisableFFLogsOutsideDuty = true;
+        public bool LogConnectionErrors = false;
 
         public ActConfig()
         {
@@ -122,6 +123,8 @@ namespace LMeter.Config
                             + "The option can be found in ACT under Options -> Sound Settings."
                     );
                 }
+
+                ImGui.Checkbox("Log connection errors", ref this.LogConnectionErrors);
 
                 if (this.AutoEnd)
                 {

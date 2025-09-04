@@ -31,7 +31,7 @@ namespace LMeter.Act
             catch (Exception ex)
             {
                 this.Status = ConnectionStatus.ConnectionFailed;
-                LogConnectionFailure(ex.ToString());
+                if(Config.LogConnectionErrors) LogConnectionFailure(ex.ToString());
             }
         }
 
@@ -52,7 +52,7 @@ namespace LMeter.Act
             catch (Exception ex)
             {
                 this.Status = ConnectionStatus.ConnectionFailed;
-                LogConnectionFailure(ex.ToString());
+                if(Config.LogConnectionErrors) LogConnectionFailure(ex.ToString());
                 return;
             }
 
