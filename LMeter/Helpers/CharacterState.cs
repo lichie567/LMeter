@@ -45,7 +45,7 @@ namespace LMeter.Helpers
 
         public static void UpdateCurrentCharacter()
         {
-            string? playerName = Singletons.Get<IClientState>().LocalPlayer?.Name.ToString();
+            string? playerName = Singletons.Get<IObjectTable>().LocalPlayer?.Name.ToString();
             if (!string.IsNullOrEmpty(playerName))
             {
                 CharacterName = playerName;
@@ -84,7 +84,7 @@ namespace LMeter.Helpers
 
         public static Job GetCharacterJob()
         {
-            IPlayerCharacter? player = Singletons.Get<IClientState>().LocalPlayer;
+            IPlayerCharacter? player = Singletons.Get<IObjectTable>().LocalPlayer;
             if (player is null)
             {
                 return Job.UKN;

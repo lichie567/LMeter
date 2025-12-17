@@ -115,7 +115,7 @@ namespace LMeter
             config.FirstLoad = false;
 
             // Start the plugin
-            Singletons.Register(new PluginManager(clientState, commandManager, pluginInterface, config));
+            Singletons.Register(new PluginManager(clientState, objectTable, commandManager, pluginInterface, config));
         }
 
         private static IDalamudTextureWrap? LoadIconTexture(ITextureProvider textureProvider)
