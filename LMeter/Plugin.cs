@@ -27,6 +27,7 @@ namespace LMeter
 
         public Plugin(
             IClientState clientState,
+            IPlayerState playerState,
             ICommandManager commandManager,
             ICondition condition,
             IDalamudPluginInterface pluginInterface,
@@ -52,6 +53,7 @@ namespace LMeter
 
             // Register Dalamud APIs
             Singletons.Register(clientState);
+            Singletons.Register(playerState);
             Singletons.Register(commandManager);
             Singletons.Register(condition);
             Singletons.Register(pluginInterface);
@@ -115,7 +117,7 @@ namespace LMeter
             config.FirstLoad = false;
 
             // Start the plugin
-            Singletons.Register(new PluginManager(clientState, commandManager, pluginInterface, config));
+            Singletons.Register(new PluginManager(clientState, playerState, commandManager, pluginInterface, config));
         }
 
         private static IDalamudTextureWrap? LoadIconTexture(ITextureProvider textureProvider)

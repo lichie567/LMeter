@@ -481,7 +481,7 @@ namespace LMeter.Meter
                 }
 
                 int currentIndex = 0;
-                string playerName = Singletons.Get<IClientState>().LocalPlayer?.Name.ToString() ?? "YOU";
+                string playerName = Singletons.Get<IPlayerState>().CharacterName ?? "YOU";
                 if (sortedCombatants.Count > barCount)
                 {
                     int unclampedScroll = _scrollPosition;
