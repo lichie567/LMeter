@@ -33,7 +33,7 @@ namespace LMeter.Config
         public int ClientType = 0;
         public bool UseFFLogs = false;
         public bool DisableFFLogsOutsideDuty = true;
-        public bool LogConnectionErrors = false;
+        public bool LogConnectionErrors = true;
 
         public ActConfig()
         {
@@ -113,6 +113,8 @@ namespace LMeter.Config
                     ImGui.PopItemWidth();
                 }
 
+                ImGui.Checkbox("Log connection errors", ref this.LogConnectionErrors);
+
                 ImGui.NewLine();
                 ImGui.Checkbox("Clear ACT when clearing LMeter", ref this.ClearAct);
                 ImGui.Checkbox("Force ACT to end encounter after combat", ref this.AutoEnd);
@@ -123,8 +125,6 @@ namespace LMeter.Config
                             + "The option can be found in ACT under Options -> Sound Settings."
                     );
                 }
-
-                ImGui.Checkbox("Log connection errors", ref this.LogConnectionErrors);
 
                 if (this.AutoEnd)
                 {
