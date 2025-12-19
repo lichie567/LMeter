@@ -64,7 +64,7 @@ namespace LMeter.Act
             catch (Exception ex)
             {
                 this.Status = ConnectionStatus.ConnectionFailed;
-                LogConnectionFailure("IINACT server was not found or was not finished starting.", ex);
+                if(Config.LogConnectionErrors) LogConnectionFailure("IINACT server was not found or was not finished starting.", ex);
                 return;
             }
 
@@ -102,7 +102,7 @@ namespace LMeter.Act
             catch (Exception ex)
             {
                 this.Status = ConnectionStatus.ConnectionFailed;
-                LogConnectionFailure("Failed to finalize IINACT subscription!", ex);
+                if(Config.LogConnectionErrors) LogConnectionFailure("Failed to finalize IINACT subscription!", ex);
             }
         }
 
