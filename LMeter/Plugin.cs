@@ -1,8 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
-using Dalamud.Game;
-using Dalamud.Game.ClientState.Objects;
 using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
@@ -37,7 +35,6 @@ namespace LMeter
             IJobGauges jobGauges,
             IObjectTable objectTable,
             IPartyList partyList,
-            ISigScanner sigScanner,
             ITargetManager targetManager,
             IChatGui chatGui,
             IPluginLog logger,
@@ -63,7 +60,6 @@ namespace LMeter
             Singletons.Register(jobGauges);
             Singletons.Register(objectTable);
             Singletons.Register(partyList);
-            Singletons.Register(sigScanner);
             Singletons.Register(targetManager);
             Singletons.Register(chatGui);
             Singletons.Register(pluginInterface.UiBuilder);
