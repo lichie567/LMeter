@@ -1,3 +1,9 @@
+# Version 0.4.3.2
+- Remove leftover data sort options.
+
+# Version 0.4.3.1
+- Updated for Dalamud Api 14
+
 # Version 0.4.2.2
 - Fix problem with exporting and importing profiles
 

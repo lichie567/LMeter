@@ -1,66 +1,17 @@
 <Project Sdk="Dalamud.NET.Sdk/14.0.1">
-    <PropertyGroup Label="Target">
-        <PlatformTarget>x64</PlatformTarget>
-        <TargetFramework>net10.0-windows</TargetFramework>
-        <LangVersion>latest</LangVersion>
-        <Platforms>x64</Platforms>
-        <Configurations>Debug;Release</Configurations>
-    </PropertyGroup>
-
     <!-- Assembly Configuration -->
     <PropertyGroup>
         <AssemblyName>LMeter</AssemblyName>
-        <AssemblyVersion>0.4.3.1</AssemblyVersion>
-        <FileVersion>0.4.3.1</FileVersion>
-        <InformationalVersion>0.4.3.1</InformationalVersion>
+        <AssemblyVersion>0.4.3.2</AssemblyVersion>
+        <FileVersion>0.4.3.2</FileVersion>
+        <InformationalVersion>0.4.3.2</InformationalVersion>
     </PropertyGroup>
 
     <!-- Build Configuration -->
     <PropertyGroup>
-        <OutputType>Library</OutputType>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-        <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-        <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-        <DebugSymbols>true</DebugSymbols>
-        <DebugType>full</DebugType>
-        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
         <Nullable>enable</Nullable>
         <WarningsAsErrors>Nullable</WarningsAsErrors>
-        <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
-    </PropertyGroup>
-
-    <!-- Release Configuration -->
-    <PropertyGroup Condition="'$(Configuration)'=='Release'">
-        <Deterministic>true</Deterministic>
-    </PropertyGroup>
-
-    <!-- Dalamud Configuration -->
-    <PropertyGroup>
-        <DalamudVersion>dev</DalamudVersion>
-        <DalamudHome>$(DALAMUD_HOME)/</DalamudHome>
-        <DalamudLocal>../dalamud/</DalamudLocal>
-    </PropertyGroup>
-
-    <!-- Dalamud Configuration (Windows-specific) -->
-    <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
-        <DalamudLibPath>$(APPDATA)\XIVLauncher\addon\Hooks\$(DalamudVersion)\</DalamudLibPath>
-    </PropertyGroup>
-
-    <!-- Dalamud Configuration (Linux-specific) -->
-    <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Linux'))">
-        <DalamudLibPath>$(HOME)/.xlcore/dalamud/Hooks/$(DalamudVersion)/</DalamudLibPath>
-    </PropertyGroup>
-
-    <!-- Assembly Reference Locations -->
-    <PropertyGroup>
-        <AssemblySearchPaths>
-            $(AssemblySearchPaths);
-            $(DalamudHome);
-            $(DalamudLocal);
-            $(DalamudLibPath);
-        </AssemblySearchPaths>
     </PropertyGroup>
 
     <!-- Included Content -->
@@ -74,37 +25,5 @@
             CopyToOutputDirectory="PreserveNewest"
             Visible="false"
         />
-    </ItemGroup>
-
-    <!-- Library References -->
-    <ItemGroup>
-        <Reference Include="Dalamud">
-            <HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="Newtonsoft.Json">
-            <HintPath>$(DalamudLibPath)Newtonsoft.Json.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="Dalamud.Bindings.ImGui">
-            <HintPath>$(DalamudLibPath)Dalamud.Bindings.ImGui.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="Lumina">
-            <HintPath>$(DalamudLibPath)Lumina.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="Lumina.Excel">
-            <HintPath>$(DalamudLibPath)Lumina.Excel.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="FFXIVClientStructs">
-            <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="InteropGenerator.Runtime">
-            <HintPath>$(DalamudLibPath)InteropGenerator.Runtime.dll</HintPath>
-            <Private>false</Private>
-        </Reference>
     </ItemGroup>
 </Project>
