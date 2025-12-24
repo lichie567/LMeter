@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using Dalamud.Game.ClientState.Conditions;
+using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Plugin.Services;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 
 namespace LMeter.Helpers
 {
@@ -61,13 +63,16 @@ namespace LMeter.Helpers
 
         public static Job GetCharacterJob()
         {
-            IPlayerState player = Singletons.Get<IPlayerState>();
-            if (player.IsLoaded)
+            IPlayerCharacter? player = Singletons.Get<IObjectTable>().LocalPlayer;
+            if (player is null)
             {
                 return Job.UKN;
             }
 
-            return (Job)player.ClassJob.RowId;
+            unsafe
+            {
+                return (Job)((Character*)player.Address)->CharacterData.ClassJob;
+            }
         }
 
         public static bool IsJobType(Job job, JobType type, IEnumerable<Job>? jobList = null) =>

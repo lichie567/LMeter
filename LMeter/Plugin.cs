@@ -15,7 +15,7 @@ namespace LMeter
     {
         public const string ConfigFileName = "LMeter.json";
 
-        public static string Version { get; private set; } = "0.4.3.2";
+        public static string Version { get; private set; } = "0.4.3.3";
         public static string ConfigFileDir { get; private set; } = "";
         public static string ConfigFilePath { get; private set; } = "";
         public static string AssemblyFileDir { get; private set; } = "";
@@ -113,7 +113,7 @@ namespace LMeter
             config.FirstLoad = false;
 
             // Start the plugin
-            Singletons.Register(new PluginManager(clientState, playerState, commandManager, pluginInterface, config));
+            Singletons.Register(new PluginManager(clientState, commandManager, pluginInterface, config));
         }
 
         private static IDalamudTextureWrap? LoadIconTexture(ITextureProvider textureProvider)

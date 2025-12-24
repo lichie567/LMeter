@@ -1,3 +1,6 @@
+# Version 0.4.3.3
+- Fix job detection
+
 # Version 0.4.3.2
 - Remove leftover data sort options.
 

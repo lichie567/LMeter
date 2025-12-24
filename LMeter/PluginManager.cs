@@ -19,7 +19,6 @@ namespace LMeter
         private readonly Vector2 _configSize = new(650, 750);
 
         private readonly IClientState _clientState;
-        private readonly IPlayerState _playerState;
         private readonly IDalamudPluginInterface _pluginInterface;
         private readonly ICommandManager _commandManager;
         private readonly WindowSystem _windowSystem;
@@ -39,14 +38,12 @@ namespace LMeter
 
         public PluginManager(
             IClientState clientState,
-            IPlayerState playerState,
             ICommandManager commandManager,
             IDalamudPluginInterface pluginInterface,
             LMeterConfig config
         )
         {
             _clientState = clientState;
-            _playerState = playerState;
             _commandManager = commandManager;
             _pluginInterface = pluginInterface;
             _config = config;
@@ -77,7 +74,7 @@ namespace LMeter
 
         private void Draw()
         {
-            if (!_playerState.IsLoaded || CharacterState.IsCharacterBusy())
+            if (Singletons.Get<IObjectTable>().LocalPlayer is null || CharacterState.IsCharacterBusy())
             {
                 return;
             }
