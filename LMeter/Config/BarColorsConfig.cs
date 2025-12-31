@@ -1,4 +1,6 @@
+using System;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
 using Dalamud.Bindings.ImGui;
 using LMeter.Helpers;
@@ -13,6 +15,8 @@ namespace LMeter.Config
         public string Name => "Colors";
 
         public IConfigPage GetDefault() => new BarColorsConfig();
+
+        public BarColorScheme ColorScheme = BarColorScheme.Job;
 
         public ConfigColor PLDColor = new(168f / 255f, 210f / 255f, 230f / 255f, 1f);
         public ConfigColor DRKColor = new(209f / 255f, 38f / 255f, 204f / 255f, 1f);
@@ -50,9 +54,37 @@ namespace LMeter.Config
         public ConfigColor THMColor = new(165f / 255f, 121f / 255f, 214f / 255f, 1f);
         public ConfigColor ACNColor = new(45f / 255f, 155f / 255f, 120f / 255f, 1f);
 
+        public ConfigColor ThreeRoleTankColor = new(60f / 255f, 60f / 255f, 192f / 255f, 1f);
+        public ConfigColor ThreeRoleHealerColor = new(60f / 255f, 192f / 255f, 60f / 255f, 1f);
+        public ConfigColor ThreeRoleDpsColor = new(192f / 255f, 60f / 255f, 60f / 255f, 1f);
+
+        public ConfigColor FiveRoleTankColor = new(60f / 255f, 60f / 255f, 192f / 255f, 1f);
+        public ConfigColor FiveRoleHealerColor = new(60f / 255f, 192f / 255f, 60f / 255f, 1f);
+        public ConfigColor FiveRoleMeleeColor = new(192f / 255f, 60f / 255f, 60f / 255f, 1f);
+        public ConfigColor FiveRoleRangedColor = new(192f / 255f, 192f / 255f, 60f / 255f, 1f);
+        public ConfigColor FiveRoleCasterColor = new(192f / 255f, 60f / 255f, 192f / 255f, 1f);
+
         public ConfigColor UKNColor = new(218f / 255f, 157f / 255f, 46f / 255f, 1f);
 
         public ConfigColor GetColor(Job job) =>
+            ColorScheme switch
+            {
+                BarColorScheme.Job => GetJobColor(job),
+
+                BarColorScheme.ThreeRole when CharacterState.IsJobType(job, JobType.Tanks) => ThreeRoleTankColor,
+                BarColorScheme.ThreeRole when CharacterState.IsJobType(job, JobType.Healers) => ThreeRoleHealerColor,
+                BarColorScheme.ThreeRole when CharacterState.IsJobType(job, JobType.Combat) => ThreeRoleDpsColor,
+
+                BarColorScheme.FiveRole when CharacterState.IsJobType(job, JobType.Tanks) => FiveRoleTankColor,
+                BarColorScheme.FiveRole when CharacterState.IsJobType(job, JobType.Healers) => FiveRoleHealerColor,
+                BarColorScheme.FiveRole when CharacterState.IsJobType(job, JobType.Melee) => FiveRoleMeleeColor,
+                BarColorScheme.FiveRole when CharacterState.IsJobType(job, JobType.Ranged) => FiveRoleRangedColor,
+                BarColorScheme.FiveRole when CharacterState.IsJobType(job, JobType.Casters) => FiveRoleCasterColor,
+
+                _ => UKNColor,
+            };
+
+        private ConfigColor GetJobColor(Job job) =>
             job switch
             {
                 Job.GLA => this.GLAColor,
@@ -97,47 +129,76 @@ namespace LMeter.Config
         {
             if (ImGui.BeginChild($"##{this.Name}", new Vector2(size.X, size.Y), border))
             {
-                DrawHelpers.DrawColorSelector("PLD", this.PLDColor);
-                DrawHelpers.DrawColorSelector("WAR", this.WARColor);
-                DrawHelpers.DrawColorSelector("DRK", this.DRKColor);
-                DrawHelpers.DrawColorSelector("GNB", this.GNBColor);
+                var colorSchemeNames = Enum.GetNames<BarColorScheme>();
+
+                ImGui.Combo(
+                    "Color Scheme",
+                    ref Unsafe.As<BarColorScheme, int>(ref ColorScheme),
+                    colorSchemeNames,
+                    colorSchemeNames.Length);
 
                 ImGui.NewLine();
-                DrawHelpers.DrawColorSelector("SCH", this.SCHColor);
-                DrawHelpers.DrawColorSelector("WHM", this.WHMColor);
-                DrawHelpers.DrawColorSelector("AST", this.ASTColor);
-                DrawHelpers.DrawColorSelector("SGE", this.SGEColor);
 
-                ImGui.NewLine();
-                DrawHelpers.DrawColorSelector("MNK", this.MNKColor);
-                DrawHelpers.DrawColorSelector("NIN", this.NINColor);
-                DrawHelpers.DrawColorSelector("DRG", this.DRGColor);
-                DrawHelpers.DrawColorSelector("SAM", this.SAMColor);
-                DrawHelpers.DrawColorSelector("RPR", this.RPRColor);
-                DrawHelpers.DrawColorSelector("VPR", this.VPRColor);
+                switch (ColorScheme)
+                {
+                    case BarColorScheme.Job:
+                        DrawHelpers.DrawColorSelector("PLD", this.PLDColor);
+                        DrawHelpers.DrawColorSelector("WAR", this.WARColor);
+                        DrawHelpers.DrawColorSelector("DRK", this.DRKColor);
+                        DrawHelpers.DrawColorSelector("GNB", this.GNBColor);
 
-                ImGui.NewLine();
-                DrawHelpers.DrawColorSelector("BRD", this.BRDColor);
-                DrawHelpers.DrawColorSelector("MCH", this.MCHColor);
-                DrawHelpers.DrawColorSelector("DNC", this.DNCColor);
+                        ImGui.NewLine();
+                        DrawHelpers.DrawColorSelector("SCH", this.SCHColor);
+                        DrawHelpers.DrawColorSelector("WHM", this.WHMColor);
+                        DrawHelpers.DrawColorSelector("AST", this.ASTColor);
+                        DrawHelpers.DrawColorSelector("SGE", this.SGEColor);
 
-                ImGui.NewLine();
-                DrawHelpers.DrawColorSelector("BLM", this.BLMColor);
-                DrawHelpers.DrawColorSelector("SMN", this.SMNColor);
-                DrawHelpers.DrawColorSelector("RDM", this.RDMColor);
-                DrawHelpers.DrawColorSelector("PCT", this.PCTColor);
-                DrawHelpers.DrawColorSelector("BLU", this.BLUColor);
+                        ImGui.NewLine();
+                        DrawHelpers.DrawColorSelector("MNK", this.MNKColor);
+                        DrawHelpers.DrawColorSelector("NIN", this.NINColor);
+                        DrawHelpers.DrawColorSelector("DRG", this.DRGColor);
+                        DrawHelpers.DrawColorSelector("SAM", this.SAMColor);
+                        DrawHelpers.DrawColorSelector("RPR", this.RPRColor);
+                        DrawHelpers.DrawColorSelector("VPR", this.VPRColor);
 
-                ImGui.NewLine();
-                DrawHelpers.DrawColorSelector("GLA", this.GLAColor);
-                DrawHelpers.DrawColorSelector("MRD", this.MRDColor);
-                DrawHelpers.DrawColorSelector("CNJ", this.CNJColor);
-                DrawHelpers.DrawColorSelector("PGL", this.PGLColor);
-                DrawHelpers.DrawColorSelector("ROG", this.ROGColor);
-                DrawHelpers.DrawColorSelector("LNC", this.LNCColor);
-                DrawHelpers.DrawColorSelector("ARC", this.ARCColor);
-                DrawHelpers.DrawColorSelector("THM", this.THMColor);
-                DrawHelpers.DrawColorSelector("ACN", this.ACNColor);
+                        ImGui.NewLine();
+                        DrawHelpers.DrawColorSelector("BRD", this.BRDColor);
+                        DrawHelpers.DrawColorSelector("MCH", this.MCHColor);
+                        DrawHelpers.DrawColorSelector("DNC", this.DNCColor);
+
+                        ImGui.NewLine();
+                        DrawHelpers.DrawColorSelector("BLM", this.BLMColor);
+                        DrawHelpers.DrawColorSelector("SMN", this.SMNColor);
+                        DrawHelpers.DrawColorSelector("RDM", this.RDMColor);
+                        DrawHelpers.DrawColorSelector("PCT", this.PCTColor);
+                        DrawHelpers.DrawColorSelector("BLU", this.BLUColor);
+
+                        ImGui.NewLine();
+                        DrawHelpers.DrawColorSelector("GLA", this.GLAColor);
+                        DrawHelpers.DrawColorSelector("MRD", this.MRDColor);
+                        DrawHelpers.DrawColorSelector("CNJ", this.CNJColor);
+                        DrawHelpers.DrawColorSelector("PGL", this.PGLColor);
+                        DrawHelpers.DrawColorSelector("ROG", this.ROGColor);
+                        DrawHelpers.DrawColorSelector("LNC", this.LNCColor);
+                        DrawHelpers.DrawColorSelector("ARC", this.ARCColor);
+                        DrawHelpers.DrawColorSelector("THM", this.THMColor);
+                        DrawHelpers.DrawColorSelector("ACN", this.ACNColor);
+                        break;
+
+                    case BarColorScheme.ThreeRole:
+                        DrawHelpers.DrawColorSelector("Tanks", this.ThreeRoleTankColor);
+                        DrawHelpers.DrawColorSelector("Healers", this.ThreeRoleHealerColor);
+                        DrawHelpers.DrawColorSelector("DPS", this.ThreeRoleDpsColor);
+                        break;
+
+                    case BarColorScheme.FiveRole:
+                        DrawHelpers.DrawColorSelector("Tanks", this.FiveRoleTankColor);
+                        DrawHelpers.DrawColorSelector("Healers", this.FiveRoleHealerColor);
+                        DrawHelpers.DrawColorSelector("Melee", this.FiveRoleMeleeColor);
+                        DrawHelpers.DrawColorSelector("Ranged", this.FiveRoleRangedColor);
+                        DrawHelpers.DrawColorSelector("Casters", this.FiveRoleCasterColor);
+                        break;
+                }
 
                 ImGui.NewLine();
                 DrawHelpers.DrawColorSelector("Limit Break", this.UKNColor);

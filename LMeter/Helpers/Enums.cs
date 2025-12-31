@@ -135,4 +135,11 @@ namespace LMeter.Helpers
         BottomLeft = 7,
         BottomRight = 8,
     }
+
+    public enum BarColorScheme
+    {
+        Job,
+        ThreeRole,
+        FiveRole,
+    }
 }
