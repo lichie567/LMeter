@@ -1,3 +1,4 @@
+using System;
 using System.Numerics;
 using System.Text.Json.Serialization;
 using Dalamud.Bindings.ImGui;
@@ -13,10 +14,22 @@ namespace LMeter.Config
 
         private static readonly string[] _jobIconStyleOptions = ["Style 1", "Style 2"];
 
-        public int BarHeightType = 0;
+        public BarSizeType BarSizeType = BarSizeType.ConstantCount;
         public int BarCount = 8;
-        public int BarGaps = 1;
+
+        [Obsolete($"Use {nameof(BarVerticalGaps)} instead, retained for serialization backwards compatibility")]
+        public int BarGaps
+        {
+            get => BarVerticalGaps;
+            set => BarVerticalGaps = value;
+        }
+
+        public int BarVerticalGaps = 1;
+        public int BarHorizontalGaps = 1;
         public float BarHeight = 25;
+        public float BarWidth = 150;
+        public int MaxRows = 0;
+        public int MaxColumns = 1;
 
         public bool ShowJobIcon = true;
         public int JobIconSizeType = 0;
@@ -83,6 +96,14 @@ namespace LMeter.Config
         public RoundingOptions MiddleBarRounding = new(false, 10f, RoundingFlag.All);
         public RoundingOptions BottomBarRounding = new(false, 10f, RoundingFlag.BottomLeft);
 
+        public RoundingOptions LeftBarRounding = new(false, 10f, RoundingFlag.Left);
+        public RoundingOptions RightBarRounding = new(false, 10f, RoundingFlag.Right);
+
+        public RoundingOptions TopLeftBarRounding = new(false, 10f, RoundingFlag.TopLeft);
+        public RoundingOptions TopRightBarRounding = new(false, 10f, RoundingFlag.TopRight);
+        public RoundingOptions BottomLeftBarRounding = new(false, 10f, RoundingFlag.BottomLeft);
+        public RoundingOptions BottomRightBarRounding = new(false, 10f, RoundingFlag.BottomRight);
+
         public IConfigPage GetDefault()
         {
             BarConfig defaultConfig = new()
@@ -104,21 +125,30 @@ namespace LMeter.Config
         {
             if (ImGui.BeginChild($"##{this.Name}", new Vector2(size.X, size.Y), border))
             {
-                ImGui.Text("Bar Height Type");
-                ImGui.RadioButton("Constant Bar Number", ref this.BarHeightType, 0);
+                ImGui.Text("Bar Size Type");
+                ImGui.RadioButton("Constant Bar Number", ref this.BarSizeType, BarSizeType.ConstantCount);
                 ImGui.SameLine();
-                ImGui.RadioButton("Constant Bar Height", ref this.BarHeightType, 1);
+                ImGui.RadioButton("Constant Bar Size", ref this.BarSizeType, BarSizeType.ConstantSize);
 
-                if (this.BarHeightType == 0)
+                if (this.BarSizeType == BarSizeType.ConstantCount)
                 {
                     ImGui.DragInt("Num Bars to Display", ref this.BarCount, 1, 1, 48);
                 }
-                else if (this.BarHeightType == 1)
+                else if (this.BarSizeType == BarSizeType.ConstantSize)
                 {
                     ImGui.DragFloat("Bar Height", ref this.BarHeight, .1f, 1, 100);
+                    ImGui.DragFloat("Bar Width", ref this.BarWidth, .1f, 1, 1000);
                 }
 
-                ImGui.DragInt("Bar Gap Size", ref this.BarGaps, 1, 0, 20);
+                ImGui.DragInt("Maximum Columns", ref this.MaxColumns, 1, 1, 40);
+                ImGui.DragInt("Maximum Rows", ref this.MaxRows, 1, 0, 40);
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.SetTooltip("Set to 0 for unlimited");
+                }
+
+                ImGui.DragInt("Bar Vertical Gap Size", ref this.BarVerticalGaps, 1, 0, 20);
+                ImGui.DragInt("Bar Horizontal Gap Size", ref this.BarHorizontalGaps, 1, 0, 20);
 
                 ImGui.NewLine();
                 ImGui.DragFloat("Bar Fill Height (% of Bar Height)", ref this.BarFillHeight, .1f, 0, 1f);
@@ -208,15 +238,37 @@ namespace LMeter.Config
                 }
 
                 ImGui.Checkbox("Use your name instead of 'YOU'", ref this.UseCharacterName);
-                if (this.BarHeightType == 0)
+                if (this.BarSizeType == BarSizeType.ConstantCount)
                 {
                     ImGui.Checkbox("Always show your own bar", ref this.AlwaysShowSelf);
                 }
 
                 ImGui.NewLine();
-                DrawHelpers.DrawRoundingOptions("Top Bar Rounded Corners", 0, this.TopBarRounding);
-                DrawHelpers.DrawRoundingOptions("Middle Bar Rounded Corners", 0, this.MiddleBarRounding);
-                DrawHelpers.DrawRoundingOptions("Bottom Bar Rounded Corners", 0, this.BottomBarRounding);
+
+                if (MaxColumns == 1)
+                {
+                    DrawHelpers.DrawRoundingOptions("Top Bar Rounded Corners", 0, this.TopBarRounding);
+                    DrawHelpers.DrawRoundingOptions("Middle Bar Rounded Corners", 0, this.MiddleBarRounding);
+                    DrawHelpers.DrawRoundingOptions("Bottom Bar Rounded Corners", 0, this.BottomBarRounding);
+                }
+                else if (MaxRows == 1)
+                {
+                    DrawHelpers.DrawRoundingOptions("Left Bar Rounded Corners", depth: 0, this.LeftBarRounding);
+                    DrawHelpers.DrawRoundingOptions("Middle Bar Rounded Corners", depth: 0, this.MiddleBarRounding);
+                    DrawHelpers.DrawRoundingOptions("Right Bar Rounded Corners", depth: 0, this.RightBarRounding);
+                }
+                else
+                {
+                    DrawHelpers.DrawRoundingOptions("Top Left Bar Rounded Corners", 0, this.TopLeftBarRounding);
+                    DrawHelpers.DrawRoundingOptions("Top Middle Bar Rounded Corners", 0, this.TopBarRounding);
+                    DrawHelpers.DrawRoundingOptions("Top Right Bar Rounded Corners", 0, this.TopRightBarRounding);
+                    DrawHelpers.DrawRoundingOptions("Middle Left Bar Rounded Corners", 0, this.LeftBarRounding);
+                    DrawHelpers.DrawRoundingOptions("Middle Middle Bar Rounded Corners", 0, this.MiddleBarRounding);
+                    DrawHelpers.DrawRoundingOptions("Middle Right Bar Rounded Corners", 0, this.RightBarRounding);
+                    DrawHelpers.DrawRoundingOptions("Bottom Left Bar Rounded Corners", 0, this.BottomLeftBarRounding);
+                    DrawHelpers.DrawRoundingOptions("Bottom Middle Bar Rounded Corners", 0, this.BottomBarRounding);
+                    DrawHelpers.DrawRoundingOptions("Bottom Right Bar Rounded Corners", 0, this.BottomRightBarRounding);
+                }
             }
 
             ImGui.EndChild();
