@@ -523,105 +523,106 @@ namespace LMeter.Meter
 
         private void DrawBars(ImDrawListPtr drawList, Vector2 localPos, Vector2 size, ActEvent? actEvent)
         {
-            if (actEvent?.Combatants is not null && actEvent.Combatants.Count != 0)
+            if (actEvent?.Combatants is null || actEvent.Combatants.Count == 0)
             {
-                // We don't want to corrupt the cache. The entire logic past this point mutates the sorted Act combatants instead of using a rendering cache
-                // This has the issue that some settings can't behave properly and or don't update till the following combat update/fight
-                List<Combatant> sortedCombatants = [.. this.GetSortedCombatants(actEvent, this.GeneralConfig.DataType)];
+                return;
+            }
 
-                // add rank to the sorted combatants, with this we have the real rank of the player
-                int rank = 1;
-                foreach (var combatant in sortedCombatants)
+            // We don't want to corrupt the cache. The entire logic past this point mutates the sorted Act combatants instead of using a rendering cache
+            // This has the issue that some settings can't behave properly and or don't update till the following combat update/fight
+            List<Combatant> sortedCombatants = [.. this.GetSortedCombatants(actEvent, this.GeneralConfig.DataType)];
+
+            // add rank to the sorted combatants, with this we have the real rank of the player
+            int rank = 1;
+            foreach (var combatant in sortedCombatants)
+            {
+                combatant.Rank = rank++;
+            }
+
+            float top = sortedCombatants[0].GetValueForDataType(this.GeneralConfig.DataType);
+            int barCount = this.BarConfig.BarCount;
+            float margin = 0;
+            if (this.BarConfig.BarHeightType == 1)
+            {
+                float total = 0;
+                barCount = 0;
+                do
                 {
-                    combatant.Rank = rank++;
+                    barCount++;
+                    total += this.BarConfig.BarHeight + this.BarConfig.BarGaps;
+                } while (total <= size.Y);
+                margin = total - size.Y - this.BarConfig.BarGaps;
+            }
+
+            int currentIndex = 0;
+            string playerName = Singletons.Get<IPlayerState>().CharacterName ?? "YOU";
+            if (sortedCombatants.Count > barCount)
+            {
+                int unclampedScroll = _scrollPosition;
+                currentIndex = Math.Clamp(_scrollPosition, 0, sortedCombatants.Count - barCount);
+                _scrollPosition = currentIndex;
+
+                if (margin > 0 && _scrollPosition < unclampedScroll)
+                {
+                    _scrollShift = margin;
                 }
 
-                float top = sortedCombatants[0].GetValueForDataType(this.GeneralConfig.DataType);
-                int barCount = this.BarConfig.BarCount;
-                float margin = 0;
-                if (this.BarConfig.BarHeightType == 1)
+                if (unclampedScroll < 0)
                 {
-                    float total = 0;
-                    barCount = 0;
-                    do
-                    {
-                        barCount++;
-                        total += this.BarConfig.BarHeight + this.BarConfig.BarGaps;
-                    } while (total <= size.Y);
-                    margin = total - size.Y - this.BarConfig.BarGaps;
+                    _scrollShift = 0;
                 }
 
-                int currentIndex = 0;
-                string playerName = Singletons.Get<IPlayerState>().CharacterName ?? "YOU";
-                if (sortedCombatants.Count > barCount)
+                if (this.BarConfig.AlwaysShowSelf && this.BarConfig.BarHeightType == 0)
                 {
-                    int unclampedScroll = _scrollPosition;
-                    currentIndex = Math.Clamp(_scrollPosition, 0, sortedCombatants.Count - barCount);
-                    _scrollPosition = currentIndex;
-
-                    if (margin > 0 && _scrollPosition < unclampedScroll)
-                    {
-                        _scrollShift = margin;
-                    }
-
-                    if (unclampedScroll < 0)
-                    {
-                        _scrollShift = 0;
-                    }
-
-                    if (this.BarConfig.AlwaysShowSelf && this.BarConfig.BarHeightType == 0)
-                    {
-                        MovePlayerIntoViewableRange(sortedCombatants, _scrollPosition, playerName);
-                    }
-                }
-
-                localPos = localPos.AddY(-_scrollShift);
-                int maxIndex = Math.Min(currentIndex + barCount, sortedCombatants.Count);
-                int startIndex = currentIndex;
-                for (; currentIndex < maxIndex; currentIndex++)
-                {
-                    Combatant combatant = sortedCombatants[currentIndex];
-                    float current = combatant.GetValueForDataType(this.GeneralConfig.DataType);
-                    ConfigColor barColor = this.BarConfig.BarColor;
-                    ConfigColor jobColor = this.BarColorsConfig.GetColor(combatant.Job);
-
-                    if (this.BarConfig.UseCustomColorForSelf && combatant.OriginalName.Equals("YOU"))
-                    {
-                        barColor = this.BarConfig.CustomColorForSelf;
-                        jobColor = this.BarConfig.CustomColorForSelf;
-                    }
-
-                    combatant.NameOverwrite = this.BarConfig.UseCharacterName switch
-                    {
-                        true when combatant.Name.Contains("YOU") => combatant.Name.Replace("YOU", playerName),
-                        false when combatant.NameOverwrite is not null => null,
-                        _ => combatant.NameOverwrite,
-                    };
-
-                    RoundingOptions rounding = this.BarConfig.MiddleBarRounding;
-                    if (currentIndex == startIndex)
-                    {
-                        rounding = this.BarConfig.TopBarRounding;
-                    }
-                    else if (currentIndex == maxIndex - 1)
-                    {
-                        rounding = this.BarConfig.BottomBarRounding;
-                    }
-
-                    localPos = this.DrawBar(
-                        drawList,
-                        localPos,
-                        size,
-                        combatant,
-                        jobColor,
-                        barColor,
-                        top,
-                        current,
-                        rounding
-                    );
+                    MovePlayerIntoViewableRange(sortedCombatants, _scrollPosition, playerName);
                 }
             }
-            ;
+
+            localPos = localPos.AddY(-_scrollShift);
+            int maxIndex = Math.Min(currentIndex + barCount, sortedCombatants.Count);
+            int startIndex = currentIndex;
+            for (; currentIndex < maxIndex; currentIndex++)
+            {
+                Combatant combatant = sortedCombatants[currentIndex];
+                float current = combatant.GetValueForDataType(this.GeneralConfig.DataType);
+                ConfigColor barColor = this.BarConfig.BarColor;
+                ConfigColor jobColor = this.BarColorsConfig.GetColor(combatant.Job);
+
+                if (this.BarConfig.UseCustomColorForSelf && combatant.OriginalName.Equals("YOU"))
+                {
+                    barColor = this.BarConfig.CustomColorForSelf;
+                    jobColor = this.BarConfig.CustomColorForSelf;
+                }
+
+                combatant.NameOverwrite = this.BarConfig.UseCharacterName switch
+                {
+                    true when combatant.Name.Contains("YOU") => combatant.Name.Replace("YOU", playerName),
+                    false when combatant.NameOverwrite is not null => null,
+                    _ => combatant.NameOverwrite,
+                };
+
+                RoundingOptions rounding = this.BarConfig.MiddleBarRounding;
+                if (currentIndex == startIndex)
+                {
+                    rounding = this.BarConfig.TopBarRounding;
+                }
+                else if (currentIndex == maxIndex - 1)
+                {
+                    rounding = this.BarConfig.BottomBarRounding;
+                }
+
+                localPos = this.DrawBar(
+                    drawList,
+                    localPos,
+                    size,
+                    combatant,
+                    jobColor,
+                    barColor,
+                    top,
+                    current,
+                    rounding
+                );
+            }
         }
 
         private Vector2 DrawBar(
