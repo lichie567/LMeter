@@ -335,23 +335,30 @@ namespace LMeter.Meter
                         layout = CalculateBarLayout(size, this.GetSortedCombatants(actEvent, this.GeneralConfig.DataType).Count);
                     }
 
-                    if (this.BarConfig.ShowColumnHeader && actEvent is not null)
+                    if (this.BarConfig.ShowColumnHeader && actEvent is not null && layout is not null)
                     {
-                        List<Text> columnHeaderTexts = GetColumnHeaderTexts(this.BarTextConfig.Texts, this.BarConfig);
-                        Vector2 columnHeaderSize = new(size.X, this.BarConfig.ColumnHeaderHeight);
-                        drawList.AddRectFilled(
-                            localPos,
-                            localPos + columnHeaderSize,
-                            this.BarConfig.ColumnHeaderColor.Base
-                        );
-                        DrawBarTexts(
-                            drawList,
-                            columnHeaderTexts,
-                            localPos + this.BarConfig.ColumnHeaderOffset,
-                            columnHeaderSize,
-                            jobColor,
-                            actEvent
-                        );
+                        Vector2 columnHeaderSize = new(layout.BarSize.X, this.BarConfig.ColumnHeaderHeight);
+
+                        for (int i = 0; i < layout.Columns; i++)
+                        {
+                            List<Text> columnHeaderTexts = GetColumnHeaderTexts(this.BarTextConfig.Texts, this.BarConfig);
+
+                            var headerPos = localPos.AddX(i * (layout.BarSize.X + this.BarConfig.BarHorizontalGaps));
+
+                            drawList.AddRectFilled(
+                                headerPos,
+                                headerPos + columnHeaderSize,
+                                this.BarConfig.ColumnHeaderColor.Base
+                            );
+                            DrawBarTexts(
+                                drawList,
+                                columnHeaderTexts,
+                                headerPos + this.BarConfig.ColumnHeaderOffset,
+                                columnHeaderSize,
+                                jobColor,
+                                actEvent
+                            );
+                        }
 
                         localPos = localPos.AddY(columnHeaderSize.Y);
                     }
