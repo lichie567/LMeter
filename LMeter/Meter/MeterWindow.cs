@@ -543,15 +543,19 @@ namespace LMeter.Meter
 
             int currentIndex = 0;
             string playerName = Singletons.Get<IPlayerState>().CharacterName ?? "YOU";
-            if (sortedCombatants.Count > barCount)
+            if (sortedCombatants.Count > layout.Bars)
             {
                 int unclampedScroll = _scrollPosition;
-                currentIndex = Math.Clamp(_scrollPosition, 0, sortedCombatants.Count - barCount);
-                _scrollPosition = currentIndex;
 
-                if (margin > 0 && _scrollPosition < unclampedScroll)
+                var hiddenRowCount = (int)Math.Ceiling((float)(sortedCombatants.Count - layout.Bars) / layout.Columns);
+
+                _scrollPosition = Math.Clamp(_scrollPosition, 0, hiddenRowCount);
+
+                currentIndex = _scrollPosition * layout.Columns;
+
+                if (layout.Margin > 0 && _scrollPosition < unclampedScroll)
                 {
-                    _scrollShift = margin;
+                    _scrollShift = layout.Margin;
                 }
 
                 if (unclampedScroll < 0)
@@ -559,7 +563,7 @@ namespace LMeter.Meter
                     _scrollShift = 0;
                 }
 
-                if (this.BarConfig.AlwaysShowSelf && this.BarConfig.BarHeightType == 0)
+                if (this.BarConfig.AlwaysShowSelf && this.BarConfig.BarSizeType == BarSizeType.ConstantCount)
                 {
                     MovePlayerIntoViewableRange(sortedCombatants, _scrollPosition, playerName);
                 }
