@@ -450,6 +450,77 @@ namespace LMeter.Meter
             return (pos.AddY(headerConfig.HeaderHeight), size.AddY(-headerConfig.HeaderHeight));
         }
 
+        private class BarLayout
+        {
+            public int Bars;
+
+            public int Rows;
+            public int Columns;
+
+            public Vector2 BarSize;
+
+            public float Margin = 0;
+        }
+
+        private BarLayout CalculateBarLayout(Vector2 size, int combatantCount)
+        {
+            BarLayout layout = new();
+
+            if (combatantCount == 0)
+            {
+                layout.Rows = 1;
+                layout.Columns = 1;
+                layout.BarSize = size;
+                layout.Bars = 1;
+            }
+            else if (this.BarConfig.BarSizeType == BarSizeType.ConstantSize)
+            {
+                var barWidth = Math.Min(this.BarConfig.BarWidth, size.X);
+                layout.BarSize = new Vector2(barWidth, this.BarConfig.BarHeight);
+
+                if (this.BarConfig.MaxColumns > 1)
+                {
+                    barWidth += this.BarConfig.BarHorizontalGaps;
+                }
+
+                layout.Columns = Math.Min(this.BarConfig.MaxColumns, (int)Math.Floor(size.X / barWidth));
+
+                var barHeight = this.BarConfig.BarHeight + this.BarConfig.BarVerticalGaps;
+                layout.Rows = this.BarConfig.MaxRows > 0
+                    ? Math.Min(this.BarConfig.MaxRows, (int)Math.Ceiling(size.Y / barHeight))
+                    : (int)Math.Ceiling(size.Y / barHeight);
+
+                float totalY = layout.Rows * barHeight;
+                layout.Margin = totalY - size.Y - this.BarConfig.BarVerticalGaps;
+
+                layout.Bars = layout.Columns * layout.Rows;
+            }
+            else
+            {
+                layout.Columns = Math.Min(combatantCount, this.BarConfig.MaxColumns);
+                var totalHorizontalGaps = (layout.Columns - 1) * this.BarConfig.BarHorizontalGaps;
+                var barWidth = (size.X - totalHorizontalGaps) / layout.Columns;
+
+                var effectiveBarCount = Math.Min(this.BarConfig.BarCount, combatantCount);
+
+                layout.Rows = (int)Math.Ceiling((float)effectiveBarCount / layout.Columns);
+
+                if (this.BarConfig.MaxRows > 0 && this.BarConfig.MaxRows < layout.Rows)
+                {
+                    layout.Rows = this.BarConfig.MaxRows;
+                }
+
+                var totalVerticalGaps = layout.Rows * this.BarConfig.BarVerticalGaps;
+                var barHeight = (int)((size.Y - totalVerticalGaps) / layout.Rows);
+
+                layout.BarSize = new Vector2(barWidth, barHeight);
+
+                layout.Bars = Math.Min(this.BarConfig.BarCount, layout.Rows * layout.Columns);
+            }
+
+            return layout;
+        }
+
         private void DrawBars(ImDrawListPtr drawList, Vector2 localPos, Vector2 size, ActEvent? actEvent)
         {
             if (actEvent?.Combatants is not null && actEvent.Combatants.Count != 0)
