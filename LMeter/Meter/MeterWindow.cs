@@ -318,6 +318,23 @@ namespace LMeter.Meter
                         this.GeneralConfig.Rounding
                     );
 
+                    BarLayout? layout = null;
+
+                    if (this.HeaderConfig.ShowFooter)
+                    {
+                        size = size.AddY(-this.HeaderConfig.FooterHeight);
+                    }
+
+                    if (actEvent is not null)
+                    {
+                        if (this.BarConfig.ShowColumnHeader)
+                        {
+                            size = size.AddY(-this.BarConfig.ColumnHeaderHeight);
+                        }
+
+                        layout = CalculateBarLayout(size, this.GetSortedCombatants(actEvent, this.GeneralConfig.DataType).Count);
+                    }
+
                     if (this.BarConfig.ShowColumnHeader && actEvent is not null)
                     {
                         List<Text> columnHeaderTexts = GetColumnHeaderTexts(this.BarTextConfig.Texts, this.BarConfig);
@@ -336,16 +353,11 @@ namespace LMeter.Meter
                             actEvent
                         );
 
-                        (localPos, size) = (localPos.AddY(columnHeaderSize.Y), size.AddY(-columnHeaderSize.Y));
-                    }
-
-                    if (this.HeaderConfig.ShowFooter)
-                    {
-                        size = size.AddY(-this.HeaderConfig.FooterHeight);
+                        localPos = localPos.AddY(columnHeaderSize.Y);
                     }
 
                     ImGui.PushClipRect(localPos, localPos + size, false);
-                    this.DrawBars(drawList, localPos, size, actEvent);
+                    this.DrawBars(drawList, localPos, layout, actEvent);
                     ImGui.PopClipRect();
 
                     if (this.HeaderConfig.ShowFooter)
