@@ -625,10 +625,10 @@ namespace LMeter.Meter
             }
         }
 
-        private Vector2 DrawBar(
+        private void DrawBar(
             ImDrawListPtr drawList,
             Vector2 localPos,
-            Vector2 size,
+            Vector2 barSize,
             Combatant combatant,
             ConfigColor jobColor,
             ConfigColor barColor,
@@ -638,19 +638,14 @@ namespace LMeter.Meter
         )
         {
             BarConfig barConfig = this.BarConfig;
-            float barHeight =
-                barConfig.BarHeightType == 0
-                    ? (size.Y - (barConfig.BarCount - 1) * barConfig.BarGaps) / barConfig.BarCount
-                    : barConfig.BarHeight;
 
             Vector2 barPos = localPos;
-            Vector2 barSize = new(size.X, barHeight);
-            Vector2 barFillSize = new(size.X * (current / top), barHeight * barConfig.BarFillHeight);
+            Vector2 barFillSize = new(barSize.X * (current / top), barSize.Y * barConfig.BarFillHeight);
 
             if (barConfig.BarFillHeight != 1f)
             {
-                barPos = barConfig.BarFillDirection == 0 ? barPos.AddY(barHeight - barFillSize.Y) : barPos;
-                Vector2 barBackgroundSize = new(size.X * (current / top), barHeight);
+                barPos = barConfig.BarFillDirection == 0 ? barPos.AddY(barSize.Y - barFillSize.Y) : barPos;
+                Vector2 barBackgroundSize = new(barSize.X * (current / top), barSize.Y);
                 drawList.AddRectFilled(localPos, localPos + barBackgroundSize, barConfig.BarBackgroundColor.Base);
             }
 
@@ -666,7 +661,7 @@ namespace LMeter.Meter
             {
                 uint jobIconId = 62000u + (uint)combatant.Job + 100u * (uint)barConfig.JobIconStyle;
                 Vector2 jobIconPos = localPos + barConfig.JobIconOffset;
-                Vector2 jobIconSize = barConfig.JobIconSizeType == 0 ? Vector2.One * barHeight : barConfig.JobIconSize;
+                Vector2 jobIconSize = barConfig.JobIconSizeType == 0 ? Vector2.One * barSize.Y : barConfig.JobIconSize;
                 if (barConfig.JobIconBackgroundColor.Vector.W > 0f)
                 {
                     Vector2 jobIconBackgroundPos = new(jobIconPos.X, localPos.Y);
@@ -682,7 +677,6 @@ namespace LMeter.Meter
             }
 
             DrawBarTexts(drawList, this.BarTextConfig.Texts, localPos, barSize, jobColor, combatant);
-            return localPos.AddY(barHeight + barConfig.BarGaps);
         }
 
         private static void DrawBarTexts<T>(
