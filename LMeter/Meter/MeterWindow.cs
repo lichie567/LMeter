@@ -590,15 +590,7 @@ namespace LMeter.Meter
                         _ => combatant.NameOverwrite,
                     };
 
-                    RoundingOptions rounding = this.BarConfig.MiddleBarRounding;
-                    if (currentIndex == startIndex)
-                    {
-                        rounding = this.BarConfig.TopBarRounding;
-                    }
-                    else if (currentIndex == maxIndex - 1)
-                    {
-                        rounding = this.BarConfig.BottomBarRounding;
-                    }
+                    var rounding = GetRounding(layout, currentRow, currentColumn);
 
                     var barPos = new Vector2(
                         localPos.X + currentColumn * (layout.BarSize.X + this.BarConfig.BarHorizontalGaps),
@@ -618,6 +610,36 @@ namespace LMeter.Meter
                     );
                 }
             }
+        }
+
+        private RoundingOptions GetRounding(BarLayout layout, int row, int column)
+        {
+            var top = row == 0;
+            var bottom = row == layout.Rows - 1;
+            var left = column == 0;
+            var right = column == layout.Columns - 1;
+
+            if (layout.Columns == 1)
+            {
+                return top ? this.BarConfig.TopBarRounding : bottom ? this.BarConfig.BottomBarRounding : this.BarConfig.MiddleBarRounding;
+            }
+
+            if (layout.Rows == 1)
+            {
+                return left ? this.BarConfig.LeftBarRounding : right ? this.BarConfig.RightBarRounding : this.BarConfig.MiddleBarRounding;
+            }
+
+            if (top)
+            {
+                return left ? this.BarConfig.TopLeftBarRounding : right ? this.BarConfig.TopRightBarRounding : this.BarConfig.TopBarRounding;
+            }
+
+            if (bottom)
+            {
+                return left ? this.BarConfig.BottomLeftBarRounding : right ? this.BarConfig.BottomRightBarRounding : this.BarConfig.BottomBarRounding;
+            }
+
+            return left ? this.BarConfig.LeftBarRounding : right ? this.BarConfig.RightBarRounding : this.BarConfig.MiddleBarRounding;
         }
 
         private void DrawBar(
