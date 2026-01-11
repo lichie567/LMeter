@@ -521,9 +521,9 @@ namespace LMeter.Meter
             return layout;
         }
 
-        private void DrawBars(ImDrawListPtr drawList, Vector2 localPos, Vector2 size, ActEvent? actEvent)
+        private void DrawBars(ImDrawListPtr drawList, Vector2 localPos, BarLayout? layout, ActEvent? actEvent)
         {
-            if (actEvent?.Combatants is null || actEvent.Combatants.Count == 0)
+            if (actEvent?.Combatants is null || actEvent.Combatants.Count == 0 || layout is null)
             {
                 return;
             }
@@ -540,19 +540,6 @@ namespace LMeter.Meter
             }
 
             float top = sortedCombatants[0].GetValueForDataType(this.GeneralConfig.DataType);
-            int barCount = this.BarConfig.BarCount;
-            float margin = 0;
-            if (this.BarConfig.BarHeightType == 1)
-            {
-                float total = 0;
-                barCount = 0;
-                do
-                {
-                    barCount++;
-                    total += this.BarConfig.BarHeight + this.BarConfig.BarGaps;
-                } while (total <= size.Y);
-                margin = total - size.Y - this.BarConfig.BarGaps;
-            }
 
             int currentIndex = 0;
             string playerName = Singletons.Get<IPlayerState>().CharacterName ?? "YOU";
@@ -579,49 +566,57 @@ namespace LMeter.Meter
             }
 
             localPos = localPos.AddY(-_scrollShift);
-            int maxIndex = Math.Min(currentIndex + barCount, sortedCombatants.Count);
-            int startIndex = currentIndex;
-            for (; currentIndex < maxIndex; currentIndex++)
+            int maxIndex = Math.Min(currentIndex + layout.Bars, sortedCombatants.Count);
+
+            for (int currentRow = 0; currentRow < layout.Rows && currentIndex < maxIndex; ++currentRow)
             {
-                Combatant combatant = sortedCombatants[currentIndex];
-                float current = combatant.GetValueForDataType(this.GeneralConfig.DataType);
-                ConfigColor barColor = this.BarConfig.BarColor;
-                ConfigColor jobColor = this.BarColorsConfig.GetColor(combatant.Job);
-
-                if (this.BarConfig.UseCustomColorForSelf && combatant.OriginalName.Equals("YOU"))
+                for (int currentColumn = 0; currentColumn < layout.Columns && currentIndex < maxIndex; ++currentColumn, ++currentIndex)
                 {
-                    barColor = this.BarConfig.CustomColorForSelf;
-                    jobColor = this.BarConfig.CustomColorForSelf;
+                    Combatant combatant = sortedCombatants[currentIndex];
+                    float current = combatant.GetValueForDataType(this.GeneralConfig.DataType);
+                    ConfigColor barColor = this.BarConfig.BarColor;
+                    ConfigColor jobColor = this.BarColorsConfig.GetColor(combatant.Job);
+
+                    if (this.BarConfig.UseCustomColorForSelf && combatant.OriginalName.Equals("YOU"))
+                    {
+                        barColor = this.BarConfig.CustomColorForSelf;
+                        jobColor = this.BarConfig.CustomColorForSelf;
+                    }
+
+                    combatant.NameOverwrite = this.BarConfig.UseCharacterName switch
+                    {
+                        true when combatant.Name.Contains("YOU") => combatant.Name.Replace("YOU", playerName),
+                        false when combatant.NameOverwrite is not null => null,
+                        _ => combatant.NameOverwrite,
+                    };
+
+                    RoundingOptions rounding = this.BarConfig.MiddleBarRounding;
+                    if (currentIndex == startIndex)
+                    {
+                        rounding = this.BarConfig.TopBarRounding;
+                    }
+                    else if (currentIndex == maxIndex - 1)
+                    {
+                        rounding = this.BarConfig.BottomBarRounding;
+                    }
+
+                    var barPos = new Vector2(
+                        localPos.X + currentColumn * (layout.BarSize.X + this.BarConfig.BarHorizontalGaps),
+                        localPos.Y + currentRow * (layout.BarSize.Y + this.BarConfig.BarVerticalGaps)
+                    );
+
+                    this.DrawBar(
+                        drawList,
+                        barPos,
+                        layout.BarSize,
+                        combatant,
+                        jobColor,
+                        barColor,
+                        top,
+                        current,
+                        rounding
+                    );
                 }
-
-                combatant.NameOverwrite = this.BarConfig.UseCharacterName switch
-                {
-                    true when combatant.Name.Contains("YOU") => combatant.Name.Replace("YOU", playerName),
-                    false when combatant.NameOverwrite is not null => null,
-                    _ => combatant.NameOverwrite,
-                };
-
-                RoundingOptions rounding = this.BarConfig.MiddleBarRounding;
-                if (currentIndex == startIndex)
-                {
-                    rounding = this.BarConfig.TopBarRounding;
-                }
-                else if (currentIndex == maxIndex - 1)
-                {
-                    rounding = this.BarConfig.BottomBarRounding;
-                }
-
-                localPos = this.DrawBar(
-                    drawList,
-                    localPos,
-                    size,
-                    combatant,
-                    jobColor,
-                    barColor,
-                    top,
-                    current,
-                    rounding
-                );
             }
         }
 
