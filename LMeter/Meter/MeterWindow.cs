@@ -318,34 +318,53 @@ namespace LMeter.Meter
                         this.GeneralConfig.Rounding
                     );
 
-                    if (this.BarConfig.ShowColumnHeader && actEvent is not null)
-                    {
-                        List<Text> columnHeaderTexts = GetColumnHeaderTexts(this.BarTextConfig.Texts, this.BarConfig);
-                        Vector2 columnHeaderSize = new(size.X, this.BarConfig.ColumnHeaderHeight);
-                        drawList.AddRectFilled(
-                            localPos,
-                            localPos + columnHeaderSize,
-                            this.BarConfig.ColumnHeaderColor.Base
-                        );
-                        DrawBarTexts(
-                            drawList,
-                            columnHeaderTexts,
-                            localPos + this.BarConfig.ColumnHeaderOffset,
-                            columnHeaderSize,
-                            jobColor,
-                            actEvent
-                        );
-
-                        (localPos, size) = (localPos.AddY(columnHeaderSize.Y), size.AddY(-columnHeaderSize.Y));
-                    }
+                    BarLayout? layout = null;
 
                     if (this.HeaderConfig.ShowFooter)
                     {
                         size = size.AddY(-this.HeaderConfig.FooterHeight);
                     }
 
+                    if (actEvent is not null)
+                    {
+                        if (this.BarConfig.ShowColumnHeader)
+                        {
+                            size = size.AddY(-this.BarConfig.ColumnHeaderHeight);
+                        }
+
+                        layout = CalculateBarLayout(size, this.GetSortedCombatants(actEvent, this.GeneralConfig.DataType).Count);
+                    }
+
+                    if (this.BarConfig.ShowColumnHeader && actEvent is not null && layout is not null)
+                    {
+                        Vector2 columnHeaderSize = new(layout.BarSize.X, this.BarConfig.ColumnHeaderHeight);
+
+                        for (int i = 0; i < layout.Columns; i++)
+                        {
+                            List<Text> columnHeaderTexts = GetColumnHeaderTexts(this.BarTextConfig.Texts, this.BarConfig);
+
+                            var headerPos = localPos.AddX(i * (layout.BarSize.X + this.BarConfig.BarHorizontalGaps));
+
+                            drawList.AddRectFilled(
+                                headerPos,
+                                headerPos + columnHeaderSize,
+                                this.BarConfig.ColumnHeaderColor.Base
+                            );
+                            DrawBarTexts(
+                                drawList,
+                                columnHeaderTexts,
+                                headerPos + this.BarConfig.ColumnHeaderOffset,
+                                columnHeaderSize,
+                                jobColor,
+                                actEvent
+                            );
+                        }
+
+                        localPos = localPos.AddY(columnHeaderSize.Y);
+                    }
+
                     ImGui.PushClipRect(localPos, localPos + size, false);
-                    this.DrawBars(drawList, localPos, size, actEvent);
+                    this.DrawBars(drawList, localPos, layout, actEvent);
                     ImGui.PopClipRect();
 
                     if (this.HeaderConfig.ShowFooter)
@@ -450,64 +469,131 @@ namespace LMeter.Meter
             return (pos.AddY(headerConfig.HeaderHeight), size.AddY(-headerConfig.HeaderHeight));
         }
 
-        private void DrawBars(ImDrawListPtr drawList, Vector2 localPos, Vector2 size, ActEvent? actEvent)
+        private class BarLayout
         {
-            if (actEvent?.Combatants is not null && actEvent.Combatants.Count != 0)
+            public int Bars;
+
+            public int Rows;
+            public int Columns;
+
+            public Vector2 BarSize;
+
+            public float Margin = 0;
+        }
+
+        private BarLayout CalculateBarLayout(Vector2 size, int combatantCount)
+        {
+            BarLayout layout = new();
+
+            if (combatantCount == 0)
             {
-                // We don't want to corrupt the cache. The entire logic past this point mutates the sorted Act combatants instead of using a rendering cache
-                // This has the issue that some settings can't behave properly and or don't update till the following combat update/fight
-                List<Combatant> sortedCombatants = [.. this.GetSortedCombatants(actEvent, this.GeneralConfig.DataType)];
+                layout.Rows = 1;
+                layout.Columns = 1;
+                layout.BarSize = size;
+                layout.Bars = 1;
+            }
+            else if (this.BarConfig.BarSizeType == BarSizeType.ConstantSize)
+            {
+                var barWidth = Math.Min(this.BarConfig.BarWidth, size.X);
+                layout.BarSize = new Vector2(barWidth, this.BarConfig.BarHeight);
 
-                // add rank to the sorted combatants, with this we have the real rank of the player
-                int rank = 1;
-                foreach (var combatant in sortedCombatants)
+                if (this.BarConfig.MaxColumns > 1)
                 {
-                    combatant.Rank = rank++;
+                    barWidth += this.BarConfig.BarHorizontalGaps;
                 }
 
-                float top = sortedCombatants[0].GetValueForDataType(this.GeneralConfig.DataType);
-                int barCount = this.BarConfig.BarCount;
-                float margin = 0;
-                if (this.BarConfig.BarHeightType == 1)
+                layout.Columns = Math.Min(this.BarConfig.MaxColumns, (int)Math.Floor(size.X / barWidth));
+
+                var barHeight = this.BarConfig.BarHeight + this.BarConfig.BarVerticalGaps;
+                layout.Rows = this.BarConfig.MaxRows > 0
+                    ? Math.Min(this.BarConfig.MaxRows, (int)Math.Ceiling(size.Y / barHeight))
+                    : (int)Math.Ceiling(size.Y / barHeight);
+
+                float totalY = layout.Rows * barHeight;
+                layout.Margin = totalY - size.Y - this.BarConfig.BarVerticalGaps;
+
+                layout.Bars = layout.Columns * layout.Rows;
+            }
+            else
+            {
+                layout.Columns = Math.Min(combatantCount, this.BarConfig.MaxColumns);
+                var totalHorizontalGaps = (layout.Columns - 1) * this.BarConfig.BarHorizontalGaps;
+                var barWidth = (size.X - totalHorizontalGaps) / layout.Columns;
+
+                var effectiveBarCount = Math.Min(this.BarConfig.BarCount, combatantCount);
+
+                layout.Rows = (int)Math.Ceiling((float)effectiveBarCount / layout.Columns);
+
+                if (this.BarConfig.MaxRows > 0 && this.BarConfig.MaxRows < layout.Rows)
                 {
-                    float total = 0;
-                    barCount = 0;
-                    do
-                    {
-                        barCount++;
-                        total += this.BarConfig.BarHeight + this.BarConfig.BarGaps;
-                    } while (total <= size.Y);
-                    margin = total - size.Y - this.BarConfig.BarGaps;
+                    layout.Rows = this.BarConfig.MaxRows;
                 }
 
-                int currentIndex = 0;
-                string playerName = Singletons.Get<IPlayerState>().CharacterName ?? "YOU";
-                if (sortedCombatants.Count > barCount)
+                var totalVerticalGaps = layout.Rows * this.BarConfig.BarVerticalGaps;
+                var barHeight = (int)((size.Y - totalVerticalGaps) / layout.Rows);
+
+                layout.BarSize = new Vector2(barWidth, barHeight);
+
+                layout.Bars = Math.Min(this.BarConfig.BarCount, layout.Rows * layout.Columns);
+            }
+
+            return layout;
+        }
+
+        private void DrawBars(ImDrawListPtr drawList, Vector2 localPos, BarLayout? layout, ActEvent? actEvent)
+        {
+            if (actEvent?.Combatants is null || actEvent.Combatants.Count == 0 || layout is null)
+            {
+                return;
+            }
+
+            // We don't want to corrupt the cache. The entire logic past this point mutates the sorted Act combatants instead of using a rendering cache
+            // This has the issue that some settings can't behave properly and or don't update till the following combat update/fight
+            List<Combatant> sortedCombatants = [.. this.GetSortedCombatants(actEvent, this.GeneralConfig.DataType)];
+
+            // add rank to the sorted combatants, with this we have the real rank of the player
+            int rank = 1;
+            foreach (var combatant in sortedCombatants)
+            {
+                combatant.Rank = rank++;
+            }
+
+            float top = sortedCombatants[0].GetValueForDataType(this.GeneralConfig.DataType);
+
+            int currentIndex = 0;
+            string playerName = Singletons.Get<IPlayerState>().CharacterName ?? "YOU";
+            if (sortedCombatants.Count > layout.Bars)
+            {
+                int unclampedScroll = _scrollPosition;
+
+                var hiddenRowCount = (int)Math.Ceiling((float)(sortedCombatants.Count - layout.Bars) / layout.Columns);
+
+                _scrollPosition = Math.Clamp(_scrollPosition, 0, hiddenRowCount);
+
+                currentIndex = _scrollPosition * layout.Columns;
+
+                if (layout.Margin > 0 && _scrollPosition < unclampedScroll)
                 {
-                    int unclampedScroll = _scrollPosition;
-                    currentIndex = Math.Clamp(_scrollPosition, 0, sortedCombatants.Count - barCount);
-                    _scrollPosition = currentIndex;
-
-                    if (margin > 0 && _scrollPosition < unclampedScroll)
-                    {
-                        _scrollShift = margin;
-                    }
-
-                    if (unclampedScroll < 0)
-                    {
-                        _scrollShift = 0;
-                    }
-
-                    if (this.BarConfig.AlwaysShowSelf && this.BarConfig.BarHeightType == 0)
-                    {
-                        MovePlayerIntoViewableRange(sortedCombatants, _scrollPosition, playerName);
-                    }
+                    _scrollShift = layout.Margin;
                 }
 
-                localPos = localPos.AddY(-_scrollShift);
-                int maxIndex = Math.Min(currentIndex + barCount, sortedCombatants.Count);
-                int startIndex = currentIndex;
-                for (; currentIndex < maxIndex; currentIndex++)
+                if (unclampedScroll < 0)
+                {
+                    _scrollShift = 0;
+                }
+
+                if (this.BarConfig.AlwaysShowSelf && this.BarConfig.BarSizeType == BarSizeType.ConstantCount)
+                {
+                    MovePlayerIntoViewableRange(sortedCombatants, _scrollPosition, playerName);
+                }
+            }
+
+            localPos = localPos.AddY(-_scrollShift);
+            int maxIndex = Math.Min(currentIndex + layout.Bars, sortedCombatants.Count);
+
+            for (int currentRow = 0; currentRow < layout.Rows && currentIndex < maxIndex; ++currentRow)
+            {
+                for (int currentColumn = 0; currentColumn < layout.Columns && currentIndex < maxIndex; ++currentColumn, ++currentIndex)
                 {
                     Combatant combatant = sortedCombatants[currentIndex];
                     float current = combatant.GetValueForDataType(this.GeneralConfig.DataType);
@@ -527,20 +613,17 @@ namespace LMeter.Meter
                         _ => combatant.NameOverwrite,
                     };
 
-                    RoundingOptions rounding = this.BarConfig.MiddleBarRounding;
-                    if (currentIndex == startIndex)
-                    {
-                        rounding = this.BarConfig.TopBarRounding;
-                    }
-                    else if (currentIndex == maxIndex - 1)
-                    {
-                        rounding = this.BarConfig.BottomBarRounding;
-                    }
+                    var rounding = GetRounding(layout, currentRow, currentColumn);
 
-                    localPos = this.DrawBar(
+                    var barPos = new Vector2(
+                        localPos.X + currentColumn * (layout.BarSize.X + this.BarConfig.BarHorizontalGaps),
+                        localPos.Y + currentRow * (layout.BarSize.Y + this.BarConfig.BarVerticalGaps)
+                    );
+
+                    this.DrawBar(
                         drawList,
-                        localPos,
-                        size,
+                        barPos,
+                        layout.BarSize,
                         combatant,
                         jobColor,
                         barColor,
@@ -550,13 +633,42 @@ namespace LMeter.Meter
                     );
                 }
             }
-            ;
         }
 
-        private Vector2 DrawBar(
+        private RoundingOptions GetRounding(BarLayout layout, int row, int column)
+        {
+            var top = row == 0;
+            var bottom = row == layout.Rows - 1;
+            var left = column == 0;
+            var right = column == layout.Columns - 1;
+
+            if (layout.Columns == 1)
+            {
+                return top ? this.BarConfig.TopBarRounding : bottom ? this.BarConfig.BottomBarRounding : this.BarConfig.MiddleBarRounding;
+            }
+
+            if (layout.Rows == 1)
+            {
+                return left ? this.BarConfig.LeftBarRounding : right ? this.BarConfig.RightBarRounding : this.BarConfig.MiddleBarRounding;
+            }
+
+            if (top)
+            {
+                return left ? this.BarConfig.TopLeftBarRounding : right ? this.BarConfig.TopRightBarRounding : this.BarConfig.TopBarRounding;
+            }
+
+            if (bottom)
+            {
+                return left ? this.BarConfig.BottomLeftBarRounding : right ? this.BarConfig.BottomRightBarRounding : this.BarConfig.BottomBarRounding;
+            }
+
+            return left ? this.BarConfig.LeftBarRounding : right ? this.BarConfig.RightBarRounding : this.BarConfig.MiddleBarRounding;
+        }
+
+        private void DrawBar(
             ImDrawListPtr drawList,
             Vector2 localPos,
-            Vector2 size,
+            Vector2 barSize,
             Combatant combatant,
             ConfigColor jobColor,
             ConfigColor barColor,
@@ -566,19 +678,14 @@ namespace LMeter.Meter
         )
         {
             BarConfig barConfig = this.BarConfig;
-            float barHeight =
-                barConfig.BarHeightType == 0
-                    ? (size.Y - (barConfig.BarCount - 1) * barConfig.BarGaps) / barConfig.BarCount
-                    : barConfig.BarHeight;
 
             Vector2 barPos = localPos;
-            Vector2 barSize = new(size.X, barHeight);
-            Vector2 barFillSize = new(size.X * (current / top), barHeight * barConfig.BarFillHeight);
+            Vector2 barFillSize = new(barSize.X * (current / top), barSize.Y * barConfig.BarFillHeight);
 
             if (barConfig.BarFillHeight != 1f)
             {
-                barPos = barConfig.BarFillDirection == 0 ? barPos.AddY(barHeight - barFillSize.Y) : barPos;
-                Vector2 barBackgroundSize = new(size.X * (current / top), barHeight);
+                barPos = barConfig.BarFillDirection == 0 ? barPos.AddY(barSize.Y - barFillSize.Y) : barPos;
+                Vector2 barBackgroundSize = new(barSize.X * (current / top), barSize.Y);
                 drawList.AddRectFilled(localPos, localPos + barBackgroundSize, barConfig.BarBackgroundColor.Base);
             }
 
@@ -594,7 +701,7 @@ namespace LMeter.Meter
             {
                 uint jobIconId = 62000u + (uint)combatant.Job + 100u * (uint)barConfig.JobIconStyle;
                 Vector2 jobIconPos = localPos + barConfig.JobIconOffset;
-                Vector2 jobIconSize = barConfig.JobIconSizeType == 0 ? Vector2.One * barHeight : barConfig.JobIconSize;
+                Vector2 jobIconSize = barConfig.JobIconSizeType == 0 ? Vector2.One * barSize.Y : barConfig.JobIconSize;
                 if (barConfig.JobIconBackgroundColor.Vector.W > 0f)
                 {
                     Vector2 jobIconBackgroundPos = new(jobIconPos.X, localPos.Y);
@@ -610,7 +717,6 @@ namespace LMeter.Meter
             }
 
             DrawBarTexts(drawList, this.BarTextConfig.Texts, localPos, barSize, jobColor, combatant);
-            return localPos.AddY(barHeight + barConfig.BarGaps);
         }
 
         private static void DrawBarTexts<T>(

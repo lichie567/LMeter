@@ -135,4 +135,10 @@ namespace LMeter.Helpers
         BottomLeft = 7,
         BottomRight = 8,
     }
+
+    public enum BarSizeType
+    {
+        ConstantCount = 0,
+        ConstantSize = 1,
+    }
 }
