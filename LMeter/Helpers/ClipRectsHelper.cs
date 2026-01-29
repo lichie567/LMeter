@@ -137,11 +137,11 @@ namespace LMeter.Helpers
             "SelectYesno",
         ];
 
-        private readonly List<ClipRect> _clipRects = [];
+        private readonly List<ClipRect> m_clipRects = [];
 
         public unsafe void Update()
         {
-            _clipRects.Clear();
+            m_clipRects.Clear();
 
             AtkStage* stage = AtkStage.Instance();
             if (stage == null)
@@ -194,7 +194,7 @@ namespace LMeter.Helpers
                         continue;
                     }
 
-                    _clipRects.Add(clipRect);
+                    m_clipRects.Add(clipRect);
                 }
                 catch { }
             }
@@ -203,7 +203,7 @@ namespace LMeter.Helpers
         public ClipRect? GetClipRectForArea(Vector2 pos, Vector2 size)
         {
             ClipRect area = new(pos, pos + size);
-            foreach (ClipRect clipRect in _clipRects)
+            foreach (ClipRect clipRect in m_clipRects)
             {
                 if (clipRect.IntersectsWith(area))
                 {
@@ -216,7 +216,7 @@ namespace LMeter.Helpers
 
         public bool IsPointClipped(Vector2 point)
         {
-            foreach (ClipRect clipRect in _clipRects)
+            foreach (ClipRect clipRect in m_clipRects)
             {
                 if (clipRect.Contains(point))
                 {

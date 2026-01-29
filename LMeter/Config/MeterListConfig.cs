@@ -14,12 +14,12 @@ namespace LMeter.Config
     public class MeterListConfig : IConfigPage
     {
         [JsonIgnore]
-        private string _input = string.Empty;
+        private string m_input = string.Empty;
 
         [JsonIgnore]
-        private MeterDataType _meterDataType = MeterDataType.Damage;
+        private MeterDataType m_meterDataType = MeterDataType.Damage;
 
-        private const float MenuBarHeight = 40;
+        private const float MENU_BAR_HEIGHT = 40;
 
         [JsonIgnore]
         public bool Active { get; set; }
@@ -77,22 +77,22 @@ namespace LMeter.Config
             float meterTypeWidth = 100f;
             float textInputWidth = size.X - meterTypeWidth - buttonSize.X * 2 - padX * 5;
 
-            if (ImGui.BeginChild("##Buttons", new Vector2(size.X, MenuBarHeight), true))
+            if (ImGui.BeginChild("##Buttons", new Vector2(size.X, MENU_BAR_HEIGHT), true))
             {
                 ImGui.PushItemWidth(textInputWidth);
-                ImGui.InputTextWithHint("##Input", "Profile Name/Import String", ref _input, 10000);
+                ImGui.InputTextWithHint("##Input", "Profile Name/Import String", ref m_input, 10000);
                 ImGui.PopItemWidth();
 
                 ImGui.PushItemWidth(meterTypeWidth);
                 ImGui.SameLine();
-                ImGui.Combo("", ref Unsafe.As<MeterDataType, int>(ref _meterDataType), ["Damage", "Healing"], 2);
+                ImGui.Combo("", ref Unsafe.As<MeterDataType, int>(ref m_meterDataType), ["Damage", "Healing"], 2);
                 ImGui.PopItemWidth();
 
                 ImGui.SameLine();
                 DrawHelpers.DrawButton(
                     string.Empty,
                     FontAwesomeIcon.Plus,
-                    () => CreateMeter(_input, _meterDataType),
+                    () => CreateMeter(m_input, m_meterDataType),
                     "Create new Meter",
                     buttonSize
                 );
@@ -101,7 +101,7 @@ namespace LMeter.Config
                 DrawHelpers.DrawButton(
                     string.Empty,
                     FontAwesomeIcon.Download,
-                    () => ImportMeter(_input),
+                    () => ImportMeter(m_input),
                     "Import new Meter",
                     buttonSize
                 );
@@ -121,7 +121,7 @@ namespace LMeter.Config
                 | ImGuiTableFlags.ScrollY
                 | ImGuiTableFlags.NoSavedSettings;
 
-            if (ImGui.BeginTable("##Meter_Table", 3, flags, new Vector2(size.X, size.Y - MenuBarHeight)))
+            if (ImGui.BeginTable("##Meter_Table", 3, flags, new Vector2(size.X, size.Y - MENU_BAR_HEIGHT)))
             {
                 Vector2 buttonsize = new(30, 0);
                 float actionsWidth = buttonsize.X * 3 + padX * 2;
@@ -138,8 +138,8 @@ namespace LMeter.Config
                     MeterWindow meter = this.Meters[i];
 
                     if (
-                        !string.IsNullOrEmpty(_input)
-                        && !meter.Name.Contains(_input, StringComparison.OrdinalIgnoreCase)
+                        !string.IsNullOrEmpty(m_input)
+                        && !meter.Name.Contains(m_input, StringComparison.OrdinalIgnoreCase)
                     )
                     {
                         continue;
@@ -202,7 +202,7 @@ namespace LMeter.Config
                 this.Meters.Add(MeterWindow.GetDefaultMeter(dataType, name));
             }
 
-            _input = string.Empty;
+            m_input = string.Empty;
         }
 
         private void EditMeter(MeterWindow meter)
@@ -233,7 +233,7 @@ namespace LMeter.Config
                 DrawHelpers.DrawNotification("Failed to Import Meter!", NotificationType.Error);
             }
 
-            _input = string.Empty;
+            m_input = string.Empty;
         }
 
         private void ExportMeter(MeterWindow meter)

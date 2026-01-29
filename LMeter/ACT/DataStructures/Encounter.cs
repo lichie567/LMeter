@@ -16,7 +16,7 @@ public class Encounter : IActData<Encounter>
             .Select(x => $"[{x.Name.ToLower()}]")
             .ToArray();
 
-    private static readonly Dictionary<string, MemberInfo> _textTagMembers = typeof(Encounter)
+    private static readonly Dictionary<string, MemberInfo> m_textTagMembers = typeof(Encounter)
         .GetMembers()
         .Where(x => Attribute.IsDefined(x, typeof(TextTagAttribute)))
         .ToDictionary((x) => x.Name.ToLower());
@@ -75,7 +75,7 @@ public class Encounter : IActData<Encounter>
     {
         return TextTagFormatter.TextTagRegex.Replace(
             format,
-            new TextTagFormatter(this, numberFormat, emptyIfZero, _textTagMembers).Evaluate
+            new TextTagFormatter(this, numberFormat, emptyIfZero, m_textTagMembers).Evaluate
         );
     }
 

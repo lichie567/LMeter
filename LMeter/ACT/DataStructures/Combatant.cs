@@ -17,7 +17,7 @@ public class Combatant : IActData<Combatant>
             .Select(x => $"[{x.Name.ToLower()}]")
             .ToArray();
 
-    private static readonly Dictionary<string, MemberInfo> _textTagMembers = typeof(Combatant)
+    private static readonly Dictionary<string, MemberInfo> m_textTagMembers = typeof(Combatant)
         .GetMembers()
         .Where(x => Attribute.IsDefined(x, typeof(TextTagAttribute)))
         .ToDictionary((x) => x.Name.ToLower());
@@ -87,15 +87,15 @@ public class Combatant : IActData<Combatant>
 
     // [TextTag]
     [JsonProperty("crithit%")]
-    private string _critHitPctString { get; set; } = string.Empty;
+    private string m_critHitPctString { get; set; } = string.Empty;
 
     // [TextTag]
     [JsonProperty("DirectHitPct")]
-    private string _directHitPctString { get; set; } = string.Empty;
+    private string m_directHitPctString { get; set; } = string.Empty;
 
     // [TextTag]
     [JsonProperty("CritDirectHitPct")]
-    private string _critDirectHitPctString { get; set; } = string.Empty;
+    private string m_critDirectHitPctString { get; set; } = string.Empty;
 
     [TextTag]
     [JsonProperty("enchps")]
@@ -141,7 +141,7 @@ public class Combatant : IActData<Combatant>
     public string MaxHit { get; set; } = string.Empty;
 
     [JsonProperty("MAXHIT")]
-    private string _maxHit { get; set; } = string.Empty;
+    private string m_maxHit { get; set; } = string.Empty;
 
     [TextTag]
     public LazyString<string?> MaxHitName { get; set; }
@@ -151,19 +151,19 @@ public class Combatant : IActData<Combatant>
 
     [JsonProperty("hits")]
     [JsonConverter(typeof(LazyFloatConverter))]
-    private LazyFloat? _hits { get; set; }
+    private LazyFloat? m_hits { get; set; }
 
     [JsonProperty("crithits")]
     [JsonConverter(typeof(LazyFloatConverter))]
-    private LazyFloat? _critHits { get; set; }
+    private LazyFloat? m_critHits { get; set; }
 
     [JsonProperty("DirectHitCount")]
     [JsonConverter(typeof(LazyFloatConverter))]
-    private LazyFloat? _directHits { get; set; }
+    private LazyFloat? m_directHits { get; set; }
 
     [JsonProperty("CritDirectHitCount")]
     [JsonConverter(typeof(LazyFloatConverter))]
-    private LazyFloat? _critdirectHits { get; set; }
+    private LazyFloat? m_critdirectHits { get; set; }
 
     public Combatant()
     {
@@ -174,16 +174,16 @@ public class Combatant : IActData<Combatant>
         this.EffectiveHealing = new LazyFloat(() => (this.HealingTotal?.Value ?? 0) - (this.OverHeal?.Value ?? 0));
         this.MaxHitName = new LazyString<string?>(() => this.MaxHit, LazyStringConverters.MaxHitName);
         this.MaxHitValue = new LazyFloat(() => LazyStringConverters.MaxHitValue(this.MaxHit));
-        this.CritHitPct = new LazyFloat(() => GetPercent(_critHits, _hits));
-        this.DirectHitPct = new LazyFloat(() => GetPercent(_directHits, _hits));
-        this.CritDirectHitPct = new LazyFloat(() => GetPercent(_critdirectHits, _hits));
+        this.CritHitPct = new LazyFloat(() => GetPercent(m_critHits, m_hits));
+        this.DirectHitPct = new LazyFloat(() => GetPercent(m_directHits, m_hits));
+        this.CritDirectHitPct = new LazyFloat(() => GetPercent(m_critdirectHits, m_hits));
     }
 
     public string GetFormattedString(string format, string numberFormat, bool emptyIfZero)
     {
         return TextTagFormatter.TextTagRegex.Replace(
             format,
-            new TextTagFormatter(this, numberFormat, emptyIfZero, _textTagMembers).Evaluate
+            new TextTagFormatter(this, numberFormat, emptyIfZero, m_textTagMembers).Evaluate
         );
     }
 

@@ -15,55 +15,53 @@ namespace LMeter.Meter
     public class MeterWindow(string name) : IConfigurable
     {
         [JsonIgnore]
-        private bool _lastFrameWasUnlocked = false;
+        private bool m_lastFrameWasUnlocked = false;
 
         [JsonIgnore]
-        private bool _lastFrameWasDragging = false;
+        private bool m_lastFrameWasDragging = false;
 
         [JsonIgnore]
-        private bool _lastFrameWasPreview = false;
+        private bool m_lastFrameWasPreview = false;
 
         [JsonIgnore]
-        private bool _lastFrameWasCombat = false;
+        private bool m_lastFrameWasCombat = false;
 
         [JsonIgnore]
-        private bool _contextMenuWasOpen = false;
+        private bool m_contextMenuWasOpen = false;
 
         [JsonIgnore]
-        private bool _unlocked = false;
+        private bool m_unlocked = false;
 
         [JsonIgnore]
-        private bool _hovered = false;
+        private bool m_hovered = false;
 
         [JsonIgnore]
-        private bool _dragging = false;
+        private bool m_dragging = false;
 
         [JsonIgnore]
-        private bool _locked = false;
+        private bool m_locked = false;
 
         [JsonIgnore]
-        private int _eventIndex = -1;
+        private int m_eventIndex = -1;
 
         [JsonIgnore]
-        private ActEvent? _previewEvent = null;
+        private ActEvent? m_previewEvent = null;
 
         [JsonIgnore]
-        private int _scrollPosition = 0;
+        private int m_scrollPosition = 0;
 
         [JsonIgnore]
-        private float _scrollShift = 0;
+        private float m_scrollShift = 0;
 
         [JsonIgnore]
-        private DateTime? _lastSortedTimestamp = null;
+        private DateTime? m_lastSortedTimestamp = null;
 
         [JsonIgnore]
-        private List<Combatant> _lastSortedCombatants = [];
+        private List<Combatant> m_lastSortedCombatants = [];
 
         [JsonIgnore]
         public string Id { get; init; } = $"LMeter_MeterWindow_{Guid.NewGuid()}";
-
         public string Name { get; set; } = name;
-
         public bool Enabled = true;
         public GeneralConfig GeneralConfig { get; set; } = new GeneralConfig();
         public HeaderConfig HeaderConfig { get; set; } = new HeaderConfig();
@@ -138,11 +136,11 @@ namespace LMeter.Meter
         {
             MeterWindow? newMeter = type switch
             {
-                MeterDataType.Damage => ConfigHelpers.GetFromImportString<MeterWindow>(DefaultProfiles.DefaultDpsMeter),
+                MeterDataType.Damage => ConfigHelpers.GetFromImportString<MeterWindow>(DefaultProfiles.DEFAULT_DPS_METER),
                 MeterDataType.Healing => ConfigHelpers.GetFromImportString<MeterWindow>(
-                    DefaultProfiles.DefaultHpsMeter
+                    DefaultProfiles.DEFAULT_HPS_METER
                 ),
-                _ => ConfigHelpers.GetFromImportString<MeterWindow>(DefaultProfiles.DefaultDpsMeter),
+                _ => ConfigHelpers.GetFromImportString<MeterWindow>(DefaultProfiles.DEFAULT_DPS_METER),
             };
 
             if (newMeter is not null)
@@ -155,23 +153,23 @@ namespace LMeter.Meter
 
         public void Clear()
         {
-            _lastSortedCombatants = [];
-            _lastSortedTimestamp = null;
+            m_lastSortedCombatants = [];
+            m_lastSortedTimestamp = null;
         }
 
         // Dont ask
         protected void UpdateDragData(Vector2 pos, Vector2 size, bool locked)
         {
-            _unlocked = !locked;
-            _hovered = ImGui.IsMouseHoveringRect(pos, pos + size);
-            _dragging = _lastFrameWasDragging && ImGui.IsMouseDown(ImGuiMouseButton.Left);
-            _locked = (_unlocked && !_lastFrameWasUnlocked || !_hovered) && !_dragging;
-            _lastFrameWasDragging = _hovered || _dragging;
+            m_unlocked = !locked;
+            m_hovered = ImGui.IsMouseHoveringRect(pos, pos + size);
+            m_dragging = m_lastFrameWasDragging && ImGui.IsMouseDown(ImGuiMouseButton.Left);
+            m_locked = (m_unlocked && !m_lastFrameWasUnlocked || !m_hovered) && !m_dragging;
+            m_lastFrameWasDragging = m_hovered || m_dragging;
         }
 
         private bool ShouldDraw(Vector2 pos, Vector2 size)
         {
-            if (_dragging)
+            if (m_dragging)
             {
                 return true;
             }
@@ -205,14 +203,14 @@ namespace LMeter.Meter
 
             Vector2 localPos = pos + this.GeneralConfig.Position;
             Vector2 size = this.GeneralConfig.Size;
-            if (!this.ShouldDraw(localPos, size) && !_contextMenuWasOpen)
+            if (!this.ShouldDraw(localPos, size) && !m_contextMenuWasOpen)
             {
                 return;
             }
 
             if (ImGui.IsMouseHoveringRect(localPos, localPos + size))
             {
-                _scrollPosition -= (int)ImGui.GetIO().MouseWheel;
+                m_scrollPosition -= (int)ImGui.GetIO().MouseWheel;
 
                 if (ImGui.IsMouseClicked(ImGuiMouseButton.Right) && !this.GeneralConfig.Preview)
                 {
@@ -220,19 +218,19 @@ namespace LMeter.Meter
                 }
             }
 
-            _contextMenuWasOpen = this.DrawContextMenu($"{this.Id}_ContextMenu", out bool selected, out int index);
-            if (_contextMenuWasOpen && selected)
+            m_contextMenuWasOpen = this.DrawContextMenu($"{this.Id}_ContextMenu", out bool selected, out int index);
+            if (m_contextMenuWasOpen && selected)
             {
-                _eventIndex = index;
-                _lastSortedTimestamp = null;
-                _lastSortedCombatants = [];
-                _scrollPosition = 0;
+                m_eventIndex = index;
+                m_lastSortedTimestamp = null;
+                m_lastSortedCombatants = [];
+                m_scrollPosition = 0;
             }
 
             bool combat = CharacterState.IsInCombat();
-            if (this.GeneralConfig.ReturnToCurrent && !_lastFrameWasCombat && combat)
+            if (this.GeneralConfig.ReturnToCurrent && !m_lastFrameWasCombat && combat)
             {
-                _eventIndex = -1;
+                m_eventIndex = -1;
             }
 
             this.UpdateDragData(localPos, size, this.GeneralConfig.Lock);
@@ -242,12 +240,12 @@ namespace LMeter.Meter
                 localPos,
                 size,
                 needsInput,
-                _locked || this.GeneralConfig.Lock,
+                m_locked || this.GeneralConfig.Lock,
                 (drawList) =>
                 {
-                    if (_unlocked)
+                    if (m_unlocked)
                     {
-                        if (_lastFrameWasDragging)
+                        if (m_lastFrameWasDragging)
                         {
                             localPos = ImGui.GetWindowPos();
                             this.GeneralConfig.Position = localPos - pos;
@@ -283,14 +281,14 @@ namespace LMeter.Meter
                         size -= Vector2.One * this.GeneralConfig.BorderThickness * 2;
                     }
 
-                    if (this.GeneralConfig.Preview && !_lastFrameWasPreview)
+                    if (this.GeneralConfig.Preview && !m_lastFrameWasPreview)
                     {
-                        _previewEvent = ActEvent.GetTestData();
+                        m_previewEvent = ActEvent.GetTestData();
                     }
 
                     ActEvent? actEvent = this.GeneralConfig.Preview
-                        ? _previewEvent
-                        : Singletons.Get<LogClient>().GetEvent(_eventIndex);
+                        ? m_previewEvent
+                        : Singletons.Get<LogClient>().GetEvent(m_eventIndex);
                     ConfigColor jobColor = this.BarColorsConfig.GetColor(CharacterState.GetCharacterJob());
 
                     Vector2 footerPos = localPos.AddY(size.Y - this.HeaderConfig.FooterHeight);
@@ -363,9 +361,9 @@ namespace LMeter.Meter
                 }
             );
 
-            _lastFrameWasUnlocked = _unlocked;
-            _lastFrameWasPreview = this.GeneralConfig.Preview;
-            _lastFrameWasCombat = combat;
+            m_lastFrameWasUnlocked = m_unlocked;
+            m_lastFrameWasPreview = this.GeneralConfig.Preview;
+            m_lastFrameWasCombat = combat;
         }
 
         private static List<Text> GetColumnHeaderTexts(List<Text> texts, BarConfig config)
@@ -484,27 +482,27 @@ namespace LMeter.Meter
                 string playerName = Singletons.Get<IPlayerState>().CharacterName ?? "YOU";
                 if (sortedCombatants.Count > barCount)
                 {
-                    int unclampedScroll = _scrollPosition;
-                    currentIndex = Math.Clamp(_scrollPosition, 0, sortedCombatants.Count - barCount);
-                    _scrollPosition = currentIndex;
+                    int unclampedScroll = m_scrollPosition;
+                    currentIndex = Math.Clamp(m_scrollPosition, 0, sortedCombatants.Count - barCount);
+                    m_scrollPosition = currentIndex;
 
-                    if (margin > 0 && _scrollPosition < unclampedScroll)
+                    if (margin > 0 && m_scrollPosition < unclampedScroll)
                     {
-                        _scrollShift = margin;
+                        m_scrollShift = margin;
                     }
 
                     if (unclampedScroll < 0)
                     {
-                        _scrollShift = 0;
+                        m_scrollShift = 0;
                     }
 
                     if (this.BarConfig.AlwaysShowSelf && this.BarConfig.BarHeightType == 0)
                     {
-                        MovePlayerIntoViewableRange(sortedCombatants, _scrollPosition, playerName);
+                        MovePlayerIntoViewableRange(sortedCombatants, m_scrollPosition, playerName);
                     }
                 }
 
-                localPos = localPos.AddY(-_scrollShift);
+                localPos = localPos.AddY(-m_scrollShift);
                 int maxIndex = Math.Min(currentIndex + barCount, sortedCombatants.Count);
                 int startIndex = currentIndex;
                 for (; currentIndex < maxIndex; currentIndex++)
@@ -797,12 +795,12 @@ namespace LMeter.Meter
         {
             if (
                 actEvent.Combatants is null
-                || _lastSortedTimestamp.HasValue
-                    && _lastSortedTimestamp.Value == actEvent.Timestamp
+                || m_lastSortedTimestamp.HasValue
+                    && m_lastSortedTimestamp.Value == actEvent.Timestamp
                     && !this.GeneralConfig.Preview
             )
             {
-                return _lastSortedCombatants;
+                return m_lastSortedCombatants;
             }
 
             List<Combatant> sortedCombatants = [.. actEvent.Combatants.Values];
@@ -821,8 +819,8 @@ namespace LMeter.Meter
                 }
             );
 
-            _lastSortedTimestamp = actEvent.Timestamp;
-            _lastSortedCombatants = sortedCombatants;
+            m_lastSortedTimestamp = actEvent.Timestamp;
+            m_lastSortedCombatants = sortedCombatants;
             return sortedCombatants;
         }
     }

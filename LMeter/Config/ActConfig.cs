@@ -11,17 +11,16 @@ namespace LMeter.Config
     public class ActConfig : IConfigPage
     {
         [JsonIgnore]
-        private const string _defaultSocketAddress = "ws://127.0.0.1:10501/ws";
+        private const string SOCKET_ADDRESS = "ws://127.0.0.1:10501/ws";
 
         [JsonIgnore]
-        private DateTime? LastCombatTime { get; set; }
+        private DateTime? m_lastCombatTime { get; set; }
 
         [JsonIgnore]
-        private DateTime? LastReconnectAttempt { get; set; }
+        private DateTime? m_lastReconnectAttempt { get; set; }
 
         [JsonIgnore]
         public bool Active { get; set; }
-
         public string Name => "ACT";
         public string ActSocketAddress;
         public int EncounterHistorySize = 15;
@@ -37,7 +36,7 @@ namespace LMeter.Config
 
         public ActConfig()
         {
-            this.ActSocketAddress = _defaultSocketAddress;
+            this.ActSocketAddress = SOCKET_ADDRESS;
         }
 
         public IConfigPage GetDefault() => new ActConfig();
@@ -74,7 +73,7 @@ namespace LMeter.Config
                 {
                     ImGui.InputTextWithHint(
                         "ACT Websocket Address",
-                        $"Default: '{_defaultSocketAddress}'",
+                        $"Default: '{SOCKET_ADDRESS}'",
                         ref this.ActSocketAddress,
                         64
                     );
@@ -165,22 +164,22 @@ namespace LMeter.Config
         {
             ConnectionStatus status = Singletons.Get<LogClient>().Status;
             if (
-                this.LastReconnectAttempt.HasValue
+                m_lastReconnectAttempt.HasValue
                 && (status == ConnectionStatus.NotConnected || status == ConnectionStatus.ConnectionFailed)
             )
             {
                 if (
                     this.AutoReconnect
-                    && this.LastReconnectAttempt < DateTime.UtcNow - TimeSpan.FromSeconds(this.ReconnectDelay)
+                    && m_lastReconnectAttempt < DateTime.UtcNow - TimeSpan.FromSeconds(this.ReconnectDelay)
                 )
                 {
                     Singletons.Get<LogClient>().Reset();
-                    this.LastReconnectAttempt = DateTime.UtcNow;
+                    m_lastReconnectAttempt = DateTime.UtcNow;
                 }
             }
             else
             {
-                this.LastReconnectAttempt = DateTime.UtcNow;
+                m_lastReconnectAttempt = DateTime.UtcNow;
             }
         }
 
@@ -190,15 +189,15 @@ namespace LMeter.Config
             {
                 if (this.AutoEnd && CharacterState.IsInCombat())
                 {
-                    this.LastCombatTime = DateTime.UtcNow;
+                    m_lastCombatTime = DateTime.UtcNow;
                 }
                 else if (
-                    this.LastCombatTime is not null
-                    && this.LastCombatTime < DateTime.UtcNow - TimeSpan.FromSeconds(this.AutoEndDelay)
+                    m_lastCombatTime is not null
+                    && m_lastCombatTime < DateTime.UtcNow - TimeSpan.FromSeconds(this.AutoEndDelay)
                 )
                 {
                     Singletons.Get<LogClient>().EndEncounter();
-                    this.LastCombatTime = null;
+                    m_lastCombatTime = null;
                 }
             }
         }

@@ -17,13 +17,13 @@ namespace LMeter.Act.DataStructures
                 .Select(x => $"[{x.Name.ToLower()}]")
                 .ToArray();
 
-        private static readonly Dictionary<string, MemberInfo> _textTagMembers = typeof(ActEvent)
+        private static readonly Dictionary<string, MemberInfo> m_textTagMembers = typeof(ActEvent)
             .GetMembers()
             .Where(x => Attribute.IsDefined(x, typeof(TextTagAttribute)))
             .ToDictionary((x) => x.Name.ToLower());
 
-        private bool _parsedActive;
-        private bool _active;
+        private bool m_parsedActive;
+        private bool m_active;
 
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
 
@@ -43,19 +43,19 @@ namespace LMeter.Act.DataStructures
         {
             return TextTagFormatter.TextTagRegex.Replace(
                 format,
-                new TextTagFormatter(this, numberFormat, emptyIfZero, _textTagMembers).Evaluate
+                new TextTagFormatter(this, numberFormat, emptyIfZero, m_textTagMembers).Evaluate
             );
         }
 
         public bool IsEncounterActive()
         {
-            if (_parsedActive)
+            if (m_parsedActive)
             {
-                return _active;
+                return m_active;
             }
 
-            _parsedActive = bool.TryParse(this.IsActive, out _active);
-            return _active;
+            m_parsedActive = bool.TryParse(this.IsActive, out m_active);
+            return m_active;
         }
 
         public bool Equals(ActEvent? actEvent)

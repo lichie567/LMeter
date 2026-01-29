@@ -10,7 +10,7 @@ namespace LMeter.Config
     public class GeneralConfig : IConfigPage
     {
         [JsonIgnore]
-        private static readonly string[] _meterTypeOptions = Enum.GetNames<MeterDataType>();
+        private static readonly string[] m_meterTypeOptions = Enum.GetNames<MeterDataType>();
 
         [JsonIgnore]
         public bool Preview = false;
@@ -19,7 +19,6 @@ namespace LMeter.Config
         public bool Active { get; set; }
 
         public string Name => "General";
-
         public Vector2 Position = Vector2.Zero;
         public Vector2 Size = new(ImGui.GetMainViewport().Size.Y * 16 / 90, ImGui.GetMainViewport().Size.Y / 10);
         public bool Lock = false;
@@ -72,8 +71,8 @@ namespace LMeter.Config
                 ImGui.Combo(
                     "Sort Type",
                     ref Unsafe.As<MeterDataType, int>(ref this.DataType),
-                    _meterTypeOptions,
-                    _meterTypeOptions.Length
+                    m_meterTypeOptions,
+                    m_meterTypeOptions.Length
                 );
 
                 ImGui.Checkbox("Return to Current Data when entering combat", ref this.ReturnToCurrent);

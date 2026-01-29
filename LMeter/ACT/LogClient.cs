@@ -14,16 +14,16 @@ namespace LMeter.Act
 {
     public abstract class LogClient(ActConfig config) : IPluginDisposable
     {
-        protected const string SubscriptionMessage = "{\"call\":\"subscribe\",\"events\":[\"CombatData\"]}";
+        protected const string SUBSCRIPTION_MESSAGE = "{\"call\":\"subscribe\",\"events\":[\"CombatData\"]}";
 
         protected ActConfig Config { get; set; } = config;
 
         public ConnectionStatus Status { get; protected set; } = ConnectionStatus.NotConnected;
         public List<ActEvent> PastEvents { get; protected init; } = [];
 
-        private ActEvent? _lastEvent;
-        private ActEvent? _currentEvent;
-        private readonly JsonSerializer _jsonSerializer = new() { Culture = CultureInfo.CurrentCulture };
+        private ActEvent? m_lastEvent;
+        private ActEvent? m_currentEvent;
+        private readonly JsonSerializer m_jsonSerializer = new() { Culture = CultureInfo.CurrentCulture };
 
         public abstract void Start();
         public abstract void Shutdown();
@@ -36,7 +36,7 @@ namespace LMeter.Act
                 return this.PastEvents[index];
             }
 
-            return _currentEvent;
+            return m_currentEvent;
         }
 
         protected void ParseLogData(string data)
@@ -46,7 +46,7 @@ namespace LMeter.Act
 
         protected void ParseLogData(JObject data)
         {
-            this.HandleNewEvent(data.ToObject<ActEvent>(_jsonSerializer));
+            this.HandleNewEvent(data.ToObject<ActEvent>(m_jsonSerializer));
         }
 
         private void HandleNewEvent(ActEvent? newEvent)
@@ -55,7 +55,7 @@ namespace LMeter.Act
                 newEvent?.Encounter is not null
                 && newEvent?.Combatants is not null
                 && newEvent.Combatants.Count != 0
-                && !newEvent.Equals(_lastEvent)
+                && !newEvent.Equals(m_lastEvent)
             )
             {
                 if (!newEvent.IsEncounterActive() && !newEvent.Equals(this.PastEvents.LastOrDefault()))
@@ -67,8 +67,8 @@ namespace LMeter.Act
                     }
                 }
 
-                _lastEvent = newEvent;
-                _currentEvent = newEvent;
+                m_lastEvent = newEvent;
+                m_currentEvent = newEvent;
             }
         }
 
@@ -82,7 +82,7 @@ namespace LMeter.Act
 
         public virtual void Clear()
         {
-            _currentEvent = null;
+            m_currentEvent = null;
             this.PastEvents.Clear();
             if (Config.ClearAct)
             {

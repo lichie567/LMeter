@@ -21,28 +21,28 @@ namespace LMeter.Helpers
 
     public class FontScope : IDisposable
     {
-        private readonly IFontHandle? _handle;
+        private readonly IFontHandle? m_handle;
 
         public FontScope(IFontHandle? handle = null)
         {
-            _handle = handle;
-            _handle?.Push();
+            m_handle = handle;
+            m_handle?.Push();
         }
 
         public void Dispose()
         {
-            _handle?.Pop();
+            m_handle?.Pop();
             GC.SuppressFinalize(this);
         }
     }
 
     public class FontsManager : IDisposable
     {
-        private readonly Dictionary<string, IFontHandle> _imGuiFonts = [];
-        private string[] _fontList;
-        private readonly IUiBuilder _uiBuilder;
+        private readonly Dictionary<string, IFontHandle> m_imGuiFonts = [];
+        private string[] m_fontList;
+        private readonly IUiBuilder m_uiBuilder;
 
-        public const string DalamudFontKey = "Dalamud Font";
+        public const string DALAMUD_FONT_KEY = "Dalamud Font";
         public static readonly List<string> DefaultFontKeys = ["Expressway_24", "Expressway_20", "Expressway_16"];
         public static string DefaultBigFontKey => DefaultFontKeys[0];
         public static string DefaultMediumFontKey => DefaultFontKeys[1];
@@ -50,8 +50,8 @@ namespace LMeter.Helpers
 
         public FontsManager(IUiBuilder uiBuilder, IEnumerable<FontData> fonts)
         {
-            _uiBuilder = uiBuilder;
-            _fontList = [DalamudFontKey];
+            m_uiBuilder = uiBuilder;
+            m_fontList = [DALAMUD_FONT_KEY];
             this.BuildFonts(fonts);
         }
 
@@ -75,7 +75,7 @@ namespace LMeter.Helpers
 
                 try
                 {
-                    IFontHandle fontHandle = this._uiBuilder.FontAtlas.NewDelegateFontHandle(e =>
+                    IFontHandle fontHandle = m_uiBuilder.FontAtlas.NewDelegateFontHandle(e =>
                         e.OnPreBuild(tk =>
                             tk.AddFontFromFile(
                                 path,
@@ -88,7 +88,7 @@ namespace LMeter.Helpers
                         )
                     );
 
-                    _imGuiFonts.Add(GetFontKey(font), fontHandle);
+                    m_imGuiFonts.Add(GetFontKey(font), fontHandle);
                 }
                 catch (Exception ex)
                 {
@@ -97,7 +97,7 @@ namespace LMeter.Helpers
                 }
             }
 
-            _fontList = [DalamudFontKey, .. _imGuiFonts.Keys];
+            m_fontList = [DALAMUD_FONT_KEY, .. m_imGuiFonts.Keys];
         }
 
         public static FontData[] GetDefaultFontData()
@@ -122,12 +122,12 @@ namespace LMeter.Helpers
 
         private void DisposeFontHandles()
         {
-            foreach ((string _, IFontHandle value) in _imGuiFonts)
+            foreach ((string _, IFontHandle value) in m_imGuiFonts)
             {
                 value.Dispose();
             }
 
-            _imGuiFonts.Clear();
+            m_imGuiFonts.Clear();
         }
 
         private unsafe ushort[]? GetCharacterRanges(bool chinese, bool korean)
@@ -159,9 +159,9 @@ namespace LMeter.Helpers
         public static int GetFontIndex(string fontKey)
         {
             FontsManager manager = Singletons.Get<FontsManager>();
-            for (int i = 0; i < manager._fontList.Length; i++)
+            for (int i = 0; i < manager.m_fontList.Length; i++)
             {
-                if (manager._fontList[i].Equals(fontKey))
+                if (manager.m_fontList[i].Equals(fontKey))
                 {
                     return i;
                 }
@@ -179,7 +179,7 @@ namespace LMeter.Helpers
         {
             if (!string.IsNullOrEmpty(fontKey))
             {
-                if (Singletons.Get<FontsManager>()._imGuiFonts.TryGetValue(fontKey, out IFontHandle? fontHandle))
+                if (Singletons.Get<FontsManager>().m_imGuiFonts.TryGetValue(fontKey, out IFontHandle? fontHandle))
                 {
                     return new FontScope(fontHandle);
                 }
@@ -190,7 +190,7 @@ namespace LMeter.Helpers
 
         public static string[] GetFontList()
         {
-            return Singletons.Get<FontsManager>()._fontList;
+            return Singletons.Get<FontsManager>().m_fontList;
         }
 
         public static string GetFontKey(FontData font)

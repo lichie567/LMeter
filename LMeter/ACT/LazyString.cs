@@ -5,9 +5,9 @@ namespace LMeter.Act
 {
     public class LazyString<T>(Func<T> getInput, Func<T, string> converter)
     {
-        private string _value = string.Empty;
-        private readonly Func<T, string> _converter = converter;
-        private readonly Func<T> _getInput = getInput;
+        private string m_value = string.Empty;
+        private readonly Func<T, string> m_converter = converter;
+        private readonly Func<T> m_getInput = getInput;
 
         public bool WasGenerated { get; private set; }
 
@@ -17,12 +17,12 @@ namespace LMeter.Act
             {
                 if (this.WasGenerated)
                 {
-                    return _value;
+                    return m_value;
                 }
 
-                _value = _converter.Invoke(_getInput.Invoke());
+                m_value = m_converter.Invoke(m_getInput.Invoke());
                 this.WasGenerated = true;
-                return _value;
+                return m_value;
             }
         }
 

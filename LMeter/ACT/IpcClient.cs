@@ -10,22 +10,21 @@ namespace LMeter.Act
 {
     public class IpcClient : LogClient
     {
-        private const string IinactListeningIpcEndpoint = "IINACT.Server.Listening";
-        private const string IinactSubscribeIpcEndpoint = "IINACT.CreateSubscriber";
-        private const string IinactUnsubscribeIpcEndpoint = "IINACT.Unsubscribe";
-        private const string LMeterSubscriptionIpcEndpoint = "LMeter.SubscriptionReceiver";
-        private const string IinactProviderEditEndpoint = "IINACT.IpcProvider." + LMeterSubscriptionIpcEndpoint;
-        private static readonly JObject SubscriptionMessageObject = JObject.Parse(SubscriptionMessage);
-
-        private readonly ICallGateProvider<JObject, bool> _subscriptionReceiver;
+        private const string IINACT_LISTENING_ENDPOINT = "IINACT.Server.Listening";
+        private const string IINACT_SUBSCRIBE_ENDPOINT = "IINACT.CreateSubscriber";
+        private const string IINACT_UNSUBSCRIBE_ENDPOINT = "IINACT.Unsubscribe";
+        private const string LMETER_SUBSCRIPTION_ENDPOINT = "LMeter.SubscriptionReceiver";
+        private const string IINACTPROVIDEREDITENDPOINT = "IINACT.IpcProvider." + LMETER_SUBSCRIPTION_ENDPOINT;
+        private static readonly JObject m_subscriptionMessageObject = JObject.Parse(SUBSCRIPTION_MESSAGE);
+        private readonly ICallGateProvider<JObject, bool> m_subscriptionReceiver;
 
         public IpcClient(ActConfig config)
             : base(config)
         {
-            _subscriptionReceiver = Singletons
+            m_subscriptionReceiver = Singletons
                 .Get<IDalamudPluginInterface>()
-                .GetIpcProvider<JObject, bool>(LMeterSubscriptionIpcEndpoint);
-            _subscriptionReceiver.RegisterFunc(ReceiveIpcMessage);
+                .GetIpcProvider<JObject, bool>(LMETER_SUBSCRIPTION_ENDPOINT);
+            m_subscriptionReceiver.RegisterFunc(ReceiveIpcMessage);
         }
 
         public override void Start()
@@ -40,7 +39,7 @@ namespace LMeter.Act
                 Singletons.Get<IPluginLog>().Info("Cannot start, player is not logged in.");
                 return;
             }
-            else if (SubscriptionMessageObject is null)
+            else if (m_subscriptionMessageObject is null)
             {
                 Singletons.Get<IPluginLog>().Info("Cannot start, SubscriptionMessageObject is null!");
                 return;
@@ -51,7 +50,7 @@ namespace LMeter.Act
                 this.Status = ConnectionStatus.Connecting;
                 bool result = Singletons
                     .Get<IDalamudPluginInterface>()
-                    .GetIpcSubscriber<bool>(IinactListeningIpcEndpoint)
+                    .GetIpcSubscriber<bool>(IINACT_LISTENING_ENDPOINT)
                     .InvokeFunc();
 
                 Singletons.Get<IPluginLog>().Info("Check if IINACT installed and running: " + result);
@@ -77,8 +76,8 @@ namespace LMeter.Act
             {
                 bool result = Singletons
                     .Get<IDalamudPluginInterface>()
-                    .GetIpcSubscriber<string, bool>(IinactSubscribeIpcEndpoint)
-                    .InvokeFunc(LMeterSubscriptionIpcEndpoint);
+                    .GetIpcSubscriber<string, bool>(IINACT_SUBSCRIBE_ENDPOINT)
+                    .InvokeFunc(LMETER_SUBSCRIPTION_ENDPOINT);
 
                 if (!result)
                 {
@@ -97,8 +96,8 @@ namespace LMeter.Act
             {
                 Singletons
                     .Get<IDalamudPluginInterface>()
-                    .GetIpcSubscriber<JObject, bool>(IinactProviderEditEndpoint)
-                    .InvokeAction(SubscriptionMessageObject);
+                    .GetIpcSubscriber<JObject, bool>(IINACTPROVIDEREDITENDPOINT)
+                    .InvokeAction(m_subscriptionMessageObject);
 
                 this.Status = ConnectionStatus.Connected;
                 Singletons.Get<IPluginLog>().Info("Successfully subscribed to combat events from IINACT IPC");
@@ -142,8 +141,8 @@ namespace LMeter.Act
             {
                 bool result = Singletons
                     .Get<IDalamudPluginInterface>()
-                    .GetIpcSubscriber<string, bool>(IinactUnsubscribeIpcEndpoint)
-                    .InvokeFunc(LMeterSubscriptionIpcEndpoint);
+                    .GetIpcSubscriber<string, bool>(IINACT_UNSUBSCRIBE_ENDPOINT)
+                    .InvokeFunc(LMETER_SUBSCRIPTION_ENDPOINT);
 
                 Singletons
                     .Get<IPluginLog>()

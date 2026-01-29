@@ -12,9 +12,9 @@ namespace LMeter.Act
 {
     public class WebSocketClient(ActConfig config) : LogClient(config)
     {
-        private ClientWebSocket _socket = new ClientWebSocket();
-        private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
-        private Task? _receiveTask;
+        private ClientWebSocket m_socket = new ClientWebSocket();
+        private CancellationTokenSource m_cancellationTokenSource = new CancellationTokenSource();
+        private Task? m_receiveTask;
 
         public override void Start()
         {
@@ -26,7 +26,7 @@ namespace LMeter.Act
 
             try
             {
-                _receiveTask = Task.Run(() => this.Connect(Config.ActSocketAddress));
+                m_receiveTask = Task.Run(() => this.Connect(Config.ActSocketAddress));
             }
             catch (Exception ex)
             {
@@ -43,13 +43,13 @@ namespace LMeter.Act
             try
             {
                 this.Status = ConnectionStatus.Connecting;
-                await _socket.ConnectAsync(new Uri(host), _cancellationTokenSource.Token);
+                await m_socket.ConnectAsync(new Uri(host), m_cancellationTokenSource.Token);
 
-                await _socket.SendAsync(
-                    Encoding.UTF8.GetBytes(SubscriptionMessage),
+                await m_socket.SendAsync(
+                    Encoding.UTF8.GetBytes(SUBSCRIPTION_MESSAGE),
                     WebSocketMessageType.Text,
                     endOfMessage: true,
-                    _cancellationTokenSource.Token
+                    m_cancellationTokenSource.Token
                 );
             }
             catch (Exception ex)
@@ -82,7 +82,7 @@ namespace LMeter.Act
                     {
                         do
                         {
-                            result = await _socket.ReceiveAsync(buffer, _cancellationTokenSource.Token);
+                            result = await m_socket.ReceiveAsync(buffer, m_cancellationTokenSource.Token);
                             ms.Write(buffer.Array, buffer.Offset, result.Count);
                         } while (!result.EndOfMessage);
 
@@ -123,12 +123,12 @@ namespace LMeter.Act
         public override void Shutdown()
         {
             this.Status = ConnectionStatus.ShuttingDown;
-            if (_socket.State == WebSocketState.Open || _socket.State == WebSocketState.Connecting)
+            if (m_socket.State == WebSocketState.Open || m_socket.State == WebSocketState.Connecting)
             {
                 try
                 {
                     // Close the websocket
-                    _socket
+                    m_socket
                         .CloseOutputAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None)
                         .GetAwaiter()
                         .GetResult();
@@ -136,26 +136,26 @@ namespace LMeter.Act
                 catch
                 {
                     // If closing the socket failed, force it with the cancellation token.
-                    _cancellationTokenSource.Cancel();
+                    m_cancellationTokenSource.Cancel();
                 }
 
-                if (_receiveTask is not null)
+                if (m_receiveTask is not null)
                 {
-                    _receiveTask.Wait();
+                    m_receiveTask.Wait();
                 }
 
                 Singletons.Get<IPluginLog>().Information($"Closed ACT Connection");
             }
 
-            _socket.Dispose();
+            m_socket.Dispose();
             this.Status = ConnectionStatus.NotConnected;
         }
 
         public override void Reset()
         {
             this.Shutdown();
-            _socket = new ClientWebSocket();
-            _cancellationTokenSource = new CancellationTokenSource();
+            m_socket = new ClientWebSocket();
+            m_cancellationTokenSource = new CancellationTokenSource();
             this.Start();
         }
     }

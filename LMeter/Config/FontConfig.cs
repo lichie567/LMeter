@@ -16,25 +16,25 @@ namespace LMeter.Config
         public string Name => "Fonts";
 
         [JsonIgnore]
-        private static readonly string? _fontPath = FontsManager.GetUserFontPath();
+        private static readonly string? m_fontPath = FontsManager.GetUserFontPath();
 
         [JsonIgnore]
-        private int _selectedFont = 0;
+        private int m_selectedFont = 0;
 
         [JsonIgnore]
-        private int _selectedSize = 23;
+        private int m_selectedSize = 23;
 
         [JsonIgnore]
-        private string[] _fontPaths = FontsManager.GetFontPaths(FontsManager.GetUserFontPath());
+        private string[] m_fontPaths = FontsManager.GetFontPaths(FontsManager.GetUserFontPath());
 
         [JsonIgnore]
-        private readonly string[] _sizes = Enumerable.Range(1, 40).Select(i => i.ToString()).ToArray();
+        private readonly string[] m_sizes = Enumerable.Range(1, 40).Select(i => i.ToString()).ToArray();
 
         [JsonIgnore]
-        private bool _chinese = false;
+        private bool m_chinese = false;
 
         [JsonIgnore]
-        private bool _korean = false;
+        private bool m_korean = false;
 
         public Dictionary<string, FontData> Fonts { get; set; }
 
@@ -53,14 +53,14 @@ namespace LMeter.Config
 
         public void DrawConfig(Vector2 size, float padX, float padY, bool border = true)
         {
-            if (_fontPaths.Length == 0)
+            if (m_fontPaths.Length == 0)
             {
                 RefreshFontList();
             }
 
             if (ImGui.BeginChild("##FontConfig", new Vector2(size.X, size.Y), border))
             {
-                if (_fontPath is not null)
+                if (m_fontPath is not null)
                 {
                     float cursorY = ImGui.GetCursorPosY();
                     ImGui.SetCursorPosY(cursorY + 2f);
@@ -72,13 +72,13 @@ namespace LMeter.Config
                     DrawHelpers.DrawButton(
                         string.Empty,
                         FontAwesomeIcon.Copy,
-                        () => ImGui.SetClipboardText(_fontPath),
+                        () => ImGui.SetClipboardText(m_fontPath),
                         null,
                         buttonSize
                     );
 
-                    string[] fontNames = _fontPaths.Select(x => FontsManager.GetFontName(_fontPath, x)).ToArray();
-                    ImGui.Combo("Font", ref _selectedFont, fontNames, fontNames.Length);
+                    string[] fontNames = m_fontPaths.Select(x => FontsManager.GetFontName(m_fontPath, x)).ToArray();
+                    ImGui.Combo("Font", ref m_selectedFont, fontNames, fontNames.Length);
                     ImGui.SameLine();
                     DrawHelpers.DrawButton(
                         string.Empty,
@@ -88,20 +88,20 @@ namespace LMeter.Config
                         buttonSize
                     );
 
-                    ImGui.Combo("Size", ref _selectedSize, _sizes, _sizes.Length);
+                    ImGui.Combo("Size", ref m_selectedSize, m_sizes, m_sizes.Length);
                     ImGui.SameLine();
                     ImGui.SetCursorPosX(ImGui.GetCursorPosX() + 3f);
                     DrawHelpers.DrawButton(
                         string.Empty,
                         FontAwesomeIcon.Plus,
-                        () => AddFont(_selectedFont, _selectedSize),
+                        () => AddFont(m_selectedFont, m_selectedSize),
                         "Add Font",
                         buttonSize
                     );
 
-                    ImGui.Checkbox("Support Chinese/Japanese", ref _chinese);
+                    ImGui.Checkbox("Support Chinese/Japanese", ref m_chinese);
                     ImGui.SameLine();
-                    ImGui.Checkbox("Support Korean", ref _korean);
+                    ImGui.Checkbox("Support Korean", ref m_korean);
 
                     DrawHelpers.DrawSpacing(1);
                     ImGui.Text("Font List");
@@ -190,17 +190,17 @@ namespace LMeter.Config
 
         public void RefreshFontList()
         {
-            _fontPaths = FontsManager.GetFontPaths(FontsManager.GetUserFontPath());
+            m_fontPaths = FontsManager.GetFontPaths(FontsManager.GetUserFontPath());
         }
 
         private void AddFont(int fontIndex, int size)
         {
             FontData newFont = new(
-                FontsManager.GetFontName(_fontPath, _fontPaths[fontIndex]),
-                _fontPaths[fontIndex],
+                FontsManager.GetFontName(m_fontPath, m_fontPaths[fontIndex]),
+                m_fontPaths[fontIndex],
                 size + 1,
-                _chinese,
-                _korean
+                m_chinese,
+                m_korean
             );
             string key = FontsManager.GetFontKey(newFont);
 

@@ -10,8 +10,8 @@ namespace LMeter.Helpers
 {
     public static class CharacterState
     {
-        private static readonly uint[] _goldSaucerIds = [144, 388, 389, 390, 391, 579, 792, 899, 941];
-        private static readonly ushort[] _houseIds = [
+        private static readonly uint[] m_goldSaucerIds = [144, 388, 389, 390, 391, 579, 792, 899, 941];
+        private static readonly ushort[] m_houseIds = [
             // Small, Medium, Large, Chamber, Apartment
             282, 283, 284, 384, 608, // Mist
             342, 343, 344, 385, 609, // Lavender Beds
@@ -56,8 +56,8 @@ namespace LMeter.Helpers
         public static bool InZone(ZoneType zone) =>
             zone switch
             {
-                ZoneType.GoldSaucer => _goldSaucerIds.Any(id => id == Singletons.Get<IClientState>().TerritoryType),
-                ZoneType.PlayerHouse => _houseIds.Any(id => id == Singletons.Get<IClientState>().TerritoryType),
+                ZoneType.GoldSaucer => m_goldSaucerIds.Any(id => id == Singletons.Get<IClientState>().TerritoryType),
+                ZoneType.PlayerHouse => m_houseIds.Any(id => id == Singletons.Get<IClientState>().TerritoryType),
                 _ => false,
             };
 
