@@ -96,8 +96,6 @@ namespace LMeter
                 1 => new IpcClient(config.ActConfig),
                 _ => new WebSocketClient(config.ActConfig),
             };
-
-            actClient.Start();
             Singletons.Register(actClient);
 
             // Create profile on first load

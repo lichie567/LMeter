@@ -1,4 +1,3 @@
-using System;
 using System.Numerics;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
@@ -12,12 +11,6 @@ namespace LMeter.Config
     {
         [JsonIgnore]
         private const string SOCKET_ADDRESS = "ws://127.0.0.1:10501/ws";
-
-        [JsonIgnore]
-        private DateTime? m_lastCombatTime { get; set; }
-
-        [JsonIgnore]
-        private DateTime? m_lastReconnectAttempt { get; set; }
 
         [JsonIgnore]
         public bool Active { get; set; }
@@ -158,48 +151,6 @@ namespace LMeter.Config
             }
 
             ImGui.EndChild();
-        }
-
-        public void TryReconnect()
-        {
-            ConnectionStatus status = Singletons.Get<LogClient>().Status;
-            if (
-                m_lastReconnectAttempt.HasValue
-                && (status == ConnectionStatus.NotConnected || status == ConnectionStatus.ConnectionFailed)
-            )
-            {
-                if (
-                    this.AutoReconnect
-                    && m_lastReconnectAttempt < DateTime.UtcNow - TimeSpan.FromSeconds(this.ReconnectDelay)
-                )
-                {
-                    Singletons.Get<LogClient>().Reset();
-                    m_lastReconnectAttempt = DateTime.UtcNow;
-                }
-            }
-            else
-            {
-                m_lastReconnectAttempt = DateTime.UtcNow;
-            }
-        }
-
-        public void TryEndEncounter()
-        {
-            if (Singletons.Get<LogClient>().Status == ConnectionStatus.Connected)
-            {
-                if (this.AutoEnd && CharacterState.IsInCombat())
-                {
-                    m_lastCombatTime = DateTime.UtcNow;
-                }
-                else if (
-                    m_lastCombatTime is not null
-                    && m_lastCombatTime < DateTime.UtcNow - TimeSpan.FromSeconds(this.AutoEndDelay)
-                )
-                {
-                    Singletons.Get<LogClient>().EndEncounter();
-                    m_lastCombatTime = null;
-                }
-            }
         }
     }
 }

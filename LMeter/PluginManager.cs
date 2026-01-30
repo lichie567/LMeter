@@ -23,6 +23,8 @@ namespace LMeter
         private readonly WindowSystem m_windowSystem;
         private readonly ConfigWindow m_configRoot;
         private readonly LMeterConfig m_config;
+        private DateTime? m_lastCombatTime { get; set; }
+        private DateTime? m_lastConnectionAttempt { get; set; }
         private Vector2 m_origin;
 
         private readonly ImGuiWindowFlags m_mainWindowFlags =
@@ -80,8 +82,8 @@ namespace LMeter
 
             m_origin = ImGui.GetMainViewport().Size / 2f;
             m_windowSystem.Draw();
-            m_config.ActConfig.TryReconnect();
-            m_config.ActConfig.TryEndEncounter();
+            this.TryConnect();
+            this.TryEndEncounter();
 
             ImGuiHelpers.ForceNextWindowMainViewport();
             ImGui.SetNextWindowPos(Vector2.Zero);
@@ -126,6 +128,47 @@ namespace LMeter
 
             newClient.Start();
             Singletons.Update(newClient);
+        }
+
+        public void TryConnect()
+        {
+            ConnectionStatus status = Singletons.Get<LogClient>().Status;
+            if (status == ConnectionStatus.NotConnected || status == ConnectionStatus.ConnectionFailed)
+            {
+                if (!m_lastConnectionAttempt.HasValue)
+                {
+                    m_lastConnectionAttempt = DateTime.UtcNow;
+                    Singletons.Get<LogClient>().Start();
+                }
+                else if (
+                    m_config.ActConfig.AutoReconnect
+                    && m_lastConnectionAttempt
+                        < DateTime.UtcNow - TimeSpan.FromSeconds(m_config.ActConfig.ReconnectDelay)
+                )
+                {
+                    m_lastConnectionAttempt = DateTime.UtcNow;
+                    Singletons.Get<LogClient>().Reset();
+                }
+            }
+        }
+
+        public void TryEndEncounter()
+        {
+            if (Singletons.Get<LogClient>().Status == ConnectionStatus.Connected)
+            {
+                if (m_config.ActConfig.AutoEnd && CharacterState.IsInCombat())
+                {
+                    m_lastCombatTime = DateTime.UtcNow;
+                }
+                else if (
+                    m_lastCombatTime is not null
+                    && m_lastCombatTime < DateTime.UtcNow - TimeSpan.FromSeconds(m_config.ActConfig.AutoEndDelay)
+                )
+                {
+                    Singletons.Get<LogClient>().EndEncounter();
+                    m_lastCombatTime = null;
+                }
+            }
         }
 
         public void Edit(IConfigurable configItem)
