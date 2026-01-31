@@ -13,6 +13,9 @@ namespace LMeter.Config
     public class FontConfig : IConfigPage
     {
         [JsonIgnore]
+        private const int MIN_SIZE = 6;
+
+        [JsonIgnore]
         public bool Active { get; set; }
 
         public string Name => "Fonts";
@@ -30,7 +33,7 @@ namespace LMeter.Config
         private string[] m_fontPaths = FontsManager.GetFontPaths(FontsManager.GetUserFontPath());
 
         [JsonIgnore]
-        private readonly string[] m_sizes = Enumerable.Range(6, 72).Select(i => i.ToString()).ToArray();
+        private readonly string[] m_sizes = Enumerable.Range(MIN_SIZE, 48 - MIN_SIZE + 1).Select(i => i.ToString()).ToArray();
 
         [JsonIgnore]
         private bool m_chinese = false;
@@ -211,7 +214,7 @@ namespace LMeter.Config
             FontData newFont = new(
                 FontsManager.GetFontName(m_fontPath, m_fontPaths[fontIndex]),
                 m_fontPaths[fontIndex],
-                size + 1,
+                size + MIN_SIZE,
                 m_chinese,
                 m_korean,
                 null
