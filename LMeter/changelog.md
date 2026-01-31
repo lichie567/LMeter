@@ -1,8 +1,12 @@
+# Version 0.4.4.0
+- Added support for System and Game fonts
+- Improved logic for first connection attempt to ACT
+
 # Version 0.4.3.3
 - Fix job detection
 
 # Version 0.4.3.2
-- Remove leftover data sort options.
+- Remove leftover data sort options
 
 # Version 0.4.3.1
 - Updated for Dalamud Api 14

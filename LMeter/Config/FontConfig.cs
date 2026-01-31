@@ -3,6 +3,8 @@ using System.Linq;
 using System.Numerics;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
+using Dalamud.Interface.FontIdentifier;
+using Dalamud.Interface.ImGuiFontChooserDialog;
 using LMeter.Helpers;
 using Newtonsoft.Json;
 
@@ -22,13 +24,13 @@ namespace LMeter.Config
         private int m_selectedFont = 0;
 
         [JsonIgnore]
-        private int m_selectedSize = 23;
+        private int m_selectedSize = 10;
 
         [JsonIgnore]
         private string[] m_fontPaths = FontsManager.GetFontPaths(FontsManager.GetUserFontPath());
 
         [JsonIgnore]
-        private readonly string[] m_sizes = Enumerable.Range(1, 40).Select(i => i.ToString()).ToArray();
+        private readonly string[] m_sizes = Enumerable.Range(6, 72).Select(i => i.ToString()).ToArray();
 
         [JsonIgnore]
         private bool m_chinese = false;
@@ -99,11 +101,22 @@ namespace LMeter.Config
                         buttonSize
                     );
 
-                    ImGui.Checkbox("Support Chinese/Japanese", ref m_chinese);
+                    ImGui.Checkbox("Chinese/Japanese", ref m_chinese);
                     ImGui.SameLine();
-                    ImGui.Checkbox("Support Korean", ref m_korean);
+                    ImGui.Checkbox("Korean", ref m_korean);
+                    ImGui.SameLine();
+                    ImGui.SetCursorPosX(ImGui.GetCursorPosX() + 81f);
+                    ImGui.Text("Add System or Game Font");
+                    ImGui.SameLine();
 
-                    DrawHelpers.DrawSpacing(1);
+                    DrawHelpers.DrawButton(
+                        string.Empty,
+                        FontAwesomeIcon.Font,
+                        () => DisplayFontSelector(),
+                        string.Empty,
+                        buttonSize
+                    );
+
                     ImGui.Text("Font List");
 
                     ImGuiTableFlags tableFlags =
@@ -200,8 +213,36 @@ namespace LMeter.Config
                 m_fontPaths[fontIndex],
                 size + 1,
                 m_chinese,
-                m_korean
+                m_korean,
+                null
             );
+            string key = FontsManager.GetFontKey(newFont);
+
+            if (this.Fonts.TryAdd(key, newFont))
+            {
+                Singletons.Get<FontsManager>().UpdateFonts(this.Fonts.Values);
+            }
+        }
+
+        public void DisplayFontSelector()
+        {
+            if (Singletons.Get<IUiBuilder>() is UiBuilder uiBuilder)
+            {
+                SingleFontChooserDialog fcd = new(uiBuilder);
+                uiBuilder.Draw += fcd.Draw;
+                fcd.ResultTask.ContinueWith(r =>
+                {
+                    _ = r.Exception;
+                    uiBuilder.Draw -= fcd.Draw;
+                    SelectFontCallback(fcd.SelectedFont);
+                    fcd.Dispose();
+                });
+            }
+        }
+
+        private void SelectFontCallback(SingleFontSpec font)
+        {
+            FontData newFont = new(font.ToString(), string.Empty, font.SizePt, false, false, font);
             string key = FontsManager.GetFontKey(newFont);
 
             if (this.Fonts.TryAdd(key, newFont))

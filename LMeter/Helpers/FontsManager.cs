@@ -4,19 +4,21 @@ using System.IO;
 using System.Linq;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
+using Dalamud.Interface.FontIdentifier;
 using Dalamud.Interface.ManagedFontAtlas;
 using Dalamud.Interface.Utility;
 using Dalamud.Plugin.Services;
 
 namespace LMeter.Helpers
 {
-    public struct FontData(string name, string path, int size, bool chinese, bool korean)
+    public class FontData(string name, string path, float size, bool chinese, bool korean, IFontSpec? fontSpec)
     {
         public string Name = name;
         public string Path = path;
-        public int Size = size;
+        public float Size = size;
         public bool Chinese = chinese;
         public bool Korean = korean;
+        public IFontSpec? FontSpec = fontSpec;
     }
 
     public class FontScope : IDisposable
@@ -68,27 +70,38 @@ namespace LMeter.Helpers
             foreach (FontData font in fontData)
             {
                 string path = string.IsNullOrEmpty(font.Path) ? $"{fontDir}{font.Name}.ttf" : font.Path;
-                if (!File.Exists(path))
+                if (font.FontSpec is null && !File.Exists(path))
                 {
                     continue;
                 }
 
                 try
                 {
-                    IFontHandle fontHandle = m_uiBuilder.FontAtlas.NewDelegateFontHandle(e =>
-                        e.OnPreBuild(tk =>
-                            tk.AddFontFromFile(
-                                path,
-                                new SafeFontConfig
-                                {
-                                    SizePx = font.Size,
-                                    GlyphRanges = this.GetCharacterRanges(font.Chinese, font.Korean),
-                                }
+                    IFontHandle? fontHandle = null;
+                    if (font.FontSpec is not null)
+                    {
+                        fontHandle = font.FontSpec.CreateFontHandle(m_uiBuilder.FontAtlas);
+                    }
+                    else if (!string.IsNullOrEmpty(font.Path))
+                    {
+                        fontHandle = m_uiBuilder.FontAtlas.NewDelegateFontHandle(e =>
+                            e.OnPreBuild(tk =>
+                                tk.AddFontFromFile(
+                                    path,
+                                    new SafeFontConfig
+                                    {
+                                        SizePx = font.Size,
+                                        GlyphRanges = this.GetCharacterRanges(font.Chinese, font.Korean),
+                                    }
+                                )
                             )
-                        )
-                    );
+                        );
+                    }
 
-                    m_imGuiFonts.Add(GetFontKey(font), fontHandle);
+                    if (fontHandle is not null)
+                    {
+                        m_imGuiFonts.Add(GetFontKey(font), fontHandle);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -108,7 +121,7 @@ namespace LMeter.Helpers
                 string[] splits = DefaultFontKeys[i].Split("_", StringSplitOptions.RemoveEmptyEntries);
                 if (splits.Length == 2 && int.TryParse(splits[1], out int size))
                 {
-                    defaults[i] = new(splits[0], $"{GetUserFontPath()}{splits[0]}.ttf", size, false, false);
+                    defaults[i] = new(splits[0], $"{GetUserFontPath()}{splits[0]}.ttf", size, false, false, null);
                 }
             }
 
