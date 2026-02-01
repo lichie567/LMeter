@@ -11,7 +11,7 @@ using Dalamud.Plugin.Services;
 
 namespace LMeter.Helpers
 {
-    public class FontData(string name, string path, float size, bool chinese, bool korean, IFontSpec? fontSpec)
+    public class FontData(string name, string path, float size, bool chinese, bool korean, IFontSpec? fontSpec = null)
     {
         public string Name = name;
         public string Path = path;
@@ -65,12 +65,16 @@ namespace LMeter.Helpers
                 return;
             }
 
-            this.DisposeFontHandles();
+            if (!Directory.Exists(fontDir))
+            {
+                Directory.CreateDirectory(fontDir);
+            }
 
+            this.DisposeFontHandles();
             foreach (FontData font in fontData)
             {
-                string path = string.IsNullOrEmpty(font.Path) ? $"{fontDir}{font.Name}.ttf" : font.Path;
-                if (font.FontSpec is null && !File.Exists(path))
+                font.Path = FindFontFilePath(font);
+                if (font.FontSpec is null && !File.Exists(font.Path))
                 {
                     continue;
                 }
@@ -82,12 +86,12 @@ namespace LMeter.Helpers
                     {
                         fontHandle = font.FontSpec.CreateFontHandle(m_uiBuilder.FontAtlas);
                     }
-                    else if (!string.IsNullOrEmpty(font.Path))
+                    else if (!string.IsNullOrWhiteSpace(font.Path) && File.Exists(font.Path))
                     {
                         fontHandle = m_uiBuilder.FontAtlas.NewDelegateFontHandle(e =>
                             e.OnPreBuild(tk =>
                                 tk.AddFontFromFile(
-                                    path,
+                                    font.Path,
                                     new SafeFontConfig
                                     {
                                         SizePx = font.Size,
@@ -105,7 +109,7 @@ namespace LMeter.Helpers
                 }
                 catch (Exception ex)
                 {
-                    Singletons.Get<IPluginLog>().Error($"Failed to load font from path [{path}]!");
+                    Singletons.Get<IPluginLog>().Error($"Failed to load font from path [{font.Path}]!");
                     Singletons.Get<IPluginLog>().Error(ex.ToString());
                 }
             }
@@ -121,7 +125,7 @@ namespace LMeter.Helpers
                 string[] splits = DefaultFontKeys[i].Split("_", StringSplitOptions.RemoveEmptyEntries);
                 if (splits.Length == 2 && int.TryParse(splits[1], out int size))
                 {
-                    defaults[i] = new(splits[0], $"{GetUserFontPath()}{splits[0]}.ttf", size, false, false, null);
+                    defaults[i] = new FontData(splits[0], $"{GetUserFontPath()}{splits[0]}.ttf", size, false, false);
                 }
             }
 
@@ -272,6 +276,30 @@ namespace LMeter.Helpers
                         .Warning($"Failed to copy font {fontFileNames} to User Font Directory: {ex}");
                 }
             }
+        }
+
+        private static string FindFontFilePath(FontData font)
+        {
+            string path = font.Path;
+            if (File.Exists(path))
+            {
+                return path;
+            }
+
+            string fontDir = GetUserFontPath();
+            path = $"{fontDir}{font.Name}.ttf";
+            if (File.Exists(path))
+            {
+                return path;
+            }
+
+            path = $"{fontDir}{font.Name}.otf";
+            if (File.Exists(path))
+            {
+                return path;
+            }
+
+            return string.Empty;
         }
 
         public static string GetPluginFontPath()
