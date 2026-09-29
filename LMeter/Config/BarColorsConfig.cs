@@ -33,6 +33,7 @@ namespace LMeter.Config
         public ConfigColor SAMColor = new(228f / 255f, 109f / 255f, 4f / 255f, 1f);
         public ConfigColor RPRColor = new(150f / 255f, 90f / 255f, 144f / 255f, 1f);
         public ConfigColor VPRColor = new(16f / 255f, 130f / 255f, 16f / 255f, 1f);
+        public ConfigColor BSTColor = new(133f / 255f, 89f / 255f, 52f / 255f, 1f);
         public ConfigColor PGLColor = new(214f / 255f, 156f / 255f, 0f / 255f, 1f);
         public ConfigColor ROGColor = new(175f / 255f, 25f / 255f, 100f / 255f, 1f);
         public ConfigColor LNCColor = new(65f / 255f, 100f / 255f, 205f / 255f, 1f);
@@ -77,6 +78,7 @@ namespace LMeter.Config
                 Job.SAM => this.SAMColor,
                 Job.RPR => this.RPRColor,
                 Job.VPR => this.VPRColor,
+                Job.BST => this.BSTColor,
 
                 Job.ARC => this.ARCColor,
                 Job.BRD => this.BRDColor,
@@ -115,6 +117,7 @@ namespace LMeter.Config
                 DrawHelpers.DrawColorSelector("SAM", this.SAMColor);
                 DrawHelpers.DrawColorSelector("RPR", this.RPRColor);
                 DrawHelpers.DrawColorSelector("VPR", this.VPRColor);
+                DrawHelpers.DrawColorSelector("BST", this.BSTColor);
 
                 ImGui.NewLine();
                 DrawHelpers.DrawColorSelector("BRD", this.BRDColor);

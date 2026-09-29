@@ -78,6 +78,7 @@ namespace LMeter.Helpers
         SAM = 34,
         RPR = 39,
         VPR = 41,
+        BST = 43,
 
         ARC = 5,
         BRD = 23,
